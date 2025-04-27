@@ -1,7 +1,7 @@
 {
   "name": "guardz",
   "version": "0.1.0",
-  "description": "A TypeScript type guard library",
+  "description": "A simple and lightweight TypeScript type guard library providing runtime validation utilities.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -17,8 +17,13 @@
     "typescript",
     "type",
     "guard",
+    "typeguard",
+    "type-guard",
     "runtime",
-    "validation"
+    "validation",
+    "check",
+    "assert",
+    "is"
   ],
   "author": "Your Name <your.email@example.com>",
   "license": "MIT",
@@ -27,6 +32,8 @@
   },
   "homepage": "https://github.com/thiennp/guardz#readme",
   "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
     "typescript": "^5.0.0",
     "tsconfig-paths": "^4.2.0",
     "tsc-alias": "^1.8.10"
