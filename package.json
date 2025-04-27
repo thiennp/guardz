@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_USERNAME/guardx.git"
+    "url": "git+https://github.com/thiennp/guardz.git"
   },
   "keywords": [
     "typescript",
@@ -23,9 +23,9 @@
   "author": "Your Name <your.email@example.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/guardx/issues"
+    "url": "https://github.com/thiennp/guardz/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/guardx#readme",
+  "homepage": "https://github.com/thiennp/guardz#readme",
   "devDependencies": {
     "typescript": "^5.0.0",
     "tsconfig-paths": "^4.2.0",
