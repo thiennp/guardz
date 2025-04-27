@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",                     /* Change target to ES2017 or newer */
+    "module": "CommonJS",                  /* Specify what module code is generated. */
+    "outDir": "./dist",                     /* Specify an output folder for all emitted files. */
+    "rootDir": "./src",                    /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "baseUrl": ".",                        /* Add baseUrl for path aliases */
+    "paths": {                             /* Add paths mapping */
+      "@/*": ["src/*"]                   /* Map @/* to src/* */
+    },
+    "declaration": true,                 /* Generate corresponding '.d.ts' file. */
+    "strict": true,                      /* Enable all strict type-checking options. */
+    "esModuleInterop": true,             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "skipLibCheck": true,                /* Skip type checking of declaration files. */
+    "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
+  },
+  "include": ["src/**/*"],              /* Specifies the files included in the program. */
+  "exclude": ["node_modules", "dist"]   /* Specifies the files excluded from the program. */
+} 
