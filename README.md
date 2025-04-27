@@ -1,5 +1,9 @@
 # guardz
 
+[![NPM Version](https://img.shields.io/npm/v/guardz)](https://www.npmjs.com/package/guardz)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
+
 A simple and lightweight TypeScript type guard library.
 
 ## Installation
@@ -13,7 +17,7 @@ yarn add guardz
 ## Usage
 
 ```typescript
-import { isString, isNumber, isNonNullObject } from 'guardz';
+import { isString, isNumber, isNonNullObject, isArrayWithEachItem, isPartialOf } from 'guardz';
 
 const data: unknown = getDataFromSomewhere();
 
@@ -31,34 +35,115 @@ if (isNonNullObject(data)) {
   }
 }
 
+// Example using isArrayWithEachItem
+const maybeNumbers: unknown = [1, 2, '3', 4];
+if (isArrayWithEachItem(maybeNumbers, isNumber)) {
+  // maybeNumbers is now typed as number[]
+  const sum = maybeNumbers.reduce((acc, num) => acc + num, 0);
+  console.log('Sum:', sum); // This block won't execute due to '3'
+} else {
+  console.log('Input is not an array of numbers');
+}
+
+// Example using isPartialOf
+interface User { 
+  id: number;
+  name: string;
+  isAdmin?: boolean;
+}
+
+const partialUserData: unknown = { name: 'Alice', isAdmin: true };
+const userShape = { 
+  id: isNumber,
+  name: isString,
+  isAdmin: isBoolean // Note: This checks if the property exists AND is a boolean
+  // Or use: isUndefinedOr(isBoolean) if isAdmin can be undefined
+};
+
+if (isPartialOf(partialUserData, userShape)) {
+  // partialUserData is now typed as Partial<User>
+  console.log('Valid partial user data:', partialUserData.name);
+  if (partialUserData.isAdmin) {
+    console.log('User is an admin');
+  }
+}
+
 // Add more examples of your specific guards here
 ```
 
-## Available Guards
+## API Reference
 
-*   `isAny(value: unknown): value is any`
-*   `isArrayWithEachItem(value: unknown, itemGuard: TypeGuardFn<T>): value is T[]`
-*   `isBoolean(value: unknown): value is boolean`
-*   `isDate(value: unknown): value is Date`
-*   `isDefined<T>(value: T | undefined): value is T`
-*   `isEnum<T extends object>(value: unknown, enumObject: T): value is T[keyof T]`
-*   `isEqualTo<T>(value: unknown, comparisonValue: T): value is T`
-*   `isNil(value: unknown): value is null | undefined`
-*   `isNonNullObject(value: unknown): value is Record<number | string, unknown>`
-*   `isNonEmptyArray<T>(value: unknown): value is [T, ...T[]]`
-*   `isNonEmptyArrayWithEachItem<T>(value: unknown, itemGuard: TypeGuardFn<T>): value is [T, ...T[]]`
-*   `isNonEmptyString(value: unknown): value is string`
-*   `isNonNegativeNumber(value: unknown): value is number`
-*   `isNullOr<T>(value: unknown, nextGuard: TypeGuardFn<T>): value is T | null`
-*   `isNumber(value: unknown): value is number`
-*   `isObjectWithEachItem<V>(value: unknown, valueGuard: TypeGuardFn<V>): value is Record<string, V>`
-*   `isOneOf<T extends readonly unknown[]>(value: unknown, allowedValues: T): value is T[number]`
-*   `isOneOfTypes<T extends readonly TypeGuardFn<unknown>[]>(value: unknown, guards: T): value is GuardedType<T[number]>`
-*   `isPartialOf<T extends object>(value: unknown, shape: { [K in keyof T]: TypeGuardFn<T[K]> }): value is Partial<T>`
-*   `isString(value: unknown): value is string`
-*   `isUndefinedOr<T>(value: unknown, nextGuard: TypeGuardFn<T>): value is T | undefined`
-*   `guardWithTolerance<T>(guardFn: TypeGuardFn<T>, tolerance?: number | undefined): TypeGuardFn<T>`
-*   `// ... Potentially others depending on exports`
+Below is a list of the core type guards provided by `guardz`.
+
+*   **`isAny(value: unknown): value is any`**
+    Always returns `true`. Useful as a placeholder or in complex conditional types.
+
+*   **`isArrayWithEachItem<T>(value: unknown, itemGuard: TypeGuardFn<T>): value is T[]`**
+    Checks if `value` is an array and every item in the array passes the `itemGuard`.
+
+*   **`isBoolean(value: unknown): value is boolean`**
+    Checks if `value` is a boolean (`true` or `false`).
+
+*   **`isDate(value: unknown): value is Date`**
+    Checks if `value` is a Date object.
+
+*   **`isDefined<T>(value: T | undefined): value is T`**
+    Checks if `value` is not `undefined`.
+
+*   **`isEnum<T extends object>(value: unknown, enumObject: T): value is T[keyof T]`**
+    Checks if `value` is a valid value of the provided TypeScript enum `enumObject`.
+
+*   **`isEqualTo<T>(value: unknown, comparisonValue: T): value is T`**
+    Checks if `value` is strictly equal (`===`) to `comparisonValue`.
+
+*   **`isNil(value: unknown): value is null | undefined`**
+    Checks if `value` is `null` or `undefined`.
+
+*   **`isNonNullObject(value: unknown): value is Record<number | string, unknown>`**
+    Checks if `value` is an object, but not `null` and not an array.
+
+*   **`isNonEmptyArray<T>(value: unknown): value is [T, ...T[]]`**
+    Checks if `value` is an array with at least one element.
+
+*   **`isNonEmptyArrayWithEachItem<T>(value: unknown, itemGuard: TypeGuardFn<T>): value is [T, ...T[]]`**
+    Checks if `value` is a non-empty array and every item passes the `itemGuard`.
+
+*   **`isNonEmptyString(value: unknown): value is string`**
+    Checks if `value` is a string with length greater than 0.
+
+*   **`isNonNegativeNumber(value: unknown): value is number`**
+    Checks if `value` is a number greater than or equal to 0.
+
+*   **`isNullOr<T>(value: unknown, nextGuard: TypeGuardFn<T>): value is T | null`**
+    Checks if `value` is `null` or passes the `nextGuard`.
+
+*   **`isNumber(value: unknown): value is number`**
+    Checks if `value` is a number (and not `NaN`).
+
+*   **`isObjectWithEachItem<V>(value: unknown, valueGuard: TypeGuardFn<V>): value is Record<string, V>`**
+    Checks if `value` is a non-null object and every value within the object passes the `valueGuard`.
+
+*   **`isOneOf<T extends readonly unknown[]>(value: unknown, allowedValues: T): value is T[number]`**
+    Checks if `value` is strictly equal (`===`) to one of the `allowedValues` in the provided array.
+
+*   **`isOneOfTypes<T extends readonly TypeGuardFn<unknown>[]>(value: unknown, guards: T): value is GuardedType<T[number]>`**
+    Checks if `value` passes at least one of the type guards provided in the `guards` array.
+
+*   **`isPartialOf<T extends object>(value: unknown, shape: { [K in keyof T]: TypeGuardFn<T[K]> }): value is Partial<T>`**
+    Checks if `value` is an object and all *existing* properties in `value` match the types defined by the corresponding type guards in the `shape` object.
+
+*   **`isString(value: unknown): value is string`**
+    Checks if `value` is a string.
+
+*   **`isUndefinedOr<T>(value: unknown, nextGuard: TypeGuardFn<T>): value is T | undefined`**
+    Checks if `value` is `undefined` or passes the `nextGuard`.
+
+*   **`guardWithTolerance<T>(guardFn: TypeGuardFn<T>, tolerance?: number | undefined): TypeGuardFn<T>`**
+    Creates a debounced version of a type guard, allowing temporary tolerance for invalid states (potentially useful for user input validation). *(Requires further implementation detail)*
+
+*Note: The exact types `TypeGuardFn` and `GuardedType` would depend on your internal definitions, typically involving predicates like `value is T`.*
+
+For more detailed API documentation generated from the source code comments, please see the [TypeDoc generated documentation](docs/index.html) (available after running `npm run docs`).
 
 ## Contributing
 
