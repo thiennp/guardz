@@ -9,7 +9,7 @@ import type { TypeGuardFn } from "./isType";
  * @return {(value, MOCK_TYPE_GUARD_FN_CONFIG) => value is Record<string, T>} Returns a type-guard function that returns true if the
  *   value is an object with valid type properties, false otherwise.
  */
-export function isObjectWithEachItem<T>(predicate: TypeGuardFn<T>): TypeGuardFn<Record<string, T>> {
+export function isObjectWithEachItem<T>(predicate: TypeGuardFn<T>): TypeGuardFn<Record<string, T | undefined>> {
   return function (value, config): value is Record<string, T> {
     // Stricter check for plain objects
     const isPlainObject = typeof value === 'object' && value !== null && !Array.isArray(value) && value.constructor === Object;

@@ -9,7 +9,7 @@ import type { TypeGuardFn } from "./isType";
  * @return {boolean} Returns true if the value is of type Date, otherwise false.
  */
 export const isDate: TypeGuardFn<Date> = function (value, config): value is Date {
-  if (!(value instanceof Date) || isNaN(value.getTime())) {
+  if (!(value instanceof Date)) {
     if (config) {
       config.callbackOnError(generateTypeGuardError(value, config.identifier, "Date"));
     }
