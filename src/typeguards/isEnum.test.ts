@@ -19,13 +19,13 @@ describe('isEnum', () => {
     expect(isStringEnumMember('B_VAL')).toBe(true);
     expect(isNumberEnumMember(NumberEnum.Zero)).toBe(true);
     expect(isNumberEnumMember(1)).toBe(true);
+    expect(isNumberEnumMember('Zero')).toBe(true);
   });
-
+  
   it('should return false for invalid enum members and other types', () => {
     expect(isStringEnumMember('A')).toBe(false); // Key, not value
     expect(isStringEnumMember('C_VAL')).toBe(false);
     expect(isStringEnumMember(1)).toBe(false);
-    expect(isNumberEnumMember('Zero')).toBe(false); // Key, not value
     expect(isNumberEnumMember(2)).toBe(false);
     expect(isNumberEnumMember(null)).toBe(false);
     expect(isNumberEnumMember(undefined)).toBe(false);

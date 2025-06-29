@@ -29,11 +29,11 @@ describe('isPositiveNumber', () => {
 
     isPositiveNumber(-1, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count (-1) to be "NonNegativeNumber"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected count (-1) to be "PositiveNumber"');
 
     mockCallback.mockClear();
     isPositiveNumber('text', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count ("text") to be "NonNegativeNumber"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected count ("text") to be "PositiveNumber"');
   });
 }); 
