@@ -4,9 +4,17 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
 
-A simple and lightweight TypeScript type guard library.
+A simple and lightweight TypeScript type guard library for runtime type validation.
 
-The core function `isType` allows you to easily create type guards for complex object structures by composing simpler guards.
+**guardz** provides a comprehensive set of type guard functions that help you validate data at runtime while maintaining full TypeScript type safety. The core function `isType` allows you to easily create type guards for complex object structures by composing simpler guards.
+
+## Features
+
+- 🛡️ **Runtime Type Safety** - Validate data at runtime with full TypeScript support
+- 🔧 **Composable Guards** - Build complex type guards from simple primitives
+- 📦 **Lightweight** - Minimal bundle size with no external dependencies
+- 🎯 **Type Narrowing** - Automatic TypeScript type narrowing in conditional blocks
+- 🚀 **Easy to Use** - Simple, intuitive API with comprehensive examples
 
 ## Installation
 
@@ -18,10 +26,10 @@ yarn add guardz
 
 ## Usage
 
-### Simple usage with primitive type-guard function
-Problem:
+### Basic Type Guards
 
-- It could be simple
+Start with simple primitive type checking:
+
 ```typescript
 import { isString } from 'guardz';
 
@@ -32,12 +40,15 @@ if (isString(data)) { // data type is narrowed to string
 }
 ```
 
-- Or complicated
+### Object Type Guards
+
+Create type guards for complex object structures:
+
 ```typescript
 import { isType, isString } from 'guardz';
 const data: unknown = getDataFromSomewhere();
 
-// Build typeguard function
+// Build type guard function
 const isUser = isType({
   name: isString,
   age: isString,
@@ -49,83 +60,96 @@ if (isUser(data)) { // data type is narrowed to { name: string, age: string }
 }
 ```
 
-- For Array
+### Array Type Guards
+
+Validate arrays with specific item types:
+
 ```typescript
 import { isArrayWithEachItem, isNumber } from 'guardz';
 
-// Example using isArrayWithEachItem
 const data: unknown = getDataFromSomewhere()
 if (isArrayWithEachItem(isNumber)(data)) { // data type is narrowed to number[]
   console.log(data.map((item) => item.toFixed(2)))
 }
 ```
 
-- For Record
+### Object Property Type Guards
+
+Validate object properties with specific value types:
+
 ```typescript
 import { isObjectWithEachItem, isNumber } from 'guardz';
 
-// Example using isObjectWithEachItem
 const data: unknown = getDataFromSomewhere()
 if (isObjectWithEachItem(isNumber)(data)) { // data type is narrowed to Record<string, number | undefined>
   console.log(data.something?.toFixed(2))
 }
 ```
 
-- Union Type
-```typescript
-import { isNumber, isString, isOneOfType } from 'guardz';
+### Union Type Guards
 
-// Example using isOneOfType
+Handle multiple possible types:
+
+```typescript
+import { isNumber, isString, isOneOfTypes } from 'guardz';
+
 const data: unknown = getDataFromSomewhere()
-if (isOneOfType<number | string>(isNumber, isString)(data)) { // data type is narrowed to string | number
-  return isNumber(a) ? a.toFix(2) : a;
+if (isOneOfTypes<number | string>(isNumber, isString)(data)) { // data type is narrowed to string | number
+  return isNumber(data) ? data.toFixed(2) : data;
 }
 ```
 
+### Nullable Type Guards
 
-- Nullable type
+Handle null values:
+
 ```typescript
 import { isNullOr, isString } from 'guardz';
 
-// Example using isArrayWithEachItem
 const data: unknown = getDataFromSomewhere()
 if (isNullOr(isString)(data)) { // data type is narrowed to string | null
-  return a?.toUpperCase();
+  return data?.toUpperCase();
 }
 ```
 
-- Optional type
+### Optional Type Guards
+
+Handle undefined values:
+
 ```typescript
 import { isUndefinedOr, isString } from 'guardz';
 
-// Example using isUndefinedOr
 const data: unknown = getDataFromSomewhere()
 if (isUndefinedOr(isString)(data)) { // data type is narrowed to string | undefined
-  return a?.toUpperCase();
+  return data?.toUpperCase();
 }
 ```
 
-- Or even both
-```typescript
-import { isUndefinedOr, isString } from 'guardz';
+### Combined Nullable and Optional Types
 
-// Example using isUndefinedOr
+Handle both null and undefined values:
+
+```typescript
+import { isUndefinedOr, isNullOr, isString } from 'guardz';
+
 const data: unknown = getDataFromSomewhere()
 if (isUndefinedOr(isNullOr(isString))(data)) { // data type is narrowed to string | undefined | null
-  return a?.toUpperCase();
+  return data?.toUpperCase();
 }
 ```
 
-or complex type
+### Complex Nested Type Guards
+
+Create type guards for deeply nested structures:
+
 ```typescript
-import { isUndefinedOr, isString, isEnum, isEqualTo, isNumber, isOneOfType, isArrayWithEachItem, isType } from 'guardz';
+import { isUndefinedOr, isString, isEnum, isEqualTo, isNumber, isOneOfTypes, isArrayWithEachItem, isType } from 'guardz';
 
 enum PriceTypeEnum {
   FREE = 'free',
   PAID = 'paid'
 }
 
-// Example using isUndefinedOr
 type Book = {
   title: string;
   price: PriceTypeEnum,
@@ -158,7 +182,7 @@ const isBook = isType<Book>({
   })),
   rating: isArrayWithEachItem(isType({
     userId: isString,
-    average: isOneOfType<number | 'N/A'>(isNumber, isEqualTo('N/A'))
+    average: isOneOfTypes<number | 'N/A'>(isNumber, isEqualTo('N/A'))
   })),
 })
 
@@ -167,67 +191,145 @@ if (isBook(data)) { // data type is narrowed to Book
 }
 ```
 
-### Guard with tolerance
+### Guard with Tolerance
+
+Use `guardWithTolerance` when you want to proceed with potentially invalid data while logging validation errors:
+
 ```typescript
 import { isBook } from 'isBook'; // see previous example
 import { guardWithTolerance } from 'guardz';
 
+const data: unknown = getDataFromSomewhere();
 
+// This will return the data as Book type even if validation fails,
+// but will log errors if config is provided
+const book = guardWithTolerance(data, isBook, {
+  identifier: 'book',
+  callbackOnError: (error) => console.error('Validation error:', error)
+});
+```
 
 ## API Reference
 
-Below is a list of the core type guards provided by `guardz`.
+Below is a comprehensive list of all type guards provided by `guardz`.
 
-*   **`isType<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>`**
-    **(Core Function)** Creates a type guard function for a specific object shape `T`. It checks if a value is a non-null object and verifies that each property specified in `propsTypesToCheck` conforms to its corresponding type guard function.
+### Core Functions
 
-*   **`guardWithTolerance<T>(data: unknown, typeGuardFn: TypeGuardFn<T>, config?: Nullable<TypeGuardFnConfig>): T
-    Check if data type match typeGuardFn, otherwise assert type of data (even though it is wrong), but log the error via config
+- **isType<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>**
+  Creates a type guard function for a specific object shape `T`. It checks if a value is a non-null object and verifies that each property specified in `propsTypesToCheck` conforms to its corresponding type guard function.
 
-*   **`isAny`**
-*   **`isArrayWithEachItem`**
-*   **`isBoolean`**
-*   **`isDate`**
-*   **`isDefined`**
-*   **`isEnum`**
-*   **`isEqualTo`**
-*   **`isNil`**
-*   **`isNonEmptyArrayWithEachItem`**
-*   **`isNonEmptyString`**
-*   **`isNonNegativeNumber`**
-*   **`isNullOr`**
-*   **`isNumber`**
-*   **`isObjectWithEachItem`**
-*   **`isOneOf`**
-*   **`isOneOfTypes`**
-*   **`isString`**
-*   **`isUndefinedOr`**
-*   **`isUnknown`**
+- **guardWithTolerance<T>(data: unknown, typeGuardFn: TypeGuardFn<T>, config?: Nullable<TypeGuardFnConfig>): T**
+  Validates data using the provided type guard function. If validation fails, it still returns the data as the expected type but logs errors through the config callback.
 
+### Primitive Type Guards
 
-some utility types
-*   **`NonEmptyArray`**
-*   **`NonEmptyString`**
-*   **`NonNegativeNumber`**
-*   **`Nullable`**
-*   **`PositiveNumber`**
+- **isAny** - Always returns true for any value
+- **isBoolean** - Checks if a value is a boolean
+- **isDate** - Checks if a value is a Date object
+- **isDefined** - Checks if a value is not null or undefined
+- **isNil** - Checks if a value is null or undefined
+- **isNumber** - Checks if a value is a valid number (excludes NaN)
+- **isString** - Checks if a value is a string
+- **isUnknown** - Always returns true for any value
 
+### Array Type Guards
 
+- **isArrayWithEachItem** - Checks if a value is an array where each item matches a specific type
+- **isNonEmptyArray** - Checks if a value is a non-empty array
+- **isNonEmptyArrayWithEachItem** - Checks if a value is a non-empty array where each item matches a specific type
 
-For more detailed API documentation generated from the source code comments, please see the [TypeDoc generated documentation](docs/index.html) (available after running `npm run docs`).
+### Object Type Guards
+
+- **isNonNullObject** - Checks if a value is a non-null object (excludes arrays)
+- **isObjectWithEachItem** - Checks if a value is an object where each property value matches a specific type
+- **isPartialOf** - Checks if a value is a partial object matching a specific type
+
+### String Type Guards
+
+- **isNonEmptyString** - Checks if a value is a non-empty string
+
+### Number Type Guards
+
+- **isNonNegativeNumber** - Checks if a value is a non-negative number
+- **isPositiveNumber** - Checks if a value is a positive number
+
+### Union Type Guards
+
+- **isOneOf** - Checks if a value matches one of several specific values
+- **isOneOfTypes** - Checks if a value matches one of several type guards
+
+### Nullable/Optional Type Guards
+
+- **isNullOr** - Checks if a value is null or matches a specific type
+- **isUndefinedOr** - Checks if a value is undefined or matches a specific type
+
+### Special Type Guards
+
+- **isEnum** - Checks if a value matches any value from an enum
+- **isEqualTo** - Checks if a value exactly equals a specific value
+
+### Utility Types
+
+- **NonEmptyArray<T>** - Type for non-empty arrays
+- **NonEmptyString** - Type for non-empty strings
+- **NonNegativeNumber** - Type for non-negative numbers
+- **Nullable<T>** - Type for values that can be null
+- **PositiveNumber** - Type for positive numbers
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+We welcome contributions! Whether you're fixing a bug, adding a new feature, or improving documentation, your help is appreciated.
+
+### How to Contribute
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add some amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/thiennp/guardz.git
+cd guardz
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build the project
+npm run build
+```
+
+### Code Style
+
+- Follow the existing code style and formatting
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Support
 
-If you find this library helpful, consider buying me a beer! 🍺
+### Getting Help
 
-[Buy me a coffee](https://paypal.me/thiennp)
+- 📖 **Documentation** - This README contains comprehensive examples
+- 🐛 **Issues** - Report bugs or request features on [GitHub Issues](https://github.com/thiennp/guardz/issues)
+- 💬 **Discussions** - Ask questions and share ideas on [GitHub Discussions](https://github.com/thiennp/guardz/discussions)
+
+### Show Your Support
+
+If you find this library helpful, consider:
+
+- ⭐ **Starring** the repository on GitHub
+- 🍺 **Buying me a beer** - [PayPal](https://paypal.me/thiennp)
+- 📢 **Sharing** with your team and community
