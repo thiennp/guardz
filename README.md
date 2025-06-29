@@ -6,6 +6,8 @@
 
 A simple and lightweight TypeScript type guard library.
 
+The core function `isType` allows you to easily create type guards for complex object structures by composing simpler guards.
+
 ## Installation
 
 ```bash
@@ -17,7 +19,7 @@ yarn add guardz
 ## Usage
 
 ```typescript
-import { isString, isNumber, isNonNullObject, isArrayWithEachItem, isPartialOf } from 'guardz';
+import { isString, isNumber, isNonNullObject, isArrayWithEachItem, isPartialOf, isType, isBoolean } from 'guardz';
 
 const data: unknown = getDataFromSomewhere();
 
@@ -68,12 +70,42 @@ if (isPartialOf(partialUserData, userShape)) {
   }
 }
 
+// Using isType for object validation
+interface User {
+  id: number;
+  name: string;
+  isActive: boolean;
+  tags: string[];
+}
+
+const isUser = isType<User>({
+  id: isNumber,
+  name: isString,
+  isActive: isBoolean,
+  tags: isArrayWithEachItem(isString) // isArrayWithEachItem returns a TypeGuardFn<string[]>
+});
+
+const potentialUser: unknown = { id: 123, name: 'Alice', isActive: true, tags: ['a', 'b'] };
+
+if (isUser(potentialUser)) {
+  // potentialUser is now typed as User
+  console.log(`User ${potentialUser.name} has tags: ${potentialUser.tags.join(', ')}`);
+} else {
+  console.log('Invalid user structure');
+}
+
 // Add more examples of your specific guards here
 ```
 
 ## API Reference
 
 Below is a list of the core type guards provided by `guardz`.
+
+*   **`isType<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>`**
+    **(Core Function)** Creates a type guard function for a specific object shape `T`. It checks if a value is a non-null object and verifies that each property specified in `propsTypesToCheck` conforms to its corresponding type guard function.
+
+*   **`guardWithTolerance<T>(baseGuard: TypeGuardFn<T>, refinement: (value: T) => boolean): TypeGuardFn<T>`**
+    Creates a new type guard function that first checks using the `baseGuard` (e.g., `isNumber`). If the `baseGuard` passes, it then applies the additional `refinement` check function to the value (which must now conform to type `T`). Returns `true` only if both checks pass.
 
 *   **`isAny(value: unknown): value is any`**
     Always returns `true`. Useful as a placeholder or in complex conditional types.
@@ -137,9 +169,6 @@ Below is a list of the core type guards provided by `guardz`.
 
 *   **`isUndefinedOr<T>(value: unknown, nextGuard: TypeGuardFn<T>): value is T | undefined`**
     Checks if `value` is `undefined` or passes the `nextGuard`.
-
-*   **`guardWithTolerance<T>(guardFn: TypeGuardFn<T>, tolerance?: number | undefined): TypeGuardFn<T>`**
-    Creates a debounced version of a type guard, allowing temporary tolerance for invalid states (potentially useful for user input validation). *(Requires further implementation detail)*
 
 *Note: The exact types `TypeGuardFn` and `GuardedType` would depend on your internal definitions, typically involving predicates like `value is T`.*
 
