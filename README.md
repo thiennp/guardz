@@ -3,11 +3,13 @@
 [![NPM Version](https://img.shields.io/npm/v/guardz)](https://www.npmjs.com/package/guardz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
-[![Sample](https://codesandbox.io/p/live/c8c7f6fd-480e-43f2-b211-bd9962f54be5)
 
 A simple and lightweight TypeScript type guard library for runtime type validation.
 
 > **Runtime type guards, powered by TypeScript — not reinventing types, just enforcing them.**
+
+### Sample
+[Codesandbox](https://codesandbox.io/p/live/c8c7f6fd-480e-43f2-b211-bd9962f54be5)
 
 Guardz is a minimal, composable runtime type-checking library for TypeScript.  
 It does **one thing** and does it well: **assert that values match your types, without the weight of a full schema validator.**
