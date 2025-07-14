@@ -43,9 +43,12 @@ export { isUndefinedOr } from './typeguards/isUndefinedOr';
 export { isEnum } from './typeguards/isEnum';
 export { isEqualTo } from './typeguards/isEqualTo';
 
+// Type guard error generation
+export { generateTypeGuardError } from './typeguards/generateTypeGuardError';
+
 // Utility types
 export type { NonEmptyArray } from './types/NonEmptyArray';
 export type { NonEmptyString } from './types/NonEmptyString';
 export type { NonNegativeNumber } from './types/NonNegativeNumber';
 export type { Nullable } from './types/Nullable';
-export type { PositiveNumber } from './types/PositiveNumber'; 
+export type { PositiveNumber } from './types/PositiveNumber';

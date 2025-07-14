@@ -137,4 +137,7 @@ ehthumbs.db
 Thumbs.db
 
 # Generated Documentation
-docs/ 
+docs/
+
+# JetBrains IDEs
+.idea/
