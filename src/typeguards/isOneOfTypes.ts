@@ -3,10 +3,49 @@ import { stringify } from "@/stringify";
 import type { TypeGuardFn } from "./isType";
 
 /**
- * Combines multiple isType functions and returns true if at least one of them returns true.
+ * Creates a type guard that checks if a value matches at least one of several type guards.
+ * 
+ * This is different from `isOneOf` which checks against literal values. This function
+ * combines multiple type guard functions and returns true if the value passes any of them.
+ * Useful for union types where each type needs its own validation logic.
  *
- * @param typeGuards - an array of isType functions
- * @returns true if the value passes at least one of the type guards, otherwise false
+ * @template T - The union type of all possible types
+ * @param typeGuards - Array of type guard functions to check against
+ * @returns A type guard function that validates against any of the provided type guards
+ * 
+ * @example
+ * ```typescript
+ * import { isOneOfTypes, isString, isNumber, isBoolean, isType } from 'guardz';
+ * 
+ * // Simple union types
+ * const isStringOrNumber = isOneOfTypes(isString, isNumber);
+ * const isPrimitive = isOneOfTypes(isString, isNumber, isBoolean);
+ * 
+ * console.log(isStringOrNumber("hello")); // true
+ * console.log(isStringOrNumber(42)); // true
+ * console.log(isStringOrNumber(true)); // false
+ * 
+ * // Complex union types
+ * interface User {
+ *   type: "user";
+ *   name: string;
+ * }
+ * 
+ * interface Admin {
+ *   type: "admin";
+ *   permissions: string[];
+ * }
+ * 
+ * const isUser = isType<User>({ type: isEqualTo("user"), name: isString });
+ * const isAdmin = isType<Admin>({ type: isEqualTo("admin"), permissions: isArrayWithEachItem(isString) });
+ * const isPerson = isOneOfTypes(isUser, isAdmin);
+ * 
+ * const data: unknown = getUserInput();
+ * if (isPerson(data)) {
+ *   // data is now typed as User | Admin
+ *   console.log(data.type); // TypeScript knows this exists on both types
+ * }
+ * ```
  */
 export function isOneOfTypes<T>(...typeGuards: TypeGuardFn<T>[]): TypeGuardFn<T> {
   return function (value: unknown, config): value is T {

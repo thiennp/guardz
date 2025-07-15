@@ -26,11 +26,11 @@ describe('isNonEmptyArray', () => {
 
     isNonEmptyArray([], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected items ([]) to be "non-empty array"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected items ([]) to be "NonEmptyArray"');
 
     mockCallback.mockClear();
     isNonEmptyArray('not an array', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected items ("not an array") to be "array"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected items ("not an array") to be "NonEmptyArray"');
   });
 }); 

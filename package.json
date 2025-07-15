@@ -1,6 +1,6 @@
 {
   "name": "guardz",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A simple and lightweight TypeScript type guard library for runtime type validation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,11 @@
     "validation",
     "check",
     "assert",
-    "is"
+    "is",
+    "intersection",
+    "extension",
+    "composite",
+    "inheritance"
   ],
   "author": "Thien Nguyen",
   "license": "MIT",

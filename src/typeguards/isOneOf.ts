@@ -1,13 +1,46 @@
+import { generateTypeGuardError } from "./generateTypeGuardError";
 import { stringify } from "@/stringify";
-
 import type { TypeGuardFn } from "./isType";
 
 /**
- * A function that takes a list of possible value in a same type,
- * and returns a new function that checks if a value is one of them.
+ * Creates a type guard that checks if a value matches one of several specific values.
+ * 
+ * This function creates a type guard that validates against a list of exact values
+ * using strict equality (===). Useful for union types of literal values.
  *
- * @param {function} acceptableValues - the list of values that is acceptable and are all in type T
- * @returns {function} - a function that returns true if the value is of the listed acceptable values, false otherwise
+ * @template T - The union type of all possible values
+ * @param values - The list of valid values to check against
+ * @returns A type guard function that validates against the provided values
+ * 
+ * @example
+ * ```typescript
+ * import { isOneOf } from 'guardz';
+ * 
+ * const isColor = isOneOf("red", "green", "blue");
+ * const isStatus = isOneOf(200, 404, 500);
+ * const isBooleanOrNull = isOneOf(true, false, null);
+ * 
+ * console.log(isColor("red")); // true
+ * console.log(isColor("yellow")); // false
+ * console.log(isStatus(404)); // true
+ * console.log(isStatus(201)); // false
+ * 
+ * // With type narrowing
+ * type Theme = "light" | "dark" | "auto";
+ * const isTheme = isOneOf("light", "dark", "auto");
+ * 
+ * const data: unknown = getUserInput();
+ * if (isTheme(data)) {
+ *   // data is now typed as "light" | "dark" | "auto"
+ *   console.log(`Theme selected: ${data}`);
+ * }
+ * 
+ * // Mixed types
+ * const isMixed = isOneOf("none", 0, false);
+ * if (isMixed(data)) {
+ *   // data is typed as "none" | 0 | false
+ * }
+ * ```
  */
 export function isOneOf<T>(...acceptableValues: T[]): TypeGuardFn<T> {
   return function (value, config): value is T {

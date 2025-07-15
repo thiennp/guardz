@@ -41,6 +41,6 @@ describe('isEqualTo', () => {
     checkToken('wrong', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Note: isEqualTo uses custom error message format
-    expect(mockCallback).toHaveBeenCalledWith('token ("wrong") must be exactly "secret"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected token ("wrong") to be "equal to "secret""');
   });
 }); 

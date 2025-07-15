@@ -32,7 +32,7 @@ describe('isNonEmptyArrayWithEachItem', () => {
     // Test error for empty array
     isNonEmptyNumberArray([], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected ids ([]) to be "non-empty array"');
+    expect(mockCallback).toHaveBeenCalledWith('Expected ids ([]) to be "NonEmptyArray"');
 
     mockCallback.mockClear();
 

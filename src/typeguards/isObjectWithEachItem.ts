@@ -1,13 +1,37 @@
-import { generateTypeGuardError } from "@/typeguards/generateTypeGuardError";
-
+import { generateTypeGuardError } from "./generateTypeGuardError";
 import type { TypeGuardFn } from "./isType";
 
 /**
- * Checks if a given value is an object with valid type properties.
+ * Creates a type guard that checks if a value is a plain object where each property value matches a specific type.
+ * 
+ * This is a higher-order function that takes a type guard for the property values and returns
+ * a type guard for objects containing those values. Only checks enumerable own properties.
  *
- * @param {(item: unknown) => boolean} predicate - The predicate function to apply to each property's value in the object.
- * @return {(value, MOCK_TYPE_GUARD_FN_CONFIG) => value is Record<string, T>} Returns a type-guard function that returns true if the
- *   value is an object with valid type properties, false otherwise.
+ * @param predicate - The type guard function to apply to each property value
+ * @returns A type guard function that checks if the value is an object with valid property values
+ * 
+ * @example
+ * ```typescript
+ * import { isObjectWithEachItem, isString, isNumber } from 'guardz';
+ * 
+ * const isStringRecord = isObjectWithEachItem(isString);
+ * const isNumberRecord = isObjectWithEachItem(isNumber);
+ * 
+ * console.log(isStringRecord({ a: "hello", b: "world" })); // true
+ * console.log(isStringRecord({})); // true (empty object is valid)
+ * console.log(isStringRecord({ a: "hello", b: 123 })); // false (mixed types)
+ * console.log(isStringRecord([])); // false (array is not a plain object)
+ * console.log(isStringRecord(null)); // false
+ * 
+ * // With type narrowing
+ * const data: unknown = getUserInput();
+ * if (isStringRecord(data)) {
+ *   // data is now typed as Record<string, string>
+ *   Object.keys(data).forEach(key => {
+ *     console.log(data[key].toUpperCase());
+ *   });
+ * }
+ * ```
  */
 export function isObjectWithEachItem<T>(predicate: TypeGuardFn<T>): TypeGuardFn<Record<string, T>> {
   return function (value, config): value is Record<string, T> {

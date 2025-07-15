@@ -35,9 +35,14 @@ export { isPositiveNumber } from './typeguards/isPositiveNumber';
 export { isOneOf } from './typeguards/isOneOf';
 export { isOneOfTypes } from './typeguards/isOneOfTypes';
 
+// Composite type guards
+export { isIntersectionOf } from './typeguards/isIntersectionOf';
+export { isExtensionOf } from './typeguards/isExtensionOf';
+
 // Nullable/Undefined type guards
 export { isNullOr } from './typeguards/IsNullOr';
 export { isUndefinedOr } from './typeguards/isUndefinedOr';
+export { isNilOr } from './typeguards/isNilOr';
 
 // Special type guards
 export { isEnum } from './typeguards/isEnum';

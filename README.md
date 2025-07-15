@@ -112,6 +112,57 @@ if (isOneOfTypes<number | string>(isNumber, isString)(data)) { // data type is n
 }
 ```
 
+### Composite Type Guards
+
+Handle complex type relationships like intersections and extensions:
+
+```typescript
+import { isIntersectionOf, isExtensionOf, isType, isString, isNumber } from 'guardz';
+
+// For intersection types (Type A & Type B)
+interface Person {
+  name: string;
+  age: number;
+}
+
+interface Employee {
+  employeeId: string;
+  department: string;
+}
+
+type PersonEmployee = Person & Employee;
+
+const isPerson = isType<Person>({ name: isString, age: isNumber });
+const isEmployee = isType<Employee>({ employeeId: isString, department: isString });
+const isPersonEmployee = isIntersectionOf(isPerson, isEmployee);
+
+const data: unknown = getDataFromSomewhere();
+if (isPersonEmployee(data)) { // data type is narrowed to PersonEmployee
+  console.log(`${data.name} works in ${data.department}`);
+}
+
+// For inheritance patterns (Interface B extends Interface A)
+interface Manager extends Person {
+  employeeId: string;
+  department: string;
+  managedTeamSize: number;
+}
+
+const isManagerFull = isType<Manager>({ 
+  name: isString, 
+  age: isNumber,
+  employeeId: isString,
+  department: isString,
+  managedTeamSize: isNumber
+});
+
+const isManager = isExtensionOf(isPerson, isManagerFull);
+
+if (isManager(data)) { // data type is narrowed to Manager
+  console.log(`Manager ${data.name} manages ${data.managedTeamSize} people`);
+}
+```
+
 ### Nullable Type Guards
 
 Handle null values:
@@ -143,9 +194,15 @@ if (isUndefinedOr(isString)(data)) { // data type is narrowed to string | undefi
 Handle both null and undefined values:
 
 ```typescript
-import { isUndefinedOr, isNullOr, isString } from 'guardz';
+import { isUndefinedOr, isNullOr, isNilOr, isString } from 'guardz';
 
+// Method 1: Using isNilOr (recommended for brevity)
 const data: unknown = getDataFromSomewhere()
+if (isNilOr(isString)(data)) { // data type is narrowed to string | null | undefined
+  return data?.toUpperCase();
+}
+
+// Method 2: Explicit composition (equivalent to isNilOr)
 if (isUndefinedOr(isNullOr(isString))(data)) { // data type is narrowed to string | undefined | null
   return data?.toUpperCase();
 }
@@ -271,10 +328,16 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isOneOf** - Checks if a value matches one of several specific values
 - **isOneOfTypes** - Checks if a value matches one of several type guards
 
+### Composite Type Guards
+
+- **isIntersectionOf** - Validates a value against multiple type guards (intersection types: `A & B`)
+- **isExtensionOf** - Validates inheritance patterns where one type extends another (`interface B extends A`)
+
 ### Nullable/Optional Type Guards
 
 - **isNullOr** - Checks if a value is null or matches a specific type
 - **isUndefinedOr** - Checks if a value is undefined or matches a specific type
+- **isNilOr** - Checks if a value is null, undefined, or matches a specific type (equivalent to `isUndefinedOr(isNullOr(...))`)
 
 ### Special Type Guards
 
