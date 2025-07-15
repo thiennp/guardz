@@ -18,6 +18,7 @@ export { isUnknown } from './typeguards/isUnknown';
 export { isArrayWithEachItem } from './typeguards/isArrayWithEachItem';
 export { isNonEmptyArray } from './typeguards/isNonEmptyArray';
 export { isNonEmptyArrayWithEachItem } from './typeguards/isNonEmptyArrayWithEachItem';
+export { isTuple } from './typeguards/isTuple';
 
 // Object type guards
 export { isNonNullObject } from './typeguards/isNonNullObject';
@@ -30,6 +31,16 @@ export { isNonEmptyString } from './typeguards/isNonEmptyString';
 // Number type guards
 export { isNonNegativeNumber } from './typeguards/isNonNegativeNumber';
 export { isPositiveNumber } from './typeguards/isPositiveNumber';
+export { isNonPositiveNumber } from './typeguards/isNonPositiveNumber';
+export { isNegativeNumber } from './typeguards/isNegativeNumber';
+export { isInteger } from './typeguards/isInteger';
+export { isPositiveInteger } from './typeguards/isPositiveInteger';
+export { isNegativeInteger } from './typeguards/isNegativeInteger';
+export { isNonNegativeInteger } from './typeguards/isNonNegativeInteger';
+export { isNonPositiveInteger } from './typeguards/isNonPositiveInteger';
+
+// BigInt type guards
+export { isBigInt } from './typeguards/isBigInt';
 
 // Union type guards
 export { isOneOf } from './typeguards/isOneOf';
@@ -55,5 +66,12 @@ export { generateTypeGuardError } from './typeguards/generateTypeGuardError';
 export type { NonEmptyArray } from './types/NonEmptyArray';
 export type { NonEmptyString } from './types/NonEmptyString';
 export type { NonNegativeNumber } from './types/NonNegativeNumber';
+export type { NonPositiveNumber } from './types/NonPositiveNumber';
+export type { NegativeNumber } from './types/NegativeNumber';
 export type { Nullable } from './types/Nullable';
 export type { PositiveNumber } from './types/PositiveNumber';
+export type { Integer } from './types/Integer';
+export type { PositiveInteger } from './types/PositiveInteger';
+export type { NegativeInteger } from './types/NegativeInteger';
+export type { NonNegativeInteger } from './types/NonNegativeInteger';
+export type { NonPositiveInteger } from './types/NonPositiveInteger';

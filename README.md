@@ -279,6 +279,106 @@ const book = guardWithTolerance(data, isBook, {
 });
 ```
 
+### Additional Type Guards
+
+#### Integer Validation
+
+Validate that a value is an integer number:
+
+```typescript
+import { isInteger } from 'guardz';
+
+const data: unknown = getDataFromSomewhere();
+if (isInteger(data)) { // data type is narrowed to number
+  console.log(`User ID: ${data}`); // Safe to use as integer
+}
+```
+
+#### Tuple Validation
+
+Validate fixed-length arrays with specific types at each position:
+
+```typescript
+import { isTuple, isString, isNumber } from 'guardz';
+
+const data: unknown = getDataFromSomewhere();
+// Check for [string, number] tuple
+if (isTuple([isString, isNumber])(data)) { // data type is narrowed to [string, number]
+  const [name, age] = data;
+  console.log(`${name} is ${age} years old`);
+}
+```
+
+#### BigInt Validation
+
+Validate BigInt values for large numbers:
+
+```typescript
+import { isBigInt } from 'guardz';
+
+const data: unknown = getDataFromSomewhere();
+if (isBigInt(data)) { // data type is narrowed to bigint
+  console.log(`Large number: ${data}`);
+}
+```
+
+#### Additional Number Type Guards
+
+Validate specific number ranges:
+
+```typescript
+import { isNonPositiveNumber, isNegativeNumber } from 'guardz';
+
+// Non-positive numbers (≤ 0) - includes zero
+const data1: unknown = getDataFromSomewhere();
+if (isNonPositiveNumber(data1)) { // data1 type is narrowed to NonPositiveNumber
+  console.log(`Value is zero or negative: ${data1}`);
+}
+
+// Negative numbers (< 0) - excludes zero
+const data2: unknown = getDataFromSomewhere();
+if (isNegativeNumber(data2)) { // data2 type is narrowed to NegativeNumber
+  console.log(`Value is strictly negative: ${data2}`);
+}
+```
+
+#### Integer-Specific Type Guards
+
+Validate integers with specific range constraints:
+
+```typescript
+import { 
+  isPositiveInteger, 
+  isNegativeInteger, 
+  isNonNegativeInteger, 
+  isNonPositiveInteger 
+} from 'guardz';
+
+// Positive integers (> 0 and whole numbers)
+const userId: unknown = getUserInput();
+if (isPositiveInteger(userId)) { // userId type is narrowed to PositiveInteger
+  console.log(`User ID: ${userId}`); // Safe for database primary keys
+}
+
+// Non-negative integers (≥ 0 and whole numbers) 
+const arrayIndex: unknown = getArrayIndex();
+if (isNonNegativeInteger(arrayIndex)) { // arrayIndex type is narrowed to NonNegativeInteger
+  console.log(`Array index: ${arrayIndex}`); // Safe for 0-based indexing
+}
+
+// Negative integers (< 0 and whole numbers)
+const errorCode: unknown = getErrorCode();
+if (isNegativeInteger(errorCode)) { // errorCode type is narrowed to NegativeInteger
+  console.log(`Error code: ${errorCode}`); // Safe for negative error codes
+}
+
+// Non-positive integers (≤ 0 and whole numbers)
+const floorLevel: unknown = getFloorLevel();
+if (isNonPositiveInteger(floorLevel)) { // floorLevel type is narrowed to NonPositiveInteger
+  console.log(`Floor level: ${floorLevel}`); // Safe for ground level and basements
+}
+```
+
 ## API Reference
 
 Below is a comprehensive list of all type guards provided by `guardz`.
@@ -307,6 +407,7 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isArrayWithEachItem** - Checks if a value is an array where each item matches a specific type
 - **isNonEmptyArray** - Checks if a value is a non-empty array
 - **isNonEmptyArrayWithEachItem** - Checks if a value is a non-empty array where each item matches a specific type
+- **isTuple** - Checks if a value is a tuple (fixed-length array) with specific types at each position
 
 ### Object Type Guards
 
@@ -320,8 +421,19 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 ### Number Type Guards
 
-- **isNonNegativeNumber** - Checks if a value is a non-negative number
-- **isPositiveNumber** - Checks if a value is a positive number
+- **isNonNegativeNumber** - Checks if a value is a non-negative number (≥ 0)
+- **isPositiveNumber** - Checks if a value is a positive number (> 0)
+- **isNonPositiveNumber** - Checks if a value is a non-positive number (≤ 0)
+- **isNegativeNumber** - Checks if a value is a negative number (< 0)
+- **isInteger** - Checks if a value is an integer number
+- **isPositiveInteger** - Checks if a value is a positive integer (> 0 and whole number)
+- **isNegativeInteger** - Checks if a value is a negative integer (< 0 and whole number)
+- **isNonNegativeInteger** - Checks if a value is a non-negative integer (≥ 0 and whole number)
+- **isNonPositiveInteger** - Checks if a value is a non-positive integer (≤ 0 and whole number)
+
+### BigInt Type Guards
+
+- **isBigInt** - Checks if a value is a BigInt
 
 ### Union Type Guards
 
@@ -348,9 +460,16 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 - **NonEmptyArray<T>** - Type for non-empty arrays
 - **NonEmptyString** - Type for non-empty strings
-- **NonNegativeNumber** - Type for non-negative numbers
+- **NonNegativeNumber** - Type for non-negative numbers (≥ 0)
+- **NonPositiveNumber** - Type for non-positive numbers (≤ 0)
+- **NegativeNumber** - Type for negative numbers (< 0)
 - **Nullable<T>** - Type for values that can be null
-- **PositiveNumber** - Type for positive numbers
+- **PositiveNumber** - Type for positive numbers (> 0)
+- **Integer** - Type for integer numbers
+- **PositiveInteger** - Type for positive integers (> 0 and whole number)
+- **NegativeInteger** - Type for negative integers (< 0 and whole number)
+- **NonNegativeInteger** - Type for non-negative integers (≥ 0 and whole number)
+- **NonPositiveInteger** - Type for non-positive integers (≤ 0 and whole number)
 
 ## Contributing
 

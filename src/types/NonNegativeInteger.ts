@@ -1,0 +1,1 @@
+export type NonNegativeInteger = number & { __brand: 'NonNegativeInteger' } 
