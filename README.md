@@ -35,6 +35,76 @@ Unlike schema validators that require re-declaring types, Guardz uses **your exi
 
 ---
 
+## 🚀 Guardz Ecosystem
+
+Guardz is more than just a type guard library - it's a complete ecosystem for runtime type safety in TypeScript applications.
+
+### Core Package: `guardz`
+The foundation of the ecosystem, providing comprehensive type guards with structured error handling.
+
+### HTTP Client: `guardz-axios`
+Type-safe HTTP requests with runtime validation built on top of Axios.
+
+**Key Features:**
+- **Type-safe HTTP requests** with runtime validation
+- **Multiple API patterns** for different use cases
+- **Comprehensive error handling** with detailed feedback
+- **Retry logic** with configurable backoff strategies
+- **Tolerance mode** for graceful degradation
+
+```typescript
+import { safeGet } from 'guardz-axios';
+import { isType, isString, isNumber } from 'guardz';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const isUser = isType<User>({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+const result = await safeGet({ guard: isUser })('/users/1');
+
+if (result.status === Status.SUCCESS) {
+  console.log('User:', result.data); // Fully typed as User
+} else {
+  console.log('Error:', result.code, result.message);
+}
+```
+
+**Installation:**
+```bash
+npm install guardz-axios guardz axios
+```
+
+### Type Guard Generator: `guardz-generator`
+Automatically generate type guards from your TypeScript interfaces and type aliases.
+
+**Key Features:**
+- **Automatic generation** from TypeScript interfaces and type aliases
+- **Generic support** for complex type structures
+- **Advanced recursion detection** for self-referencing types
+- **Cross-file references** for multi-file type systems
+- **CLI and programmatic APIs** for flexible integration
+
+```bash
+# Generate type guards for all exported interfaces
+npx guardz-generator generate "src/**/*.ts"
+
+# Generate for a specific type
+npx guardz-generator generate "src/**/*.ts" -t UserDTO
+```
+
+**Installation:**
+```bash
+npm install guardz-generator
+```
+
 ## 📦 Installation
 
 ```bash
@@ -565,6 +635,44 @@ npm run build
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
+
+## 🛠️ Ecosystem Packages
+
+The Guardz ecosystem consists of three complementary packages:
+
+### 📦 `guardz` (Core)
+The foundation package providing comprehensive type guards with structured error handling.
+
+**Features:**
+- 50+ built-in type guards
+- Structured error messages
+- Custom error handling
+- Zero dependencies
+- Full TypeScript support
+
+### 🌐 `guardz-axios`
+Type-safe HTTP client with runtime validation built on top of Axios.
+
+**Features:**
+- Type-safe HTTP requests
+- Multiple API patterns
+- Comprehensive error handling
+- Retry logic with backoff strategies
+- Tolerance mode for graceful degradation
+
+**[📖 Read the full documentation →](https://github.com/thiennp/guardz/tree/main/guardz-axios)**
+
+### 🔧 `guardz-generator`
+Automatically generate type guards from TypeScript interfaces and type aliases.
+
+**Features:**
+- Automatic generation from TypeScript types
+- Generic support for complex structures
+- Advanced recursion detection
+- Cross-file references
+- CLI and programmatic APIs
+
+**[📖 Read the full documentation →](https://github.com/thiennp/guardz/tree/main/guardz-generator)**
 
 ## Support
 
