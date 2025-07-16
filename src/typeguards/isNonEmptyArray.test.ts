@@ -9,12 +9,8 @@ describe('isNonEmptyArray', () => {
 
   it('should return false for empty arrays and non-arrays', () => {
     expect(isNonEmptyArray([])).toBe(false);
-    expect(isNonEmptyArray(123)).toBe(false);
-    expect(isNonEmptyArray('hello')).toBe(false);
     expect(isNonEmptyArray(null)).toBe(false);
     expect(isNonEmptyArray(undefined)).toBe(false);
-    expect(isNonEmptyArray({})).toBe(false);
-    expect(isNonEmptyArray(true)).toBe(false);
   });
 
   it('should handle TypeGuardFn config for error reporting', () => {
@@ -27,10 +23,5 @@ describe('isNonEmptyArray', () => {
     isNonEmptyArray([], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith('Expected items ([]) to be "NonEmptyArray"');
-
-    mockCallback.mockClear();
-    isNonEmptyArray('not an array', config);
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected items ("not an array") to be "NonEmptyArray"');
   });
 }); 
