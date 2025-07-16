@@ -4,26 +4,32 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
 
-A simple and lightweight TypeScript type guard library for runtime type validation.
+A powerful TypeScript type guard library with **structured error handling** for runtime type validation.
 
-> **Runtime type guards, powered by TypeScript — not reinventing types, just enforcing them.**
+> **Runtime type guards with detailed error messages — not just validation, but actionable feedback.**
 
 ### Sample
 [Codesandbox](https://codesandbox.io/p/live/c8c7f6fd-480e-43f2-b211-bd9962f54be5)
 
-Guardz is a minimal, composable runtime type-checking library for TypeScript.  
-It does **one thing** and does it well: **assert that values match your types, without the weight of a full schema validator.**
+Guardz is a comprehensive runtime type-checking library that goes beyond simple validation.  
+It provides **detailed, structured error messages** that help you identify exactly what went wrong and where.
 
+- ✅ **Structured Error Messages** - Know exactly what failed and why
 - ✅ Zero transformation  
 - ✅ Fully type-safe  
 - ✅ Human-readable guards  
-- ✅ Tiny and dependency-free  
+- ✅ Tiny and dependency-free
+- ✅ **Custom Error Handling** - Integrate with your logging and monitoring  
 ---
 
 ## 🚀 Why Guardz?
 
 TypeScript types vanish at runtime. That’s where Guardz steps in.  
 Unlike schema validators that require re-declaring types, Guardz uses **your existing TS types as the source of truth**, matching values without coercion.
+
+**But Guardz goes further:**
+- 🛑 **Structured error messages**: Instantly know what failed, where, and why. Every type guard can provide detailed, field-specific error messages for debugging, logging, and user feedback.
+- 🔗 **Custom error handling**: Integrate with your logging, monitoring, or UI error display with a simple callback.
 
 📚 [Read: "Assert Nothing, Guard Everything"](https://medium.com/p/0b3e4388ae78)
 
@@ -378,6 +384,53 @@ if (isNonPositiveInteger(floorLevel)) { // floorLevel type is narrowed to NonPos
   console.log(`Floor level: ${floorLevel}`); // Safe for ground level and basements
 }
 ```
+
+## 🛑 Structured Error Handling (Core Feature)
+
+One of Guardz's most powerful features is its **structured error messages**. Every type guard can provide detailed, field-specific error messages that tell you:
+- **What failed** (the value and its field)
+- **Where it failed** (the property path)
+- **What was expected** (the type or constraint)
+
+### Error Message Format
+
+```
+Expected {identifier} ({value}) to be "{expectedType}"
+```
+
+**Examples:**
+- `Expected user.age ("30") to be "number"`
+- `Expected items ([]) to be "NonEmptyArray"`
+- `Expected config.port ("abc") to be "PositiveInteger"`
+
+### How to Use
+
+Every type guard accepts an optional config with an `identifier` and a `callbackOnError`:
+
+```typescript
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+};
+
+const isUser = isType({ name: isString, age: isNumber });
+const result = isUser({ name: 'John', age: '30' }, config);
+// errors now contains: [ 'Expected user.age ("30") to be "number"' ]
+```
+
+### Why It Matters
+- **Debugging**: Instantly see which field failed and why
+- **User Feedback**: Show clear, actionable error messages in your UI
+- **Logging/Monitoring**: Integrate with your error tracking systems
+- **Testing**: Assert on specific error messages in your tests
+
+### Advanced: Nested and Multiple Errors
+Guardz tracks errors even in deeply nested structures, using dot/bracket notation for property paths:
+- `Expected user.details.age ("thirty") to be "number"`
+- `Expected users[2].email (123) to be "string"`
+
+---
 
 ## API Reference
 
