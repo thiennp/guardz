@@ -1,6 +1,6 @@
 {
   "name": "guardz",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A simple and lightweight TypeScript type guard library for runtime type validation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

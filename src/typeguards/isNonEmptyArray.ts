@@ -1,5 +1,5 @@
 import { generateTypeGuardError } from "./generateTypeGuardError";
-import type { TypeGuardFn } from "./isType";
+import type { TypeGuardFn, TypeGuardFnConfig } from "./isType";
 import type { NonEmptyArray } from "@/types/NonEmptyArray";
 
 /**
@@ -40,7 +40,7 @@ import type { NonEmptyArray } from "@/types/NonEmptyArray";
  * }
  * ```
  */
-export const isNonEmptyArray: TypeGuardFn<NonEmptyArray<unknown>> = function (value, config): value is NonEmptyArray<unknown> {
+export const isNonEmptyArray = function <T>(value: T[] | undefined | null, config?: TypeGuardFnConfig | null): value is NonEmptyArray<T> {
   if (!Array.isArray(value) || value.length === 0) {
     if (config) {
       config.callbackOnError(generateTypeGuardError(value, config.identifier, "NonEmptyArray"));
