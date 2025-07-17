@@ -34,7 +34,10 @@ Nullable and special type guard examples, with error messages for null/undefined
 ### 7. `utility-types.ts`
 Demonstrates GuardZ utility types and how to combine them with runtime error reporting.
 
-### 8. `advanced-features.ts`
+### 8. `asserted-types.ts`
+Demonstrates the `isAsserted<T>` type guard for working with external library types, complex nested structures, and types that don't have runtime validation but need TypeScript type safety.
+
+### 9. `advanced-features.ts`
 Advanced features and best practices, including custom error handlers, error aggregation, and error handling in deeply nested structures.
 
 ## Running the Examples
@@ -69,6 +72,9 @@ npx ts-node -r tsconfig-paths/register examples/nullable-and-special.ts
 
 # Utility types example
 npx ts-node -r tsconfig-paths/register examples/utility-types.ts
+
+# Asserted types example
+npx ts-node -r tsconfig-paths/register examples/asserted-types.ts
 
 # Advanced features example
 npx ts-node -r tsconfig-paths/register examples/advanced-features.ts

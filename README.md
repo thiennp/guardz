@@ -337,6 +337,48 @@ if (isBook(data)) { // data type is narrowed to Book
 }
 ```
 
+### Asserted Type Guards
+
+Use `isAsserted<T>` when working with types from external libraries or APIs that don't provide runtime validation, but you want TypeScript type safety:
+
+```typescript
+import { isAsserted } from 'guardz';
+
+// For external library types
+import type { ExternalApiResponse } from 'some-external-lib';
+const isExternalResponse = isAsserted<ExternalApiResponse>;
+
+const data: unknown = { id: 123, name: 'test' };
+if (isExternalResponse(data)) {
+  // TypeScript knows data is ExternalApiResponse
+  console.log(data.id); // No type error
+  console.log(data.name); // No type error
+}
+
+// For complex nested types
+interface UserProfile {
+  id: string;
+  preferences: {
+    theme: 'light' | 'dark';
+    notifications: boolean;
+  };
+  metadata: Record<string, unknown>;
+}
+
+const isUserProfile = isAsserted<UserProfile>;
+const profile: unknown = {
+  id: 'user-123',
+  preferences: { theme: 'dark', notifications: true },
+  metadata: { lastLogin: new Date() }
+};
+
+if (isUserProfile(profile)) {
+  // Full type safety for nested properties
+  console.log(profile.preferences.theme); // 'light' | 'dark'
+  console.log(profile.metadata.lastLogin); // unknown
+}
+```
+
 ### Guard with Tolerance
 
 Use `guardWithTolerance` when you want to proceed with potentially invalid data while logging validation errors:
@@ -576,6 +618,7 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 ### Special Type Guards
 
+- **isAsserted** - Always returns true and asserts value is T (useful for 3rd party types without runtime validation)
 - **isEnum** - Checks if a value matches any value from an enum
 - **isEqualTo** - Checks if a value exactly equals a specific value
 

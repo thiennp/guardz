@@ -6,7 +6,7 @@ import type { TypeGuardFn } from "./isType";
  * This is specifically designed for inheritance patterns where one type extends another.
  * 
  * @param baseTypeGuard - Type guard for the base type
- * @param extendedTypeGuard - Type guard for the full extended type
+ * @param extendedTypeGuard - Type guard for the additional properties only (excluding base type properties)
  * @returns A type guard function for the extended type
  * 
  * @example
@@ -22,14 +22,12 @@ import type { TypeGuardFn } from "./isType";
  * }
  * 
  * const isPerson = isType<Person>({ name: isString, age: isNumber });
- * const isEmployeeFull = isType<Employee>({ 
- *   name: isString, 
- *   age: isNumber, 
+ * const isEmployeeAdditional = isType<Omit<Employee, keyof Person>>({ 
  *   employeeId: isString, 
  *   department: isString 
  * });
  * 
- * const isEmployee = isExtensionOf(isPerson, isEmployeeFull);
+ * const isEmployee = isExtensionOf(isPerson, isEmployeeAdditional);
  * 
  * // Usage
  * const candidate = { name: "John", age: 30, employeeId: "EMP001", department: "Engineering" };
@@ -41,7 +39,7 @@ import type { TypeGuardFn } from "./isType";
  */
 export function isExtensionOf<T extends U, U>(
   baseTypeGuard: TypeGuardFn<U>,
-  extendedTypeGuard: TypeGuardFn<T>
+  extendedTypeGuard: TypeGuardFn<Omit<T, keyof U>>
 ): TypeGuardFn<T> {
   return function (value: unknown, config): value is T {
     // First check if it satisfies the base type
@@ -49,7 +47,7 @@ export function isExtensionOf<T extends U, U>(
       return false;
     }
 
-    // Then check if it satisfies the extended type
+    // Then check if it satisfies the extended type (additional properties only)
     return extendedTypeGuard(value, config);
   };
 } 

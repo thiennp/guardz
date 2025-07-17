@@ -19,6 +19,7 @@ async function runExamples() {
     'union-and-composite',
     'nullable-and-special',
     'utility-types',
+    'asserted-types',
     'advanced-features'
   ];
 

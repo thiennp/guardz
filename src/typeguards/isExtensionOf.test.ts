@@ -20,14 +20,12 @@ describe('isExtensionOf', () => {
     age: isNumber,
   });
 
-  const isEmployeeFull = isType<Employee>({
-    name: isString,
-    age: isNumber,
+  const isEmployeeAdditional = isType<Omit<Employee, keyof Person>>({
     employeeId: isString,
     department: isString,
   });
 
-  const isEmployee = isExtensionOf(isPerson, isEmployeeFull);
+  const isEmployee = isExtensionOf(isPerson, isEmployeeAdditional);
 
   it('should return true when value satisfies both base and extended type guards', () => {
     const validEmployee: Employee = {
@@ -66,16 +64,12 @@ describe('isExtensionOf', () => {
       isManager: boolean;
     }
 
-    const isManagerFull = isType<Manager>({
-      name: isString,
-      age: isNumber,
-      employeeId: isString,
-      department: isString,
+    const isManagerAdditional = isType<Omit<Manager, keyof Employee>>({
       managedTeamSize: isNumber,
       isManager: isBoolean,
     });
 
-    const isManager = isExtensionOf(isEmployee, isManagerFull);
+    const isManager = isExtensionOf(isEmployee, isManagerAdditional);
 
     const validManager: Manager = {
       name: 'Jane Smith',
