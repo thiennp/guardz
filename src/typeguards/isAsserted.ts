@@ -1,4 +1,4 @@
-import type { TypeGuardFn } from "./isType";
+
 
 /**
  * A type guard that always returns true and asserts value is T.

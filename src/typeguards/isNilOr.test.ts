@@ -1,7 +1,6 @@
 import { isNilOr } from './isNilOr';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
-import { isBoolean } from './isBoolean';
 import { isType } from './isType';
 
 describe('isNilOr', () => {

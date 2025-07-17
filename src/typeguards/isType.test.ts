@@ -248,6 +248,7 @@ describe('isType', () => {
   });
 
   describe('empty object validation', () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface EmptyInterface {}
 
     const isEmptyObject = isType<EmptyInterface>({});

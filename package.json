@@ -8,7 +8,13 @@
     "build": "tsc && tsc-alias",
     "prepublishOnly": "npm run build",
     "test": "npx jest",
-    "docs": "typedoc --out docs src"
+    "docs": "typedoc --out docs src",
+    "lint": "eslint src/**/*.ts --ext .ts",
+    "lint:fix": "eslint src/**/*.ts --ext .ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "check": "npm run lint && npm run format:check && npm run type-check"
   },
   "repository": {
     "type": "git",
@@ -37,13 +43,22 @@
   },
   "homepage": "https://github.com/thiennp/guardz#readme",
   "devDependencies": {
+    "@eslint/js": "^9.31.0",
     "@types/jest": "^29.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^16.3.0",
     "jest": "^29.0.0",
+    "prettier": "^3.6.2",
     "ts-jest": "^29.4.0",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typedoc": "^0.28.3",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.37.0"
   },
   "files": [
     "dist"

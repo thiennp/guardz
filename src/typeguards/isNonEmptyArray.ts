@@ -1,5 +1,5 @@
 import { generateTypeGuardError } from "./generateTypeGuardError";
-import type { TypeGuardFn, TypeGuardFnConfig } from "./isType";
+import type { TypeGuardFnConfig } from "./isType";
 import type { NonEmptyArray } from "@/types/NonEmptyArray";
 
 /**

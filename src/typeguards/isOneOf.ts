@@ -1,4 +1,4 @@
-import { generateTypeGuardError } from "./generateTypeGuardError";
+
 import { stringify } from "@/stringify";
 import type { TypeGuardFn } from "./isType";
 

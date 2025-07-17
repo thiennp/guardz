@@ -2,7 +2,6 @@ import { isIntersectionOf } from './isIntersectionOf';
 import { isType } from './isType';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
-import { isBoolean } from './isBoolean';
 
 describe('isIntersectionOf', () => {
   interface Person {
