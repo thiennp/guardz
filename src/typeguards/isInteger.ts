@@ -1,3 +1,4 @@
+import { Integer } from "@/types/Integer";
 import { generateTypeGuardError } from "./generateTypeGuardError";
 import { isNumber } from "./isNumber";
 import type { TypeGuardFn } from "./isType";
@@ -33,7 +34,7 @@ import type { TypeGuardFn } from "./isType";
  * }
  * ```
  */
-export const isInteger: TypeGuardFn<number> = function (value, config): value is number {
+export const isInteger: TypeGuardFn<Integer> = function (value, config): value is Integer {
   if (!isNumber(value) || !Number.isInteger(value)) {
     if (config) {
       config.callbackOnError(generateTypeGuardError(value, config.identifier, "integer"));

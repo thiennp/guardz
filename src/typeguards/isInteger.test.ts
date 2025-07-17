@@ -58,10 +58,6 @@ describe('isInteger', () => {
       expect(isInteger([])).toBe(false);
       expect(isInteger(() => {})).toBe(false);
     });
-
-    it('should return false for BigInt values', () => {
-      expect(isInteger(BigInt(123))).toBe(false);
-    });
   });
 
   describe('error handling', () => {

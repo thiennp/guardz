@@ -141,3 +141,7 @@ docs/
 
 # JetBrains IDEs
 .idea/
+
+# pnpm store
+.pnpm-store/
+.pnpm-store
