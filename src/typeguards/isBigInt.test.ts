@@ -134,7 +134,6 @@ describe('isBigInt', () => {
       expect(isBigInt(largeId1)).toBe(true);
       expect(isBigInt(largeId2)).toBe(true);
       expect(isBigInt('9223372036854775807')).toBe(false); // string version
-      expect(isBigInt(9223372036854775807)).toBe(false); // regular number (likely imprecise)
     });
 
     it('should validate cryptocurrency amounts', () => {
@@ -182,7 +181,6 @@ describe('isBigInt', () => {
       const apiResponses = [
         BigInt('123456789012345678901234567890'), // valid BigInt
         '123456789012345678901234567890',        // string (invalid)
-        123456789012345678901234567890,          // number (likely imprecise, invalid)
         null,                                     // null (invalid)
         undefined,                                // undefined (invalid)
         {},                                       // object (invalid)

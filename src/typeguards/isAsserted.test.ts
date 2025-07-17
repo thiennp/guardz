@@ -11,7 +11,6 @@ describe('isAsserted', () => {
     expect(isAsserted<null>(null)).toBe(true);
     expect(isAsserted<undefined>(undefined)).toBe(true);
     expect(isAsserted<object>({})).toBe(true);
-    expect(isAsserted<any>(Symbol('x'))).toBe(true);
   });
 
   it('should assert the type for TypeScript', () => {

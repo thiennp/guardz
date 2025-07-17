@@ -131,7 +131,7 @@ describe('generateTypeGuardError', () => {
     });
 
     it('should handle circular references by throwing an error (expected behavior)', () => {
-      const circular: any = { name: 'test' };
+      const circular: { name: string; self: unknown } = { name: 'test', self: null };
       circular.self = circular;
       
       // This will throw because JSON.stringify cannot handle circular references

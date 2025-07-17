@@ -50,7 +50,7 @@ describe('guardWithTolerance', () => {
       
       expect(result).toBe(invalidData);
       // TypeScript types it as User, even though it's actually invalid
-      expect((result as any).age).toBe('30'); // Still the original invalid value
+      expect((result as unknown as { age: string }).age).toBe('30'); // Still the original invalid value
     });
 
     it('should call error callback when validation fails', () => {
@@ -222,8 +222,8 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isNestedUser);
 
       expect(result).toBe(invalidData);
-      expect((result as any).profile.bio).toBe(123);
-      expect((result as any).profile.age).toBe('30');
+      expect((result as unknown as { profile: { bio: string; age: string } }).profile.bio).toBe(123);
+      expect((result as unknown as { profile: { bio: string; age: string } }).profile.age).toBe('30');
     });
   });
 
@@ -249,8 +249,8 @@ describe('guardWithTolerance', () => {
 
       // You can still access the data (with caution)
       expect(user.name).toBe('John Doe'); // This works fine
-      expect((user as any).age).toBe('30'); // Need to handle potential string
-      expect((user as any).isActive).toBe(1); // Need to handle potential number
+      expect((user as unknown as { age: string }).age).toBe('30'); // Need to handle potential string
+      expect((user as unknown as { isActive: number }).isActive).toBe(1); // Need to handle potential number
 
       // But you have awareness of the issues
       expect(validationErrors.length).toBeGreaterThan(0);

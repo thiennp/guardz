@@ -30,7 +30,7 @@ describe('isPartialOf', () => {
     expect(isPartialTarget({ name: 'Extra', age: 10, isActive: true, extra: 'field' })).toBe(true);
 
     expect(isPartialTargetWithOptional({ name: 'Name only', isActive: true })).toBe(true);
-    expect(isPartialTargetWithOptional({ name: 'Name', age: 40, isActive: false } as any)).toBe(true); // age is ignored
+    expect(isPartialTargetWithOptional({ name: 'Name', age: 40, isActive: false })).toBe(true); // age is ignored
 
   });
 

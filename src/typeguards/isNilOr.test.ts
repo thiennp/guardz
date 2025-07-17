@@ -2,6 +2,8 @@ import { isNilOr } from './isNilOr';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
 import { isType } from './isType';
+import { isUndefinedOr } from './isUndefinedOr';
+import { isNullOr } from './IsNullOr';
 
 describe('isNilOr', () => {
   describe('with isString', () => {
@@ -140,8 +142,6 @@ describe('isNilOr', () => {
   describe('equivalence to isUndefinedOr(isNullOr(...))', () => {
     const isStringOrNil = isNilOr(isString);
     const isEquivalent = (value: unknown) => {
-      const { isUndefinedOr } = require('./isUndefinedOr');
-      const { isNullOr } = require('./IsNullOr');
       return isUndefinedOr(isNullOr(isString))(value);
     };
 
