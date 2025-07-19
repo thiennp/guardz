@@ -54,9 +54,16 @@ const isNamed = isType({ name: isString });
 const isAged = isType({ age: isNumber });
 const isActive = isType({ isActive: isBoolean });
 
-// Create intersection type guard
+// Create intersection type guards (supports 2-10 type guards)
 const isNamedAndAged = isIntersectionOf(isNamed, isAged);
 const isCompleteUser = isIntersectionOf(isNamed, isAged, isActive);
+
+// Example with more type guards
+const isVerified = isType({ verified: isBoolean });
+const isPremium = isType({ premium: isBoolean });
+
+const isCompleteVerifiedUser = isIntersectionOf(isNamed, isAged, isActive, isVerified);
+const isCompletePremiumUser = isIntersectionOf(isNamed, isAged, isActive, isVerified, isPremium);
 
 console.log('isNamedAndAged({ name: "John", age: 30 }):', 
   isNamedAndAged({ name: "John", age: 30 })); // true
@@ -72,6 +79,12 @@ console.log('isCompleteUser({ name: "John", age: 30, isActive: true }):',
 
 console.log('isCompleteUser({ name: "John", age: 30 }):', 
   isCompleteUser({ name: "John", age: 30 })); // false (missing isActive)
+
+console.log('isCompleteVerifiedUser({ name: "John", age: 30, isActive: true, verified: true }):', 
+  isCompleteVerifiedUser({ name: "John", age: 30, isActive: true, verified: true })); // true
+
+console.log('isCompletePremiumUser({ name: "John", age: 30, isActive: true, verified: true, premium: true }):', 
+  isCompletePremiumUser({ name: "John", age: 30, isActive: true, verified: true, premium: true })); // true
 
 // Extension type guards
 console.log('\n=== Extension Type Guards ===');

@@ -280,7 +280,7 @@ const result = isEmployee(invalidEmployee, config);
 Handle complex type relationships like intersections and extensions:
 
 ```typescript
-import { isIntersectionOf, isExtensionOf, isType, isString, isNumber } from 'guardz';
+import { isIntersectionOf, isExtensionOf, isType, isString, isNumber, isArrayWithEachItem } from 'guardz';
 
 // For intersection types (Type A & Type B)
 interface Person {
@@ -302,6 +302,31 @@ const isPersonEmployee = isIntersectionOf(isPerson, isEmployee);
 const data: unknown = getDataFromSomewhere();
 if (isPersonEmployee(data)) { // data type is narrowed to PersonEmployee
   console.log(`${data.name} works in ${data.department}`);
+}
+
+// Supports 2-10 type guards with full type safety
+interface Manager {
+  managedTeamSize: number;
+  level: string;
+}
+
+interface Admin {
+  permissions: string[];
+  accessLevel: number;
+}
+
+const isManager = isType<Manager>({ managedTeamSize: isNumber, level: isString });
+const isAdmin = isType<Admin>({ permissions: isArrayWithEachItem(isString), accessLevel: isNumber });
+
+// 3 type guards
+const isPersonEmployeeManager = isIntersectionOf(isPerson, isEmployee, isManager);
+
+// 4 type guards  
+const isPersonEmployeeManagerAdmin = isIntersectionOf(isPerson, isEmployee, isManager, isAdmin);
+
+if (isPersonEmployeeManagerAdmin(data)) {
+  // data type is narrowed to Person & Employee & Manager & Admin
+  console.log(`${data.name} manages ${data.managedTeamSize} people with ${data.permissions.length} permissions`);
 }
 
 // For inheritance patterns (Interface B extends Interface A)
@@ -905,7 +930,7 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 ### Composite Type Guards
 
-- **isIntersectionOf** - Validates a value against multiple type guards (intersection types: `A & B`)
+- **isIntersectionOf** - Validates a value against multiple type guards (intersection types: `A & B & C & ...`) - supports 2-10 type guards with full type safety
 - **isExtensionOf** - Validates inheritance patterns where one type extends another (`interface B extends A`)
 
 ### Nullable/Optional Type Guards
@@ -920,6 +945,10 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isEnum** - Checks if a value matches any value from an enum
 - **isEqualTo** - Checks if a value exactly equals a specific value
 - **isGeneric** - Creates a reusable type guard function that wraps another type guard, useful for creating consistent validation patterns across your application
+
+### Error Generation
+
+- **generateTypeGuardError** - Generates standardized error messages for type guard failures with configurable formatting
 
 ### Utility Types
 
