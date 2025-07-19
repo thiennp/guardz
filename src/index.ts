@@ -59,6 +59,21 @@ export { isNilOr } from './typeguards/isNilOr';
 export { isAsserted } from './typeguards/isAsserted';
 export { isEnum } from './typeguards/isEnum';
 export { isEqualTo } from './typeguards/isEqualTo';
+export { isGeneric } from './typeguards/isGeneric';
+export { isMap } from './typeguards/isMap';
+export { isSet } from './typeguards/isSet';
+export { isRegExp } from './typeguards/isRegExp';
+export { isSymbol } from './typeguards/isSymbol';
+export { isPromise } from './typeguards/isPromise';
+export { isFunction } from './typeguards/isFunction';
+
+// Additional built-in object type guards
+export { isWeakMap } from './typeguards/isWeakMap';
+export { isWeakSet } from './typeguards/isWeakSet';
+export { isTypedArray } from './typeguards/isTypedArray';
+export { isArrayBuffer } from './typeguards/isArrayBuffer';
+export { isDataView } from './typeguards/isDataView';
+export { isError } from './typeguards/isError';
 
 // Type guard error generation
 export { generateTypeGuardError } from './typeguards/generateTypeGuardError';

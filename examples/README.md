@@ -40,6 +40,12 @@ Demonstrates the `isAsserted<T>` type guard for working with external library ty
 ### 9. `advanced-features.ts`
 Advanced features and best practices, including custom error handlers, error aggregation, and error handling in deeply nested structures.
 
+### 10. `generic-type-guards.ts`
+Demonstrates the `isGeneric<T>` function for creating reusable type guard patterns, domain-specific validators, and consistent validation across your application.
+
+### 11. `built-in-objects.ts`
+Demonstrates the new built-in object type guards including `isMap`, `isSet`, `isRegExp`, `isSymbol`, `isPromise`, and `isFunction` for validating JavaScript's built-in object types.
+
 ## Running the Examples
 
 ### Prerequisites
@@ -78,7 +84,9 @@ npx ts-node -r tsconfig-paths/register examples/asserted-types.ts
 
 # Advanced features example
 npx ts-node -r tsconfig-paths/register examples/advanced-features.ts
-```
+
+# Generic type guards example
+npx ts-node -r tsconfig-paths/register examples/generic-type-guards.ts
 
 ### Method 2: Run All Examples at Once
 Execute all examples sequentially:

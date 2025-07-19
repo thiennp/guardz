@@ -188,6 +188,93 @@ if (isOneOfTypes<number | string>(isNumber, isString)(data)) { // data type is n
 }
 ```
 
+### Generic Type Guards
+
+Create reusable type guard functions that wrap other type guards. This is useful for creating consistent validation patterns across your application:
+
+```typescript
+import { isGeneric, isString, isNumber, isType, isArrayWithEachItem } from 'guardz';
+
+// Create reusable type guards
+const isGenericString = isGeneric(isString);
+const isGenericNumber = isGeneric(isNumber);
+
+// Use them in different contexts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const isUser = isType<User>({
+  id: isGenericNumber,
+  name: isGenericString,
+  email: isGenericString,
+});
+
+const user: unknown = { id: 1, name: 'John', email: 'john@example.com' };
+if (isUser(user)) {
+  // All properties are properly typed
+  console.log(user.id.toFixed(2)); // number methods available
+  console.log(user.name.toUpperCase()); // string methods available
+}
+
+// Works with complex type guards too
+const isGenericNumberArray = isGeneric(isArrayWithEachItem(isNumber));
+const isGenericStringArray = isGeneric(isArrayWithEachItem(isString));
+
+interface DataSet {
+  numbers: number[];
+  labels: string[];
+}
+
+const isDataSet = isType<DataSet>({
+  numbers: isGenericNumberArray,
+  labels: isGenericStringArray,
+});
+
+const dataset: unknown = {
+  numbers: [1, 2, 3],
+  labels: ['A', 'B', 'C']
+};
+
+if (isDataSet(dataset)) {
+  // Type-safe array operations
+  const sum = dataset.numbers.reduce((a, b) => a + b, 0);
+  const upperLabels = dataset.labels.map(label => label.toUpperCase());
+}
+
+// Advanced: Creating domain-specific type guards
+const isUserId = isGeneric(isNumber);
+const isEmail = isGeneric(isString);
+const isName = isGeneric(isString);
+
+interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  managerId?: number;
+}
+
+const isEmployee = isType<Employee>({
+  id: isUserId,
+  name: isName,
+  email: isEmail,
+  managerId: isGeneric(isNumber), // or use isUserId for consistency
+});
+
+// With error handling
+const errors: string[] = [];
+const config = {
+  identifier: 'employee',
+  callbackOnError: (error: string) => errors.push(error),
+};
+
+const invalidEmployee = { id: 'not-a-number', name: 'John', email: 'invalid-email' };
+const result = isEmployee(invalidEmployee, config);
+// errors contains: ['Expected employee.id ("not-a-number") to be "number"']
+```
+
 ### Composite Type Guards
 
 Handle complex type relationships like intersections and extensions:
@@ -337,6 +424,200 @@ if (isBook(data)) { // data type is narrowed to Book
 }
 ```
 
+### When to Use Generic Type Guards
+
+Use `isGeneric` when you want to:
+
+1. **Create reusable validation patterns** across your application
+2. **Maintain consistency** in how you validate similar types
+3. **Reduce code duplication** when the same type guard is used in multiple places
+4. **Create domain-specific type guards** that have semantic meaning
+
+**Example: Domain-specific type guards**
+```typescript
+import { isGeneric, isString, isNumber, isPositiveInteger } from 'guardz';
+
+// Create semantic type guards for your domain
+const isUserId = isGeneric(isPositiveInteger);
+const isEmail = isGeneric(isString);
+const isName = isGeneric(isString);
+const isAge = isGeneric(isNumber);
+
+// Use them consistently across your application
+interface User {
+  id: number;        // Uses isUserId
+  name: string;      // Uses isName
+  email: string;     // Uses isEmail
+  age: number;       // Uses isAge
+}
+
+interface Employee extends User {
+  employeeId: number; // Uses isUserId
+  managerId?: number; // Uses isUserId
+}
+
+// All validation is consistent and semantic
+const isUser = isType<User>({
+  id: isUserId,
+  name: isName,
+  email: isEmail,
+  age: isAge,
+});
+```
+
+**Benefits:**
+- **Semantic clarity**: `isUserId` is more meaningful than `isPositiveInteger`
+- **Consistency**: Same validation logic across your codebase
+- **Maintainability**: Change validation logic in one place
+- **Type safety**: Full TypeScript support with proper type narrowing
+
+**Best Practices:**
+```typescript
+// ✅ Good: Create semantic type guards
+const isUserId = isGeneric(isPositiveInteger);
+const isEmail = isGeneric(isString);
+const isName = isGeneric(isString);
+
+// ✅ Good: Use consistent naming
+const isUserAge = isGeneric(isNumber);
+const isEmployeeAge = isGeneric(isNumber); // Same validation, different context
+
+// ✅ Good: Combine with other type guards
+const isUserArray = isGeneric(isArrayWithEachItem(isUser));
+const isEmailArray = isGeneric(isArrayWithEachItem(isEmail));
+
+// ❌ Avoid: Unnecessary wrapping of simple types
+const isString = isGeneric(isString); // Redundant
+const isNumber = isGeneric(isNumber); // Redundant
+
+// ✅ Good: Use for complex type guards
+const isComplexObject = isGeneric(isType({
+  id: isNumber,
+  name: isString,
+  metadata: isObjectWithEachItem(isString)
+}));
+
+// ✅ Good: Error handling works seamlessly
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+};
+
+const isUserId = isGeneric(isPositiveInteger);
+const invalidUser = { id: 'not-a-number', name: 'John' };
+const result = isUserId(invalidUser.id, { ...config, identifier: 'user.id' });
+// errors contains: ['Expected user.id ("not-a-number") to be "PositiveInteger"']
+```
+
+### Built-in Object Type Guards
+
+Validate JavaScript's built-in object types with optional type checking for their contents:
+
+```typescript
+import { isMap, isSet, isWeakMap, isWeakSet, isRegExp, isSymbol, isPromise, isFunction, isTypedArray, isArrayBuffer, isDataView, isError } from 'guardz';
+
+// Map validation with key/value type checking
+const isStringNumberMap = isMap(isString, isNumber);
+const userScores = new Map([['user1', 100], ['user2', 200]]);
+if (isStringNumberMap(userScores)) {
+  // userScores is typed as Map<string, number>
+  userScores.forEach((score, user) => {
+    console.log(`${user}: ${score.toFixed(2)}`);
+  });
+}
+
+// Set validation with element type checking
+const isStringSet = isSet(isString);
+const validNames = new Set(['John', 'Jane', 'Bob']);
+if (isStringSet(validNames)) {
+  // validNames is typed as Set<string>
+  validNames.forEach(name => console.log(name.toUpperCase()));
+}
+
+// RegExp validation
+const data: unknown = /^[a-z]+$/i;
+if (isRegExp(data)) {
+  // data is typed as RegExp
+  console.log(data.test('hello')); // true
+  console.log(data.flags); // "i"
+}
+
+// Symbol validation
+const data: unknown = Symbol('user-id');
+if (isSymbol(data)) {
+  // data is typed as Symbol
+  console.log(typeof data); // "symbol"
+}
+
+// Promise validation
+const data: unknown = Promise.resolve('hello');
+if (isPromise(isString)(data)) {
+  // data is typed as Promise<string>
+  data.then(value => console.log(value.toUpperCase()));
+}
+
+// Function validation
+const data: unknown = (x: number) => x * 2;
+if (isFunction(data)) {
+  // data is typed as Function
+  console.log(data(5)); // 10
+}
+
+// WeakMap validation with key/value type checking
+const isObjectNumberWeakMap = isWeakMap(isNonNullObject, isNumber);
+const obj1 = {};
+const obj2 = {};
+const userScores = new WeakMap([[obj1, 100], [obj2, 200]]);
+if (isObjectNumberWeakMap(userScores)) {
+  // userScores is typed as WeakMap<object, number>
+  console.log(userScores.get(obj1)); // 100
+}
+
+// WeakSet validation with element type checking
+const isObjectWeakSet = isWeakSet(isNonNullObject);
+const validObjects = new WeakSet([obj1, obj2]);
+if (isObjectWeakSet(validObjects)) {
+  // validObjects is typed as WeakSet<object>
+  console.log(validObjects.has(obj1)); // true
+}
+
+// TypedArray validation with element type checking
+const isNumberTypedArray = isTypedArray(isNumber);
+const pixelData = new Uint8Array([255, 128, 0, 255]);
+if (isNumberTypedArray(pixelData)) {
+  // pixelData is typed as TypedArray<number>
+  console.log(pixelData.length); // 4
+  console.log(pixelData[0]); // 255
+}
+
+// ArrayBuffer validation
+const buffer = new ArrayBuffer(16);
+if (isArrayBuffer(buffer)) {
+  // buffer is typed as ArrayBuffer
+  console.log(buffer.byteLength); // 16
+  const sliced = buffer.slice(0, 8);
+  console.log(sliced.byteLength); // 8
+}
+
+// DataView validation
+const view = new DataView(buffer);
+if (isDataView(view)) {
+  // view is typed as DataView
+  console.log(view.byteLength); // 16
+  view.setUint16(0, 12345);
+  console.log(view.getUint16(0)); // 12345
+}
+
+// Error validation
+const error = new Error("Something went wrong");
+if (isError(error)) {
+  // error is typed as Error
+  console.log(error.message); // "Something went wrong"
+  console.log(error.name); // "Error"
+}
+```
+
 ### Asserted Type Guards
 
 Use `isAsserted<T>` when working with types from external libraries or APIs that don't provide runtime validation, but you want TypeScript type safety:
@@ -378,6 +659,8 @@ if (isUserProfile(profile)) {
   console.log(profile.metadata.lastLogin); // unknown
 }
 ```
+
+
 
 ### Guard with Tolerance
 
@@ -600,6 +883,21 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 - **isBigInt** - Checks if a value is a BigInt
 
+### Built-in Object Type Guards
+
+- **isMap** - Checks if a value is a Map object, optionally validating key and value types
+- **isSet** - Checks if a value is a Set object, optionally validating element types
+- **isWeakMap** - Checks if a value is a WeakMap object, optionally validating key and value types
+- **isWeakSet** - Checks if a value is a WeakSet object, optionally validating element types
+- **isRegExp** - Checks if a value is a RegExp object
+- **isSymbol** - Checks if a value is a Symbol
+- **isPromise** - Checks if a value is a Promise object, optionally validating resolved value type
+- **isFunction** - Checks if a value is a Function
+- **isTypedArray** - Checks if a value is a TypedArray (Int8Array, Uint8Array, etc.), optionally validating element types
+- **isArrayBuffer** - Checks if a value is an ArrayBuffer object
+- **isDataView** - Checks if a value is a DataView object
+- **isError** - Checks if a value is an Error object
+
 ### Union Type Guards
 
 - **isOneOf** - Checks if a value matches one of several specific values
@@ -621,6 +919,7 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isAsserted** - Always returns true and asserts value is T (useful for 3rd party types without runtime validation)
 - **isEnum** - Checks if a value matches any value from an enum
 - **isEqualTo** - Checks if a value exactly equals a specific value
+- **isGeneric** - Creates a reusable type guard function that wraps another type guard, useful for creating consistent validation patterns across your application
 
 ### Utility Types
 
