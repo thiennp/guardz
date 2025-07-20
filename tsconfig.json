@@ -1,19 +1,35 @@
 {
   "compilerOptions": {
-    "target": "ES2017",                     /* Change target to ES2017 or newer */
-    "module": "CommonJS",                  /* Specify what module code is generated. */
-    "outDir": "./dist",                     /* Specify an output folder for all emitted files. */
-    "rootDir": "./src",                    /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-    "baseUrl": ".",                        /* Add baseUrl for path aliases */
-    "paths": {                             /* Add paths mapping */
-      "@/*": ["src/*"]                   /* Map @/* to src/* */
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
     },
-    "declaration": true,                 /* Generate corresponding '.d.ts' file. */
-    "strict": true,                      /* Enable all strict type-checking options. */
-    "esModuleInterop": true,             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
-    "skipLibCheck": true,                /* Skip type checking of declaration files. */
-    "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmitOnError": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
-  "include": ["src/**/*"],              /* Specifies the files included in the program. */
-  "exclude": ["node_modules", "dist"]   /* Specifies the files excluded from the program. */
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "coverage", "**/*.test.ts", "**/*.spec.ts"]
 } 
