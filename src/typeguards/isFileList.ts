@@ -1,20 +1,20 @@
-import { generateTypeGuardError } from "./generateTypeGuardError";
-import type { TypeGuardFn } from "./isType";
+import { generateTypeGuardError } from './generateTypeGuardError';
+import type { TypeGuardFn } from './isType';
 
 /**
  * Checks if a value is a FileList object.
- * 
+ *
  * This type guard is primarily useful in browser environments where FileList objects
  * are available (typically from file input elements). In Node.js environments, this will always return false.
  *
  * @param value - The value to check
  * @param config - Optional configuration for error handling
  * @returns True if the value is a FileList object, false otherwise
- * 
+ *
  * @example
  * ```typescript
  * import { isFileList } from 'guardz';
- * 
+ *
  * // Browser environment
  * const fileInput = document.querySelector('input[type="file"]');
  * if (fileInput?.files && isFileList(fileInput.files)) {
@@ -24,7 +24,7 @@ import type { TypeGuardFn } from "./isType";
  *     console.log('File:', files[i].name);
  *   }
  * }
- * 
+ *
  * // With error handling
  * const data: unknown = getFileListData();
  * if (!isFileList(data, { identifier: 'uploadedFiles' })) {
@@ -34,7 +34,10 @@ import type { TypeGuardFn } from "./isType";
  * // data is now typed as FileList
  * ```
  */
-export const isFileList: TypeGuardFn<FileList> = function (value, config): value is FileList {
+export const isFileList: TypeGuardFn<FileList> = function (
+  value,
+  config
+): value is FileList {
   // Check if we're in a browser environment where FileList is available
   try {
     // Try to access FileList constructor
@@ -42,14 +45,22 @@ export const isFileList: TypeGuardFn<FileList> = function (value, config): value
     if (typeof FileListConstructor === 'undefined') {
       // FileList is not available in this environment (e.g., Node.js)
       if (config) {
-        config.callbackOnError(generateTypeGuardError(value, config.identifier, "FileList (not available in this environment)"));
+        config.callbackOnError(
+          generateTypeGuardError(
+            value,
+            config.identifier,
+            'FileList (not available in this environment)'
+          )
+        );
       }
       return false;
     }
 
     if (!(value instanceof FileListConstructor)) {
       if (config) {
-        config.callbackOnError(generateTypeGuardError(value, config.identifier, "FileList"));
+        config.callbackOnError(
+          generateTypeGuardError(value, config.identifier, 'FileList')
+        );
       }
       return false;
     }
@@ -58,7 +69,13 @@ export const isFileList: TypeGuardFn<FileList> = function (value, config): value
   } catch {
     // If accessing FileList fails, it's not available in this environment
     if (config) {
-      config.callbackOnError(generateTypeGuardError(value, config.identifier, "FileList (not available in this environment)"));
+      config.callbackOnError(
+        generateTypeGuardError(
+          value,
+          config.identifier,
+          'FileList (not available in this environment)'
+        )
+      );
     }
     return false;
   }

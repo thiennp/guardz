@@ -168,4 +168,3 @@ Use branded types for compile-time safety, combined with runtime error reporting
 ## See Also
 
 - Main [README.md](../README.md) for API and philosophy
-- [API documentation](../docs/)
