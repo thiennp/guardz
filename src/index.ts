@@ -78,6 +78,7 @@ export { isUndefinedOr } from './typeguards/isUndefinedOr';
 export { isNilOr } from './typeguards/isNilOr';
 
 // Special type guards
+export { isAsserted } from './typeguards/isAsserted';
 export { isEnum } from './typeguards/isEnum';
 export { isEqualTo } from './typeguards/isEqualTo';
 
