@@ -1,4 +1,4 @@
-import { isEnum } from '@/typeguards/isEnum';
+import { isEnum } from './isEnum';
 
 enum StringEnum {
   A = 'A_VAL',
@@ -21,7 +21,7 @@ describe('isEnum', () => {
     expect(isNumberEnumMember(1)).toBe(true);
     expect(isNumberEnumMember('Zero')).toBe(true);
   });
-  
+
   it('should return false for invalid enum members and other types', () => {
     expect(isStringEnumMember('A')).toBe(false); // Key, not value
     expect(isStringEnumMember('C_VAL')).toBe(false);
@@ -41,6 +41,8 @@ describe('isEnum', () => {
     isStringEnumMember('INVALID', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Note: isEnum uses isOneOf internally, inheriting its error format
-    expect(mockCallback).toHaveBeenCalledWith('role ("INVALID") must be one of following values "A_VAL" | "B_VAL"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'role ("INVALID") must be one of following values "A_VAL" | "B_VAL"'
+    );
   });
-}); 
+});

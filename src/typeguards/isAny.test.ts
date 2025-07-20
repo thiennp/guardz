@@ -1,4 +1,4 @@
-import { isAny } from '@/typeguards/isAny';
+import { isAny } from './isAny';
 
 describe('isAny', () => {
   it('should always return true for any value', () => {
@@ -19,4 +19,4 @@ describe('isAny', () => {
     isAny('whatever', config);
     expect(mockCallback).not.toHaveBeenCalled();
   });
-}); 
+});

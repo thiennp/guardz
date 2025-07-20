@@ -6,10 +6,10 @@ We welcome contributions of all kinds, including bug reports, feature requests, 
 
 ## Ways to Contribute
 
-*   **Reporting Bugs:** If you find a bug, please open an issue on GitHub. Include steps to reproduce the bug, the expected behavior, and the actual behavior.
-*   **Suggesting Enhancements:** If you have an idea for a new feature or an improvement to an existing one, please open an issue on GitHub. Describe your idea clearly and explain why you think it would be valuable.
-*   **Improving Documentation:** If you notice errors or areas for improvement in the documentation (like the `README.md`), feel free to open an issue or submit a pull request.
-*   **Submitting Pull Requests:** If you want to contribute code or documentation changes, please follow the steps below.
+- **Reporting Bugs:** If you find a bug, please open an issue on GitHub. Include steps to reproduce the bug, the expected behavior, and the actual behavior.
+- **Suggesting Enhancements:** If you have an idea for a new feature or an improvement to an existing one, please open an issue on GitHub. Describe your idea clearly and explain why you think it would be valuable.
+- **Improving Documentation:** If you notice errors or areas for improvement in the documentation (like the `README.md`), feel free to open an issue or submit a pull request.
+- **Submitting Pull Requests:** If you want to contribute code or documentation changes, please follow the steps below.
 
 ## Development Setup
 
@@ -67,4 +67,4 @@ We will review your pull request as soon as possible. Thank you for your contrib
 
 ## Code of Conduct
 
-Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms. (We should add a `CODE_OF_CONDUCT.md` file later if desired). 
+Please note that this project is released with a Contributor Code of Conduct. By participating in this project you agree to abide by its terms. (We should add a `CODE_OF_CONDUCT.md` file later if desired).

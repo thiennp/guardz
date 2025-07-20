@@ -1,6 +1,6 @@
-import { isObjectWithEachItem } from '@/typeguards/isObjectWithEachItem';
-import { isNumber } from '@/typeguards/isNumber';
-import { isString } from '@/typeguards/isString';
+import { isObjectWithEachItem } from './isObjectWithEachItem';
+import { isNumber } from './isNumber';
+import { isString } from './isString';
 
 describe('isObjectWithEachItem', () => {
   const isStringRecord = isObjectWithEachItem(isString);
@@ -30,7 +30,9 @@ describe('isObjectWithEachItem', () => {
     // Test error for non-object
     isNumberRecord(null, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected data (null) to be "Object"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected data (null) to be "Object"'
+    );
 
     mockCallback.mockClear();
 
@@ -41,6 +43,8 @@ describe('isObjectWithEachItem', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // We expect an error from isNumber for the 'text' value
     // The exact identifier (e.g., data[0] or data[1]) depends on iteration order
-    expect(mockCallback).toHaveBeenCalledWith(expect.stringMatching(/^Expected data\[\d+\] \("text"\) to be "number"$/));
+    expect(mockCallback).toHaveBeenCalledWith(
+      expect.stringMatching(/^Expected data\[\d+\] \("text"\) to be "number"$/)
+    );
   });
-}); 
+});

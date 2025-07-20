@@ -6,7 +6,7 @@ import {
   isNumber,
   isBoolean,
   isArrayWithEachItem,
-  isNonNullObject
+  isNonNullObject,
 } from '../src';
 
 // --- Structured Error Handling is a Core Feature ---
@@ -36,28 +36,35 @@ console.log('\n=== Guard with Tolerance ===');
 // guardWithTolerance validates data but always returns it cast to the expected type
 // Useful when you want to log validation errors but still proceed with the data
 
-const userData: unknown = { name: "John", age: "30" }; // age is string, not number
+const userData: unknown = { name: 'John', age: '30' }; // age is string, not number
 
 // Use with error logging
-const user = guardWithTolerance(userData, isType({
-  name: isString,
-  age: isNumber
-}), {
-  identifier: 'userData',
-  callbackOnError: (error) => {
-    console.warn('Validation failed:', error);
+const user = guardWithTolerance(
+  userData,
+  isType({
+    name: isString,
+    age: isNumber,
+  }),
+  {
+    identifier: 'userData',
+    callbackOnError: error => {
+      console.warn('Validation failed:', error);
+    },
   }
-});
+);
 
 console.log('User data (with tolerance):', user);
 console.log('User name:', user.name); // Works fine
 console.log('User age type:', typeof user.age); // Still string, but cast as number
 
 // Without error handling - just cast and proceed
-const user2 = guardWithTolerance(userData, isType({
-  name: isString,
-  age: isNumber
-}));
+const user2 = guardWithTolerance(
+  userData,
+  isType({
+    name: isString,
+    age: isNumber,
+  })
+);
 
 console.log('User data (without error handling):', user2);
 
@@ -73,22 +80,22 @@ function customErrorHandler(errorMessage: string) {
 const isUserWithErrors = isType({
   name: isString,
   age: isNumber,
-  email: isString
+  email: isString,
 });
 
 const complexInvalidUser = {
-  name: "Jane Smith",
-  age: "25", // should be number
+  name: 'Jane Smith',
+  age: '25', // should be number
   address: {
-    street: "456 Oak Ave",
-    city: "Somewhere",
-    zipCode: 12345 // should be string
+    street: '456 Oak Ave',
+    city: 'Somewhere',
+    zipCode: 12345, // should be string
   },
   contacts: [
-    { email: "jane@example.com", phone: "555-9999" },
-    { email: 123, phone: "555-8888" } // email should be string
+    { email: 'jane@example.com', phone: '555-9999' },
+    { email: 123, phone: '555-8888' }, // email should be string
   ],
-  isActive: "yes" // should be boolean
+  isActive: 'yes', // should be boolean
 };
 
 // Advanced object validation with nested structures
@@ -117,12 +124,12 @@ interface Person {
 const isAddress = isType({
   street: isString,
   city: isString,
-  zipCode: isString
+  zipCode: isString,
 });
 
 const isContact = isType({
   email: isString,
-  phone: isString
+  phone: isString,
 });
 
 const isPerson = isType({
@@ -130,23 +137,23 @@ const isPerson = isType({
   age: isNumber,
   address: isAddress,
   contacts: isArrayWithEachItem(isContact),
-  isActive: isBoolean
+  isActive: isBoolean,
 });
 
 // Valid person data
 const validPerson: Person = {
-  name: "John Doe",
+  name: 'John Doe',
   age: 30,
   address: {
-    street: "123 Main St",
-    city: "Anytown",
-    zipCode: "12345"
+    street: '123 Main St',
+    city: 'Anytown',
+    zipCode: '12345',
   },
   contacts: [
-    { email: "john@example.com", phone: "555-1234" },
-    { email: "john.work@company.com", phone: "555-5678" }
+    { email: 'john@example.com', phone: '555-1234' },
+    { email: 'john.work@company.com', phone: '555-5678' },
   ],
-  isActive: true
+  isActive: true,
 };
 
 console.log('Valid person:', isPerson(validPerson)); // true
@@ -156,7 +163,7 @@ console.log('Invalid person:', isPerson(complexInvalidUser)); // false
 console.log('\n=== Conditional Validation ===');
 
 interface ConditionalUser {
-  type: "admin" | "user";
+  type: 'admin' | 'user';
   name: string;
   permissions?: string[];
   department?: string;
@@ -165,49 +172,49 @@ interface ConditionalUser {
 // Create conditional type guard
 const isConditionalUser = (value: unknown): value is ConditionalUser => {
   if (!isNonNullObject(value)) return false;
-  
+
   const obj = value as any;
-  
+
   // Check required fields
   if (!isString(obj.type) || !isString(obj.name)) return false;
-  
+
   // Check type-specific requirements
-  if (obj.type === "admin") {
+  if (obj.type === 'admin') {
     // Admin must have permissions array
     if (!Array.isArray(obj.permissions) || !obj.permissions.every(isString)) {
       return false;
     }
-  } else if (obj.type === "user") {
+  } else if (obj.type === 'user') {
     // User must have department
     if (!isString(obj.department)) return false;
   } else {
     return false; // Invalid type
   }
-  
+
   return true;
 };
 
 const validAdmin: ConditionalUser = {
-  type: "admin",
-  name: "Admin User",
-  permissions: ["read", "write", "delete"]
+  type: 'admin',
+  name: 'Admin User',
+  permissions: ['read', 'write', 'delete'],
 };
 
 const validUser: ConditionalUser = {
-  type: "user",
-  name: "Regular User",
-  department: "Engineering"
+  type: 'user',
+  name: 'Regular User',
+  department: 'Engineering',
 };
 
 const invalidUser1 = {
-  type: "admin",
-  name: "Admin without permissions"
+  type: 'admin',
+  name: 'Admin without permissions',
   // missing permissions
 };
 
 const invalidUser2 = {
-  type: "user",
-  name: "User without department"
+  type: 'user',
+  name: 'User without department',
   // missing department
 };
 
@@ -228,11 +235,11 @@ function memoizedTypeGuard<T>(
   cacheKey?: string
 ): value is T {
   const key = cacheKey ?? JSON.stringify(value);
-  
+
   if (typeGuardCache.has(key)) {
     return typeGuardCache.get(key)!;
   }
-  
+
   const result = guard(value);
   typeGuardCache.set(key, result);
   return result;
@@ -249,9 +256,9 @@ const cachedValidation = (value: unknown): value is string => {
   return memoizedTypeGuard(expensiveValidation, value);
 };
 
-console.log('First call (expensive):', cachedValidation("test"));
-console.log('Second call (cached):', cachedValidation("test"));
-console.log('Third call (cached):', cachedValidation("test"));
+console.log('First call (expensive):', cachedValidation('test'));
+console.log('Second call (cached):', cachedValidation('test'));
+console.log('Third call (cached):', cachedValidation('test'));
 
 console.log('\n=== Best Practices ===');
 console.log('1. Use guardWithTolerance for approximate matching');
@@ -259,4 +266,4 @@ console.log('2. Implement custom error handling for better UX');
 console.log('3. Create reusable type guards for complex structures');
 console.log('4. Use conditional validation for polymorphic data');
 console.log('5. Consider performance optimization for expensive validations');
-console.log('6. Combine multiple type guards for comprehensive validation'); 
+console.log('6. Combine multiple type guards for comprehensive validation');

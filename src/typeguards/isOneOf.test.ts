@@ -1,4 +1,4 @@
-import { isOneOf } from '@/typeguards/isOneOf';
+import { isOneOf } from './isOneOf';
 
 describe('isOneOf', () => {
   const isStatusOkOrPending = isOneOf('OK', 'PENDING');
@@ -29,6 +29,8 @@ describe('isOneOf', () => {
     isStatusOkOrPending('FAILED', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Note: isOneOf uses custom error message format
-    expect(mockCallback).toHaveBeenCalledWith('status ("FAILED") must be one of following values "OK" | "PENDING"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'status ("FAILED") must be one of following values "OK" | "PENDING"'
+    );
   });
-}); 
+});

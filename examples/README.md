@@ -14,38 +14,53 @@ This folder contains comprehensive examples demonstrating how to use the GuardZ 
 ## Examples Overview
 
 ### 1. `basic-usage.ts`
+
 Demonstrates fundamental type guard functions for primitive types and shows how to use error handling.
 
 ### 2. `array-validation.ts`
+
 Shows how to validate arrays and tuples, and how to collect errors for each item.
 
 ### 3. `number-validation.ts`
+
 Comprehensive number validation examples, including error reporting for invalid numbers.
 
 ### 4. `string-validation.ts`
+
 String validation and formatting examples, with error handling for invalid strings.
 
 ### 5. `union-and-composite.ts`
+
 Advanced type composition examples, including error aggregation for union/intersection types.
 
 ### 6. `nullable-and-special.ts`
+
 Nullable and special type guard examples, with error messages for null/undefined handling.
 
 ### 7. `utility-types.ts`
+
 Demonstrates GuardZ utility types and how to combine them with runtime error reporting.
 
-### 8. `advanced-features.ts`
+### 8. `web-api-validation.ts`
+
+Web API type guard examples for File, FileList, Blob, FormData, URL, and URLSearchParams validation with environment-aware detection.
+
+### 9. `advanced-features.ts`
+
 Advanced features and best practices, including custom error handlers, error aggregation, and error handling in deeply nested structures.
 
 ## Running the Examples
 
 ### Prerequisites
+
 Make sure you have the required dependencies installed:
+
 ```bash
 npm install
 ```
 
 ### Method 1: Run Individual Examples (Recommended)
+
 Use ts-node with path alias resolution to run any example:
 
 ```bash
@@ -70,11 +85,15 @@ npx ts-node -r tsconfig-paths/register examples/nullable-and-special.ts
 # Utility types example
 npx ts-node -r tsconfig-paths/register examples/utility-types.ts
 
+# Web API validation example
+npx ts-node -r tsconfig-paths/register examples/web-api-validation.ts
+
 # Advanced features example
 npx ts-node -r tsconfig-paths/register examples/advanced-features.ts
 ```
 
 ### Method 2: Run All Examples at Once
+
 Execute all examples sequentially:
 
 ```bash
@@ -82,6 +101,7 @@ npx ts-node -r tsconfig-paths/register examples/run-all.ts
 ```
 
 ### Method 3: Using TypeScript Compiler (Alternative)
+
 If you prefer to compile first, then run:
 
 ```bash
@@ -93,6 +113,7 @@ npx tsc examples/run-all.ts && node examples/run-all.js
 ```
 
 ### Important Notes
+
 - **Path Aliases**: The `-r tsconfig-paths/register` flag is **required** to resolve the `@/` path aliases used in the GuardZ source code
 - **Error Output**: Each example demonstrates structured error handling - watch the console output to see detailed error messages
 - **Type Safety**: All examples are fully type-safe and will show TypeScript errors if you modify them incorrectly
@@ -100,6 +121,7 @@ npx tsc examples/run-all.ts && node examples/run-all.js
 ## Key Concepts Demonstrated
 
 ### 1. Structured Error Handling (Core Feature)
+
 Every type guard can provide detailed, field-specific error messages:
 
 ```typescript
@@ -122,15 +144,19 @@ const result = isUser({ name: 'John', age: '30' }, config);
 - **Testing**: Assert on specific error messages in your tests
 
 ### 2. Type Guard Functions
+
 Type guards validate data at runtime and provide TypeScript type narrowing.
 
 ### 3. Higher-Order Type Guards
+
 Reusable type guards for complex validation.
 
 ### 4. Union and Intersection Types
+
 Combine multiple type guards for complex validation and error aggregation.
 
 ### 5. Utility Types
+
 Use branded types for compile-time safety, combined with runtime error reporting.
 
 ## Best Practices
@@ -140,5 +166,6 @@ Use branded types for compile-time safety, combined with runtime error reporting
 3. **Test error messages**: Assert on specific error messages in your tests for robust validation.
 
 ## See Also
+
 - Main [README.md](../README.md) for API and philosophy
-- [API documentation](../docs/) 
+- [API documentation](../docs/)

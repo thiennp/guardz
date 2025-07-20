@@ -108,7 +108,9 @@ describe('isNonNegativeInteger', () => {
       };
 
       isNonNegativeInteger(-1, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (-1) to be "NonNegativeInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (-1) to be "NonNegativeInteger"'
+      );
     });
 
     test('should call error callback for decimal values', () => {
@@ -119,7 +121,9 @@ describe('isNonNegativeInteger', () => {
       };
 
       isNonNegativeInteger(1.5, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected decimalValue (1.5) to be "NonNegativeInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected decimalValue (1.5) to be "NonNegativeInteger"'
+      );
     });
 
     test('should call error callback for string values', () => {
@@ -130,7 +134,9 @@ describe('isNonNegativeInteger', () => {
       };
 
       isNonNegativeInteger('hello', config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected stringValue ("hello") to be "NonNegativeInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected stringValue ("hello") to be "NonNegativeInteger"'
+      );
     });
 
     test('should call error callback for NaN', () => {
@@ -141,7 +147,9 @@ describe('isNonNegativeInteger', () => {
       };
 
       isNonNegativeInteger(NaN, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected nanValue (NaN) to be "NonNegativeInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected nanValue (NaN) to be "NonNegativeInteger"'
+      );
     });
   });
 
@@ -200,4 +208,4 @@ describe('isNonNegativeInteger', () => {
       }
     });
   });
-}); 
+});

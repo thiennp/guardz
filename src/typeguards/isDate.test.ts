@@ -1,4 +1,4 @@
-import { isDate } from '@/typeguards/isDate';
+import { isDate } from './isDate';
 
 describe('isDate', () => {
   it('should return true for Date objects', () => {
@@ -29,11 +29,15 @@ describe('isDate', () => {
 
     isDate(invalidDate, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(`Expected timestamp (${invalidDate.toString()}) to be "Date"`);
+    expect(mockCallback).toHaveBeenCalledWith(
+      `Expected timestamp (${invalidDate.toString()}) to be "Date"`
+    );
 
     mockCallback.mockClear();
     isDate(123456789, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected timestamp (123456789) to be "Date"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected timestamp (123456789) to be "Date"'
+    );
   });
-}); 
+});

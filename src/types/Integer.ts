@@ -1,1 +1,1 @@
-export type Integer = number & { __brand: 'Integer' } 
+export type Integer = number & { __brand: 'Integer' };

@@ -1,6 +1,6 @@
-import { isArrayWithEachItem } from '@/typeguards/isArrayWithEachItem';
-import { isNumber } from '@/typeguards/isNumber';
-import { isString } from '@/typeguards/isString';
+import { isArrayWithEachItem } from './isArrayWithEachItem';
+import { isNumber } from './isNumber';
+import { isString } from './isString';
 
 describe('isArrayWithEachItem', () => {
   const isNumberArray = isArrayWithEachItem(isNumber);
@@ -31,7 +31,9 @@ describe('isArrayWithEachItem', () => {
     // Test error for non-array
     isNumberArray('not an array', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected nums ("not an array") to be "Array"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected nums ("not an array") to be "Array"'
+    );
 
     mockCallback.mockClear();
 
@@ -39,6 +41,8 @@ describe('isArrayWithEachItem', () => {
     isNumberArray([1, 'two', 3], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Error comes from the predicate (isNumber) applied to the item
-    expect(mockCallback).toHaveBeenCalledWith('Expected nums[1] ("two") to be "number"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected nums[1] ("two") to be "number"'
+    );
   });
-}); 
+});

@@ -2,7 +2,6 @@ import { isIntersectionOf } from './isIntersectionOf';
 import { isType } from './isType';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
-import { isBoolean } from './isBoolean';
 
 describe('isIntersectionOf', () => {
   interface Person {
@@ -91,7 +90,7 @@ describe('isIntersectionOf', () => {
 
   it('should work with single type guard', () => {
     const singleTypeGuard = isIntersectionOf(isPerson);
-    
+
     const validValue = {
       name: 'John Doe',
       age: 30,
@@ -124,4 +123,4 @@ describe('isIntersectionOf', () => {
     expect(result).toBe(false);
     expect(errors.length).toBeGreaterThan(0);
   });
-}); 
+});

@@ -1,4 +1,4 @@
-import { isNil } from '@/typeguards/isNil';
+import { isNil } from './isNil';
 
 describe('isNil', () => {
   it('should return true for null and undefined', () => {
@@ -17,18 +17,25 @@ describe('isNil', () => {
 
   it('should handle TypeGuardFn config for error reporting', () => {
     const mockCallback = jest.fn();
-    const config = { identifier: 'optionalValue', callbackOnError: mockCallback };
+    const config = {
+      identifier: 'optionalValue',
+      callbackOnError: mockCallback,
+    };
 
     isNil(null, config);
     expect(mockCallback).not.toHaveBeenCalled();
 
     isNil(0, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected optionalValue (0) to be "null | undefined"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected optionalValue (0) to be "null | undefined"'
+    );
 
     mockCallback.mockClear();
     isNil('hello', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected optionalValue ("hello") to be "null | undefined"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected optionalValue ("hello") to be "null | undefined"'
+    );
   });
-}); 
+});

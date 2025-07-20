@@ -1,4 +1,4 @@
-import { isPositiveNumber } from '@/typeguards/isPositiveNumber';
+import { isPositiveNumber } from './isPositiveNumber';
 
 describe('isPositiveNumber', () => {
   it('should return true for non-negative numbers', () => {
@@ -6,7 +6,7 @@ describe('isPositiveNumber', () => {
     expect(isPositiveNumber(1.23)).toBe(true);
     expect(isPositiveNumber(Number(5))).toBe(true);
   });
-  
+
   it('should return false for negative numbers and non-numbers', () => {
     expect(isPositiveNumber(0)).toBe(false);
     expect(isPositiveNumber(-10)).toBe(false);
@@ -29,11 +29,15 @@ describe('isPositiveNumber', () => {
 
     isPositiveNumber(-1, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count (-1) to be "PositiveNumber"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected count (-1) to be "PositiveNumber"'
+    );
 
     mockCallback.mockClear();
     isPositiveNumber('text', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count ("text") to be "PositiveNumber"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected count ("text") to be "PositiveNumber"'
+    );
   });
-}); 
+});

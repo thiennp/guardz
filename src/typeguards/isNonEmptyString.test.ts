@@ -1,4 +1,4 @@
-import { isNonEmptyString } from '@/typeguards/isNonEmptyString';
+import { isNonEmptyString } from './isNonEmptyString';
 
 describe('isNonEmptyString', () => {
   it('should return true for non-empty strings', () => {
@@ -26,11 +26,15 @@ describe('isNonEmptyString', () => {
 
     isNonEmptyString('', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected username ("") to be "NonEmptyString"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected username ("") to be "NonEmptyString"'
+    );
 
     mockCallback.mockClear(); // Clear mock for next check
     isNonEmptyString(123, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected username (123) to be "NonEmptyString"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected username (123) to be "NonEmptyString"'
+    );
   });
-}); 
+});

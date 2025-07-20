@@ -1,1 +1,1 @@
-export type NegativeInteger = number & { __brand: 'NegativeInteger' } 
+export type NegativeInteger = number & { __brand: 'NegativeInteger' };

@@ -1,4 +1,4 @@
-import { isEqualTo } from '@/typeguards/isEqualTo';
+import { isEqualTo } from './isEqualTo';
 
 describe('isEqualTo', () => {
   const value1 = 'hello';
@@ -41,6 +41,8 @@ describe('isEqualTo', () => {
     checkToken('wrong', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Note: isEqualTo uses custom error message format
-    expect(mockCallback).toHaveBeenCalledWith('Expected token ("wrong") to be "equal to "secret""');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected token ("wrong") to be "equal to "secret""'
+    );
   });
-}); 
+});

@@ -1,4 +1,4 @@
-import { isString } from '@/typeguards/isString';
+import { isString } from './isString';
 
 describe('isString', () => {
   it('should return true for strings', () => {
@@ -28,6 +28,8 @@ describe('isString', () => {
     // Test case where it should fail (error callback should be called)
     isString(123, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected myVar (123) to be "string"'); 
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected myVar (123) to be "string"'
+    );
   });
-}); 
+});

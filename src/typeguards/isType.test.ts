@@ -274,7 +274,9 @@ describe('isType', () => {
     });
 
     it('should handle objects with prototype pollution', () => {
-      const maliciousObject = JSON.parse('{"name":"John","age":30,"__proto__":{"isAdmin":true}}');
+      const maliciousObject = JSON.parse(
+        '{"name":"John","age":30,"__proto__":{"isAdmin":true}}'
+      );
       expect(isSimpleUser(maliciousObject)).toBe(true);
     });
 
@@ -285,4 +287,4 @@ describe('isType', () => {
       expect(isSimpleUser(nullProtoObject)).toBe(true);
     });
   });
-}); 
+});

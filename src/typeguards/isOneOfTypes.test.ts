@@ -1,6 +1,6 @@
-import { isString } from '@/typeguards/isString';
-import { isNumber } from '@/typeguards/isNumber';
-import { isOneOfTypes } from '@/typeguards/isOneOfTypes';
+import { isString } from './isString';
+import { isNumber } from './isNumber';
+import { isOneOfTypes } from './isOneOfTypes';
 
 describe('isOneOfTypes', () => {
   const isStringOrNumber = isOneOfTypes<string | number>(isString, isNumber);
@@ -38,4 +38,4 @@ describe('isOneOfTypes', () => {
     ].join('\n');
     expect(mockCallback).toHaveBeenCalledWith(expectedError);
   });
-}); 
+});

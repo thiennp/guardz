@@ -79,7 +79,9 @@ describe('isInteger', () => {
 
       isInteger(3.14, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (3.14) to be "integer"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (3.14) to be "integer"'
+      );
     });
 
     it('should call error callback for non-numbers', () => {
@@ -88,7 +90,9 @@ describe('isInteger', () => {
 
       isInteger('123', config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue ("123") to be "integer"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue ("123") to be "integer"'
+      );
     });
 
     it('should call error callback for NaN', () => {
@@ -97,7 +101,9 @@ describe('isInteger', () => {
 
       isInteger(NaN, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (NaN) to be "integer"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (NaN) to be "integer"'
+      );
     });
 
     it('should call error callback for Infinity', () => {
@@ -106,7 +112,9 @@ describe('isInteger', () => {
 
       isInteger(Infinity, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (Infinity) to be "integer"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (Infinity) to be "integer"'
+      );
     });
   });
 
@@ -150,4 +158,4 @@ describe('isInteger', () => {
       });
     });
   });
-}); 
+});

@@ -1,5 +1,9 @@
 // Core type guard function
-export { isType, type TypeGuardFn, type TypeGuardFnConfig } from './typeguards/isType';
+export {
+  isType,
+  type TypeGuardFn,
+  type TypeGuardFnConfig,
+} from './typeguards/isType';
 
 // Guard with tolerance
 export { guardWithTolerance } from './typeguards/guardWithTolerance';
@@ -13,6 +17,24 @@ export { isNil } from './typeguards/isNil';
 export { isNumber } from './typeguards/isNumber';
 export { isString } from './typeguards/isString';
 export { isUnknown } from './typeguards/isUnknown';
+
+// Function type guards
+export { isFunction } from './typeguards/isFunction';
+
+// Web API type guards
+export { isFile } from './typeguards/isFile';
+export { isFileList } from './typeguards/isFileList';
+export { isBlob } from './typeguards/isBlob';
+export { isFormData } from './typeguards/isFormData';
+export { isURL } from './typeguards/isURL';
+export { isURLSearchParams } from './typeguards/isURLSearchParams';
+
+// Collection type guards
+export { isMap } from './typeguards/isMap';
+export { isSet } from './typeguards/isSet';
+
+// Error type guards
+export { isError } from './typeguards/isError';
 
 // Array type guards
 export { isArrayWithEachItem } from './typeguards/isArrayWithEachItem';

@@ -106,7 +106,9 @@ describe('isPositiveInteger', () => {
       };
 
       isPositiveInteger(0, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (0) to be "PositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (0) to be "PositiveInteger"'
+      );
     });
 
     test('should call error callback for negative values', () => {
@@ -117,7 +119,9 @@ describe('isPositiveInteger', () => {
       };
 
       isPositiveInteger(-5, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected negativeValue (-5) to be "PositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected negativeValue (-5) to be "PositiveInteger"'
+      );
     });
 
     test('should call error callback for decimal values', () => {
@@ -128,7 +132,9 @@ describe('isPositiveInteger', () => {
       };
 
       isPositiveInteger(1.5, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected decimalValue (1.5) to be "PositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected decimalValue (1.5) to be "PositiveInteger"'
+      );
     });
 
     test('should call error callback for string values', () => {
@@ -139,7 +145,9 @@ describe('isPositiveInteger', () => {
       };
 
       isPositiveInteger('hello', config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected stringValue ("hello") to be "PositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected stringValue ("hello") to be "PositiveInteger"'
+      );
     });
   });
 
@@ -192,4 +200,4 @@ describe('isPositiveInteger', () => {
       }
     });
   });
-}); 
+});

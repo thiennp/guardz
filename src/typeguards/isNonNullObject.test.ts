@@ -1,4 +1,4 @@
-import { isNonNullObject } from '@/typeguards/isNonNullObject';
+import { isNonNullObject } from './isNonNullObject';
 
 describe('isNonNullObject', () => {
   it('should return true for non-null objects', () => {
@@ -26,11 +26,15 @@ describe('isNonNullObject', () => {
 
     isNonNullObject(null, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected userData (null) to be "non-null object"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected userData (null) to be "non-null object"'
+    );
 
     mockCallback.mockClear();
     isNonNullObject(123, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected userData (123) to be "non-null object"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected userData (123) to be "non-null object"'
+    );
   });
-}); 
+});

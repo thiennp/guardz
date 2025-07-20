@@ -21,7 +21,7 @@ describe('guardWithTolerance', () => {
     it('should return data when validation passes', () => {
       const validData = { name: 'John', age: 30, isActive: true };
       const result = guardWithTolerance(validData, isUser);
-      
+
       expect(result).toBe(validData);
       expect(result.name).toBe('John');
       expect(result.age).toBe(30);
@@ -47,7 +47,7 @@ describe('guardWithTolerance', () => {
     it('should return data even when validation fails', () => {
       const invalidData = { name: 'John', age: '30', isActive: true }; // age is string, not number
       const result = guardWithTolerance(invalidData, isUser);
-      
+
       expect(result).toBe(invalidData);
       // TypeScript types it as User, even though it's actually invalid
       expect((result as any).age).toBe('30'); // Still the original invalid value
@@ -230,7 +230,7 @@ describe('guardWithTolerance', () => {
   describe('use case scenarios', () => {
     it('should demonstrate logging validation errors while proceeding', () => {
       const validationErrors: string[] = [];
-      
+
       // Simulate data from an unreliable API
       const apiData = {
         name: 'John Doe',
@@ -240,7 +240,7 @@ describe('guardWithTolerance', () => {
 
       const user = guardWithTolerance(apiData, isUser, {
         identifier: 'apiResponse',
-        callbackOnError: (error) => {
+        callbackOnError: error => {
           validationErrors.push(error);
           // In real world, you might log to monitoring service
           console.warn('Validation warning:', error);
@@ -259,7 +259,7 @@ describe('guardWithTolerance', () => {
     it('should work for gradual migration scenarios', () => {
       // When migrating from untyped to typed code, you can use guardWithTolerance
       // to start logging validation issues while maintaining existing behavior
-      
+
       const legacyData = {
         name: 'Legacy User',
         age: '25', // Legacy system uses strings for numbers
@@ -269,14 +269,14 @@ describe('guardWithTolerance', () => {
       const migrationLogs: string[] = [];
       const user = guardWithTolerance(legacyData, isUser, {
         identifier: 'legacyData',
-        callbackOnError: (error) => migrationLogs.push(error),
+        callbackOnError: error => migrationLogs.push(error),
       });
 
       // System continues to work with legacy data
       expect(user).toBe(legacyData);
-      
+
       // But you're aware of what needs to be fixed
       expect(migrationLogs.length).toBeGreaterThan(0);
     });
   });
-}); 
+});

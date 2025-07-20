@@ -1,6 +1,6 @@
-import { isNonEmptyArrayWithEachItem } from '@/typeguards/isNonEmptyArrayWithEachItem';
-import { isNumber } from '@/typeguards/isNumber';
-import { isString } from '@/typeguards/isString';
+import { isNonEmptyArrayWithEachItem } from './isNonEmptyArrayWithEachItem';
+import { isNumber } from './isNumber';
+import { isString } from './isString';
 
 describe('isNonEmptyArrayWithEachItem', () => {
   const isNonEmptyNumberArray = isNonEmptyArrayWithEachItem(isNumber);
@@ -32,20 +32,26 @@ describe('isNonEmptyArrayWithEachItem', () => {
     // Test error for empty array
     isNonEmptyNumberArray([], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected ids ([]) to be "NonEmptyArray"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected ids ([]) to be "NonEmptyArray"'
+    );
 
     mockCallback.mockClear();
 
     // Test error for non-array
     isNonEmptyNumberArray(null, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected ids (null) to be "Array"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected ids (null) to be "Array"'
+    );
 
     mockCallback.mockClear();
 
     // Test error for an item within the array
     isNonEmptyNumberArray([1, 'two', 3], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected ids[1] ("two") to be "number"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected ids[1] ("two") to be "number"'
+    );
   });
-}); 
+});

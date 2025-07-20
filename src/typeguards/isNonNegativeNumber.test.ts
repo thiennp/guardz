@@ -1,4 +1,4 @@
-import { isNonNegativeNumber } from '@/typeguards/isNonNegativeNumber';
+import { isNonNegativeNumber } from './isNonNegativeNumber';
 
 describe('isNonNegativeNumber', () => {
   it('should return true for non-negative numbers', () => {
@@ -29,11 +29,15 @@ describe('isNonNegativeNumber', () => {
 
     isNonNegativeNumber(-1, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count (-1) to be "NonNegativeNumber"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected count (-1) to be "NonNegativeNumber"'
+    );
 
     mockCallback.mockClear();
     isNonNegativeNumber('text', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected count ("text") to be "NonNegativeNumber"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected count ("text") to be "NonNegativeNumber"'
+    );
   });
-}); 
+});

@@ -1,4 +1,4 @@
-import { isNumber } from '@/typeguards/isNumber';
+import { isNumber } from './isNumber';
 
 describe('isNumber', () => {
   it('should return true for numbers', () => {
@@ -30,6 +30,8 @@ describe('isNumber', () => {
     isNumber('not a number', config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Assuming generateTypeGuardError is used
-    expect(mockCallback).toHaveBeenCalledWith('Expected age ("not a number") to be "number"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected age ("not a number") to be "number"'
+    );
   });
-}); 
+});

@@ -1,4 +1,4 @@
-import { isNonEmptyArray } from '@/typeguards/isNonEmptyArray';
+import { isNonEmptyArray } from './isNonEmptyArray';
 
 describe('isNonEmptyArray', () => {
   it('should return true for non-empty arrays', () => {
@@ -22,6 +22,8 @@ describe('isNonEmptyArray', () => {
 
     isNonEmptyArray([], config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected items ([]) to be "NonEmptyArray"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected items ([]) to be "NonEmptyArray"'
+    );
   });
-}); 
+});

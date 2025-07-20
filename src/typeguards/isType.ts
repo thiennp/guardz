@@ -1,11 +1,14 @@
-import { isNonNullObject } from "./isNonNullObject";
+import { isNonNullObject } from './isNonNullObject';
 
 export interface TypeGuardFnConfig {
   readonly callbackOnError: (errorMessage: string) => void;
   readonly identifier: string;
 }
 
-export type TypeGuardFn<T> = (value: unknown, config?: TypeGuardFnConfig | null) => value is T;
+export type TypeGuardFn<T> = (
+  value: unknown,
+  config?: TypeGuardFnConfig | null
+) => value is T;
 
 /**
  * The data type that comes from different sources (like from server side, library, url params) is not always reliable.
@@ -34,7 +37,10 @@ export function isType<T>(propsTypesToCheck: {
 
     return Object.keys(propsTypesToCheck).every(function (key) {
       const typeGuardFn = propsTypesToCheck[key as keyof T];
-      return typeGuardFn(value[key], config ? { ...config, identifier: `${config.identifier}.${key}` } : null);
+      return typeGuardFn(
+        value[key],
+        config ? { ...config, identifier: `${config.identifier}.${key}` } : null
+      );
     });
   };
 }

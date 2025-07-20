@@ -1,5 +1,5 @@
-import { generateTypeGuardError } from "./generateTypeGuardError";
-import type { TypeGuardFn } from "./isType";
+import { generateTypeGuardError } from './generateTypeGuardError';
+import type { TypeGuardFn } from './isType';
 
 /**
  * Checks if a value is a valid number (excludes NaN).
@@ -7,11 +7,11 @@ import type { TypeGuardFn } from "./isType";
  * @param value - The value to check
  * @param config - Optional configuration for error handling
  * @returns True if the value is a valid number (not NaN), false otherwise
- * 
+ *
  * @example
  * ```typescript
  * import { isNumber } from 'guardz';
- * 
+ *
  * console.log(isNumber(123)); // true
  * console.log(isNumber(0)); // true
  * console.log(isNumber(-42.5)); // true
@@ -19,7 +19,7 @@ import type { TypeGuardFn } from "./isType";
  * console.log(isNumber(NaN)); // false
  * console.log(isNumber("123")); // false
  * console.log(isNumber(null)); // false
- * 
+ *
  * // With type narrowing
  * const data: unknown = getUserInput();
  * if (isNumber(data)) {
@@ -28,10 +28,15 @@ import type { TypeGuardFn } from "./isType";
  * }
  * ```
  */
-export const isNumber: TypeGuardFn<number> = function (value, config): value is number {
-  if (typeof value !== "number" || isNaN(value)) {
+export const isNumber: TypeGuardFn<number> = function (
+  value,
+  config
+): value is number {
+  if (typeof value !== 'number' || isNaN(value)) {
     if (config) {
-      config.callbackOnError(generateTypeGuardError(value, config.identifier, "number"));
+      config.callbackOnError(
+        generateTypeGuardError(value, config.identifier, 'number')
+      );
     }
     return false;
   }

@@ -114,7 +114,9 @@ describe('isNonPositiveNumber', () => {
       };
 
       isNonPositiveNumber(1, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (1) to be "NonPositiveNumber"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (1) to be "NonPositiveNumber"'
+      );
     });
 
     test('should call error callback for string values', () => {
@@ -125,7 +127,9 @@ describe('isNonPositiveNumber', () => {
       };
 
       isNonPositiveNumber('hello', config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected stringValue ("hello") to be "NonPositiveNumber"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected stringValue ("hello") to be "NonPositiveNumber"'
+      );
     });
 
     test('should call error callback for NaN', () => {
@@ -136,7 +140,9 @@ describe('isNonPositiveNumber', () => {
       };
 
       isNonPositiveNumber(NaN, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected nanValue (NaN) to be "NonPositiveNumber"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected nanValue (NaN) to be "NonPositiveNumber"'
+      );
     });
 
     test('should call error callback for Infinity', () => {
@@ -147,34 +153,40 @@ describe('isNonPositiveNumber', () => {
       };
 
       isNonPositiveNumber(Infinity, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected infinityValue (Infinity) to be "NonPositiveNumber"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected infinityValue (Infinity) to be "NonPositiveNumber"'
+      );
     });
   });
 
   describe('Real-world use cases', () => {
-         test('should validate temperature below freezing in Celsius', () => {
-       const temperatures = [-10, -5, 0, 5, 10];
-       const belowOrAtFreezing = temperatures.filter(x => isNonPositiveNumber(x));
-       expect(belowOrAtFreezing).toEqual([-10, -5, 0]);
-     });
+    test('should validate temperature below freezing in Celsius', () => {
+      const temperatures = [-10, -5, 0, 5, 10];
+      const belowOrAtFreezing = temperatures.filter(x =>
+        isNonPositiveNumber(x)
+      );
+      expect(belowOrAtFreezing).toEqual([-10, -5, 0]);
+    });
 
-     test('should validate debt amounts (negative balances)', () => {
-       const balances = [-1000, -50.25, 0, 100.50, 200];
-       const debtsOrZero = balances.filter(x => isNonPositiveNumber(x));
-       expect(debtsOrZero).toEqual([-1000, -50.25, 0]);
-     });
+    test('should validate debt amounts (negative balances)', () => {
+      const balances = [-1000, -50.25, 0, 100.5, 200];
+      const debtsOrZero = balances.filter(x => isNonPositiveNumber(x));
+      expect(debtsOrZero).toEqual([-1000, -50.25, 0]);
+    });
 
-     test('should validate coordinate values below or at origin', () => {
-       const coordinates = [-5, -2.5, 0, 1.5, 3];
-       const belowOrAtOrigin = coordinates.filter(x => isNonPositiveNumber(x));
-       expect(belowOrAtOrigin).toEqual([-5, -2.5, 0]);
-     });
+    test('should validate coordinate values below or at origin', () => {
+      const coordinates = [-5, -2.5, 0, 1.5, 3];
+      const belowOrAtOrigin = coordinates.filter(x => isNonPositiveNumber(x));
+      expect(belowOrAtOrigin).toEqual([-5, -2.5, 0]);
+    });
 
-     test('should validate decreases in value (non-positive changes)', () => {
-       const priceChanges = [-15.5, -5, 0, 2.5, 10];
-       const decreasesOrNoChange = priceChanges.filter(x => isNonPositiveNumber(x));
-       expect(decreasesOrNoChange).toEqual([-15.5, -5, 0]);
-     });
+    test('should validate decreases in value (non-positive changes)', () => {
+      const priceChanges = [-15.5, -5, 0, 2.5, 10];
+      const decreasesOrNoChange = priceChanges.filter(x =>
+        isNonPositiveNumber(x)
+      );
+      expect(decreasesOrNoChange).toEqual([-15.5, -5, 0]);
+    });
   });
 
   describe('Type narrowing', () => {
@@ -187,4 +199,4 @@ describe('isNonPositiveNumber', () => {
       }
     });
   });
-}); 
+});

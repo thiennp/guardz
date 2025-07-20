@@ -8,7 +8,7 @@ import {
   isPositiveInteger,
   isNegativeInteger,
   isNonNegativeInteger,
-  isNonPositiveInteger
+  isNonPositiveInteger,
 } from '../src';
 
 console.log('=== Number Type Guards ===');
@@ -16,7 +16,7 @@ console.log('=== Number Type Guards ===');
 // Basic number validation
 console.log('isNumber(42):', isNumber(42)); // true
 console.log('isNumber(3.14):', isNumber(3.14)); // true
-console.log('isNumber("42"):', isNumber("42")); // false
+console.log('isNumber("42"):', isNumber('42')); // false
 console.log('isNumber(NaN):', isNumber(NaN)); // true (NaN is a number in JavaScript)
 
 // Integer validation
@@ -85,11 +85,11 @@ function validateAge(age: unknown): number {
   if (!isNonNegativeInteger(age)) {
     throw new Error('Age must be a non-negative integer');
   }
-  
+
   if (age > 150) {
     throw new Error('Age seems unrealistic');
   }
-  
+
   return age;
 }
 
@@ -102,7 +102,10 @@ try {
   // validateAge(3.14);
   // validateAge("25");
 } catch (error) {
-  console.error('Age validation error:', error instanceof Error ? error.message : String(error));
+  console.error(
+    'Age validation error:',
+    error instanceof Error ? error.message : String(error)
+  );
 }
 
 // Practical example: Coordinate validation
@@ -110,11 +113,11 @@ function validateCoordinate(x: unknown, y: unknown): [number, number] {
   if (!isNumber(x) || !isNumber(y)) {
     throw new Error('Coordinates must be numbers');
   }
-  
+
   if (!isFinite(x) || !isFinite(y)) {
     throw new Error('Coordinates must be finite numbers');
   }
-  
+
   return [x, y];
 }
 
@@ -124,8 +127,11 @@ try {
   // This would throw an error:
   // validateCoordinate("10", "20");
 } catch (error) {
-  console.error('Coordinate validation error:', error instanceof Error ? error.message : String(error));
-} 
+  console.error(
+    'Coordinate validation error:',
+    error instanceof Error ? error.message : String(error)
+  );
+}
 
 // --- Structured Error Handling for Numbers ---
 console.log('\n=== Structured Error Handling for Numbers ===');
@@ -138,4 +144,4 @@ const validAge = isNonNegativeInteger(25, numberConfig);
 const invalidAge = isNonNegativeInteger(-5, numberConfig);
 console.log('Valid age result:', validAge); // true
 console.log('Invalid age result:', invalidAge); // false
-console.log('Collected errors:', numberErrors); // [ ... ] 
+console.log('Collected errors:', numberErrors); // [ ... ]

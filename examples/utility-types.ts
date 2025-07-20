@@ -10,7 +10,7 @@ import type {
   PositiveInteger,
   NegativeInteger,
   NonNegativeInteger,
-  NonPositiveInteger
+  NonPositiveInteger,
 } from '../src';
 
 console.log('=== GuardZ Utility Types ===');
@@ -54,7 +54,7 @@ function processPositiveInteger(num: PositiveInteger): number {
 // Nullable utility type
 function processNullableString(str: Nullable<string>): string {
   // TypeScript knows this could be string | null
-  return str ?? "default";
+  return str ?? 'default';
 }
 
 // Example usage with type assertions
@@ -66,7 +66,9 @@ console.log('\n=== Example Usage ===');
 
 console.log('Utility types provide compile-time type safety');
 console.log('They work best when combined with runtime validation');
-console.log('Direct assignment requires type assertions or validation functions');
+console.log(
+  'Direct assignment requires type assertions or validation functions'
+);
 
 // Practical example: Function signatures with utility types
 interface UserProfile {
@@ -92,7 +94,7 @@ function createUserProfile(
     email,
     age,
     tags,
-    avatar
+    avatar,
   };
 }
 
@@ -111,7 +113,9 @@ console.log('5. Nullable<T> makes null handling explicit');
 console.log('6. All utility types provide compile-time safety');
 
 console.log('\n=== Integration with Runtime Validation ===');
-console.log('These utility types work best when combined with runtime validation:');
+console.log(
+  'These utility types work best when combined with runtime validation:'
+);
 console.log('- Use type guards to validate data at runtime');
 console.log('- Use utility types to ensure type safety at compile time');
-console.log('- This provides both runtime and compile-time safety'); 
+console.log('- This provides both runtime and compile-time safety');

@@ -108,7 +108,9 @@ describe('isNonPositiveInteger', () => {
       };
 
       isNonPositiveInteger(1, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected testValue (1) to be "NonPositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected testValue (1) to be "NonPositiveInteger"'
+      );
     });
 
     test('should call error callback for decimal values', () => {
@@ -119,7 +121,9 @@ describe('isNonPositiveInteger', () => {
       };
 
       isNonPositiveInteger(-1.5, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected decimalValue (-1.5) to be "NonPositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected decimalValue (-1.5) to be "NonPositiveInteger"'
+      );
     });
 
     test('should call error callback for string values', () => {
@@ -130,7 +134,9 @@ describe('isNonPositiveInteger', () => {
       };
 
       isNonPositiveInteger('hello', config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected stringValue ("hello") to be "NonPositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected stringValue ("hello") to be "NonPositiveInteger"'
+      );
     });
 
     test('should call error callback for NaN', () => {
@@ -141,7 +147,9 @@ describe('isNonPositiveInteger', () => {
       };
 
       isNonPositiveInteger(NaN, config);
-      expect(mockCallback).toHaveBeenCalledWith('Expected nanValue (NaN) to be "NonPositiveInteger"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected nanValue (NaN) to be "NonPositiveInteger"'
+      );
     });
   });
 
@@ -160,7 +168,9 @@ describe('isNonPositiveInteger', () => {
 
     test('should validate coordinate positions (origin and left/down)', () => {
       const coordinates = [0, -5, -10, -1, 1, 5, 10, -2.5, '-3'];
-      const originAndNegative = coordinates.filter(x => isNonPositiveInteger(x));
+      const originAndNegative = coordinates.filter(x =>
+        isNonPositiveInteger(x)
+      );
       expect(originAndNegative).toEqual([0, -5, -10, -1]);
     });
 
@@ -172,7 +182,9 @@ describe('isNonPositiveInteger', () => {
 
     test('should validate temperature thresholds (freezing and below)', () => {
       const temperatures = [0, -1, -5, -10, 1, 5, 10, -2.5, '0'];
-      const freezingAndBelow = temperatures.filter(x => isNonPositiveInteger(x));
+      const freezingAndBelow = temperatures.filter(x =>
+        isNonPositiveInteger(x)
+      );
       expect(freezingAndBelow).toEqual([0, -1, -5, -10]);
     });
 
@@ -194,4 +206,4 @@ describe('isNonPositiveInteger', () => {
       }
     });
   });
-}); 
+});

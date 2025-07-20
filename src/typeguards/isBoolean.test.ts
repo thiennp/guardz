@@ -1,4 +1,4 @@
-import { isBoolean } from '@/typeguards/isBoolean';
+import { isBoolean } from './isBoolean';
 
 describe('isBoolean', () => {
   it('should return true for booleans', () => {
@@ -26,6 +26,8 @@ describe('isBoolean', () => {
 
     isBoolean(1, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected isActive (1) to be "boolean"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected isActive (1) to be "boolean"'
+    );
   });
-}); 
+});

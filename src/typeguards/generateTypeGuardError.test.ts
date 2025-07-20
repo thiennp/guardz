@@ -123,8 +123,15 @@ describe('generateTypeGuardError', () => {
     });
 
     it('should handle objects with special characters', () => {
-      const objWithSpecialChars = { message: 'hello\nworld', quote: 'say "hi"' };
-      const error = generateTypeGuardError(objWithSpecialChars, 'data', 'string');
+      const objWithSpecialChars = {
+        message: 'hello\nworld',
+        quote: 'say "hi"',
+      };
+      const error = generateTypeGuardError(
+        objWithSpecialChars,
+        'data',
+        'string'
+      );
       expect(error).toContain('Expected data');
       expect(error).toContain('hello\\nworld');
       expect(error).toContain('\\"hi\\"');
@@ -133,7 +140,7 @@ describe('generateTypeGuardError', () => {
     it('should handle circular references by throwing an error (expected behavior)', () => {
       const circular: any = { name: 'test' };
       circular.self = circular;
-      
+
       // This will throw because JSON.stringify cannot handle circular references
       expect(() => {
         generateTypeGuardError(circular, 'data', 'string');
@@ -141,7 +148,9 @@ describe('generateTypeGuardError', () => {
     });
 
     it('should handle functions', () => {
-      const fn = function testFunction() { return 'test'; };
+      const fn = function testFunction() {
+        return 'test';
+      };
       const error = generateTypeGuardError(fn, 'callback', 'string');
       expect(error).toContain('Expected callback');
       expect(error).toContain('to be "string"');
@@ -158,8 +167,14 @@ describe('generateTypeGuardError', () => {
 
   describe('identifier and expected type formatting', () => {
     it('should handle complex identifiers', () => {
-      const error = generateTypeGuardError('test', 'user.profile.name', 'NonEmptyString');
-      expect(error).toBe('Expected user.profile.name ("test") to be "NonEmptyString"');
+      const error = generateTypeGuardError(
+        'test',
+        'user.profile.name',
+        'NonEmptyString'
+      );
+      expect(error).toBe(
+        'Expected user.profile.name ("test") to be "NonEmptyString"'
+      );
     });
 
     it('should handle identifiers with array indices', () => {
@@ -168,8 +183,14 @@ describe('generateTypeGuardError', () => {
     });
 
     it('should handle complex expected types', () => {
-      const error = generateTypeGuardError('test', 'value', 'one of ["a", "b", "c"]');
-      expect(error).toBe('Expected value ("test") to be "one of ["a", "b", "c"]"');
+      const error = generateTypeGuardError(
+        'test',
+        'value',
+        'one of ["a", "b", "c"]'
+      );
+      expect(error).toBe(
+        'Expected value ("test") to be "one of ["a", "b", "c"]"'
+      );
     });
 
     it('should handle union type descriptions', () => {
@@ -195,8 +216,14 @@ describe('generateTypeGuardError', () => {
     });
 
     it('should work with enum validation errors', () => {
-      const error = generateTypeGuardError('INVALID', 'status', 'one of ["PENDING", "APPROVED", "REJECTED"]');
-      expect(error).toBe('Expected status ("INVALID") to be "one of ["PENDING", "APPROVED", "REJECTED"]"');
+      const error = generateTypeGuardError(
+        'INVALID',
+        'status',
+        'one of ["PENDING", "APPROVED", "REJECTED"]'
+      );
+      expect(error).toBe(
+        'Expected status ("INVALID") to be "one of ["PENDING", "APPROVED", "REJECTED"]"'
+      );
     });
 
     it('should work with object property validation errors', () => {
@@ -209,4 +236,4 @@ describe('generateTypeGuardError', () => {
       expect(error).toBe('Expected users[2].name (123) to be "string"');
     });
   });
-}); 
+});

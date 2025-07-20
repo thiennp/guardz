@@ -1,5 +1,5 @@
-import { isNonNullObject } from "./isNonNullObject";
-import type { TypeGuardFn } from "./isType";
+import { isNonNullObject } from './isNonNullObject';
+import type { TypeGuardFn } from './isType';
 
 /**
  * Checks if a value is a partial of a given type.
@@ -16,13 +16,22 @@ export function isPartialOf<T>(propsTypesToCheck: {
     }
 
     for (const key in propsTypesToCheck) {
-      if (Object.prototype.hasOwnProperty.call(propsTypesToCheck, key) && 
-          Object.prototype.hasOwnProperty.call(value, key)) 
-      {
+      if (
+        Object.prototype.hasOwnProperty.call(propsTypesToCheck, key) &&
+        Object.prototype.hasOwnProperty.call(value, key)
+      ) {
         const typeGuardFn = propsTypesToCheck[key as keyof T];
         const propertyValue = value[key as keyof typeof value];
-        
-        if (typeGuardFn && !typeGuardFn(propertyValue, config ? { ...config, identifier: `${config.identifier}.${key}` } : null)) {
+
+        if (
+          typeGuardFn &&
+          !typeGuardFn(
+            propertyValue,
+            config
+              ? { ...config, identifier: `${config.identifier}.${key}` }
+              : null
+          )
+        ) {
           return false;
         }
       }

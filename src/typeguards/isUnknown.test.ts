@@ -1,4 +1,4 @@
-import { isUnknown } from '@/typeguards/isUnknown';
+import { isUnknown } from './isUnknown';
 
 describe('isUnknown', () => {
   it('should always return true for any value', () => {
@@ -19,4 +19,4 @@ describe('isUnknown', () => {
     isUnknown('whatever', config);
     expect(mockCallback).not.toHaveBeenCalled();
   });
-}); 
+});

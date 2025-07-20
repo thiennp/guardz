@@ -6,31 +6,31 @@
  */
 export function stringify(value: unknown): string {
   if (value === undefined) {
-    return "undefined";
+    return 'undefined';
   }
 
   if (value instanceof Date) {
-    return isNaN(value.getTime()) ? "Invalid Date" : value.toISOString();
+    return isNaN(value.getTime()) ? 'Invalid Date' : value.toISOString();
   }
 
-  if (typeof value === "function") {
-    return "function";
+  if (typeof value === 'function') {
+    return 'function';
   }
 
   if (value instanceof Error) {
-    return "Error";
+    return 'Error';
   }
 
-  if (typeof value === "number" && isNaN(value)) {
-    return "NaN";
+  if (typeof value === 'number' && isNaN(value)) {
+    return 'NaN';
   }
 
   if (value === Infinity) {
-    return "Infinity";
+    return 'Infinity';
   }
 
   if (value === -Infinity) {
-    return "-Infinity";
+    return '-Infinity';
   }
 
   return JSON.stringify(value, null, 2);

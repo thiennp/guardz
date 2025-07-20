@@ -1,6 +1,6 @@
-import { isNullOr } from '@/typeguards/IsNullOr'; // Note the capitalization
-import { isString } from '@/typeguards/isString';
-import { isNumber } from '@/typeguards/isNumber';
+import { isNullOr } from './IsNullOr'; // Note the capitalization
+import { isString } from './isString';
+import { isNumber } from './isNumber';
 
 describe('isNullOr', () => {
   const isNullOrString = isNullOr(isString);
@@ -23,7 +23,10 @@ describe('isNullOr', () => {
 
   it('should handle error reporting from the predicate', () => {
     const mockCallback = jest.fn();
-    const config = { identifier: 'optionalValue', callbackOnError: mockCallback };
+    const config = {
+      identifier: 'optionalValue',
+      callbackOnError: mockCallback,
+    };
 
     isNullOrString(null, config);
     expect(mockCallback).not.toHaveBeenCalled();
@@ -34,6 +37,8 @@ describe('isNullOr', () => {
     isNullOrString(123, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
     // Error comes from the isString predicate
-    expect(mockCallback).toHaveBeenCalledWith('Expected optionalValue (123) to be "string"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected optionalValue (123) to be "string"'
+    );
   });
-}); 
+});

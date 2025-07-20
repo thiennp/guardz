@@ -1,4 +1,4 @@
-import { isDefined } from '@/typeguards/isDefined';
+import { isDefined } from './isDefined';
 
 describe('isDefined', () => {
   it('should return true for defined values (not null or undefined)', () => {
@@ -24,11 +24,15 @@ describe('isDefined', () => {
 
     isDefined(null, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected user (null) to be "isDefined"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected user (null) to be "isDefined"'
+    );
 
     mockCallback.mockClear();
     isDefined(undefined, config);
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith('Expected user (undefined) to be "isDefined"');
+    expect(mockCallback).toHaveBeenCalledWith(
+      'Expected user (undefined) to be "isDefined"'
+    );
   });
-}); 
+});

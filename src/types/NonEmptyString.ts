@@ -1,1 +1,1 @@
-export type NonEmptyString = string & { __brand: "NonEmptyString" };
+export type NonEmptyString = string & { __brand: 'NonEmptyString' };

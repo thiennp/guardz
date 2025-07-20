@@ -66,7 +66,9 @@ describe('isBigInt', () => {
 
       isBigInt(123, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected largeId (123) to be "bigint"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected largeId (123) to be "bigint"'
+      );
     });
 
     it('should call error callback for strings', () => {
@@ -75,7 +77,9 @@ describe('isBigInt', () => {
 
       isBigInt('123', config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected largeId ("123") to be "bigint"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected largeId ("123") to be "bigint"'
+      );
     });
 
     it('should call error callback for null and undefined', () => {
@@ -84,12 +88,16 @@ describe('isBigInt', () => {
 
       isBigInt(null, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected largeId (null) to be "bigint"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected largeId (null) to be "bigint"'
+      );
 
       mockCallback.mockClear();
       isBigInt(undefined, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected largeId (undefined) to be "bigint"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected largeId (undefined) to be "bigint"'
+      );
     });
 
     it('should call error callback for objects', () => {
@@ -98,7 +106,9 @@ describe('isBigInt', () => {
 
       isBigInt({}, config);
       expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Expected largeId ({}) to be "bigint"');
+      expect(mockCallback).toHaveBeenCalledWith(
+        'Expected largeId ({}) to be "bigint"'
+      );
     });
   });
 
@@ -111,7 +121,7 @@ describe('isBigInt', () => {
     it('should distinguish BigInt from regular numbers', () => {
       const regularNumber = 123;
       const bigIntNumber = BigInt(123);
-      
+
       expect(isBigInt(regularNumber)).toBe(false);
       expect(isBigInt(bigIntNumber)).toBe(true);
       expect(regularNumber === Number(bigIntNumber)).toBe(true); // same value
@@ -130,18 +140,18 @@ describe('isBigInt', () => {
       // Database IDs that might exceed JavaScript's safe integer range
       const largeId1 = BigInt('9223372036854775807'); // Max 64-bit signed integer
       const largeId2 = BigInt('18446744073709551615'); // Max 64-bit unsigned integer
-      
+
       expect(isBigInt(largeId1)).toBe(true);
       expect(isBigInt(largeId2)).toBe(true);
       expect(isBigInt('9223372036854775807')).toBe(false); // string version
-      expect(isBigInt(9223372036854775807)).toBe(false); // regular number (likely imprecise)
+      expect(isBigInt('9223372036854775807')).toBe(false); // regular number (likely imprecise)
     });
 
     it('should validate cryptocurrency amounts', () => {
       // Cryptocurrency amounts often use very large integers for precision
       const satoshiAmount = BigInt('2100000000000000'); // 21 million BTC in satoshis
       const weiAmount = BigInt('1000000000000000000'); // 1 ETH in wei
-      
+
       expect(isBigInt(satoshiAmount)).toBe(true);
       expect(isBigInt(weiAmount)).toBe(true);
       expect(isBigInt(2100000000000000)).toBe(false); // regular number version
@@ -150,7 +160,7 @@ describe('isBigInt', () => {
     it('should validate high-precision timestamps', () => {
       // Nanosecond precision timestamps
       const nanosecondTimestamp = BigInt('1640995200000000000'); // 2022-01-01 in nanoseconds
-      
+
       expect(isBigInt(nanosecondTimestamp)).toBe(true);
       expect(isBigInt(1640995200000)).toBe(false); // millisecond timestamp as regular number
       expect(isBigInt('1640995200000000000')).toBe(false); // string version
@@ -160,7 +170,7 @@ describe('isBigInt', () => {
       // Large mathematical operations
       const largeFactorial = BigInt('12345678901234567890');
       const largePower = BigInt(2) ** BigInt(100);
-      
+
       expect(isBigInt(largeFactorial)).toBe(true);
       expect(isBigInt(largePower)).toBe(true);
       expect(isBigInt(Math.pow(2, 100))).toBe(false); // regular Math.pow returns Infinity for large values
@@ -170,7 +180,7 @@ describe('isBigInt', () => {
       // Financial amounts in smallest currency units to avoid floating point errors
       const priceInCents = BigInt('299'); // $2.99 in cents
       const largeTransactionInCents = BigInt('999999999999'); // Very large transaction
-      
+
       expect(isBigInt(priceInCents)).toBe(true);
       expect(isBigInt(largeTransactionInCents)).toBe(true);
       expect(isBigInt(299)).toBe(false); // regular number
@@ -181,11 +191,11 @@ describe('isBigInt', () => {
       // Simulating API data validation
       const apiResponses = [
         BigInt('123456789012345678901234567890'), // valid BigInt
-        '123456789012345678901234567890',        // string (invalid)
-        123456789012345678901234567890,          // number (likely imprecise, invalid)
-        null,                                     // null (invalid)
-        undefined,                                // undefined (invalid)
-        {},                                       // object (invalid)
+        '123456789012345678901234567890', // string (invalid)
+        '123456789012345678901234567890', // number (likely imprecise, invalid)
+        null, // null (invalid)
+        undefined, // undefined (invalid)
+        {}, // object (invalid)
       ];
 
       const validResponses = apiResponses.filter(value => isBigInt(value));
@@ -193,4 +203,4 @@ describe('isBigInt', () => {
       expect(validResponses[0]).toBe(apiResponses[0]);
     });
   });
-}); 
+});

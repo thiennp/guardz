@@ -134,4 +134,4 @@ describe('isExtensionOf', () => {
     expect(result).toBe(false);
     expect(errors.length).toBeGreaterThan(0);
   });
-}); 
+});

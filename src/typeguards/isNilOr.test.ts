@@ -1,7 +1,6 @@
 import { isNilOr } from './isNilOr';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
-import { isBoolean } from './isBoolean';
 import { isType } from './isType';
 
 describe('isNilOr', () => {
@@ -160,10 +159,10 @@ describe('isNilOr', () => {
       NaN,
     ];
 
-    testValues.forEach((value) => {
+    testValues.forEach(value => {
       it(`should be equivalent to isUndefinedOr(isNullOr(isString)) for value: ${JSON.stringify(value)}`, () => {
         expect(isStringOrNil(value)).toBe(isEquivalent(value));
       });
     });
   });
-}); 
+});
