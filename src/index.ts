@@ -5,6 +5,10 @@ export {
   type TypeGuardFnConfig,
 } from './typeguards/isType';
 
+// Object type guard aliases
+export { isObjectWith } from './typeguards/isObjectWith';
+export { isObject } from './typeguards/isObject';
+
 // Guard with tolerance
 export { guardWithTolerance } from './typeguards/guardWithTolerance';
 

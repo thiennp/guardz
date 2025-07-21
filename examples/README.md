@@ -90,6 +90,9 @@ npx ts-node -r tsconfig-paths/register examples/web-api-validation.ts
 
 # Advanced features example
 npx ts-node -r tsconfig-paths/register examples/advanced-features.ts
+
+# Object aliases example
+npx ts-node -r tsconfig-paths/register examples/object-aliases-simple.ts
 ```
 
 ### Method 2: Run All Examples at Once

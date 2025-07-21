@@ -161,6 +161,33 @@ if (isUser(data)) {
 }
 ```
 
+### Object Type Guard Aliases
+
+Guardz provides aliases for `isType` with more intuitive names:
+
+```typescript
+import { isObject, isObjectWith, isString, isNumber, isBoolean } from 'guardz';
+
+// Using isObject (shorter, more concise)
+const isUser = isObject({
+  id: isNumber,
+  name: isString,
+  email: isString,
+  isActive: isBoolean,
+});
+
+// Using isObjectWith (more descriptive)
+const isProduct = isObjectWith({
+  sku: isString,
+  name: isString,
+  price: isNumber,
+  inStock: isBoolean,
+});
+
+// All three are functionally equivalent:
+// isType, isObject, and isObjectWith
+```
+
 ### Array Type Guards
 
 Validate arrays with specific item types:
@@ -756,6 +783,12 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isType<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>**
   Creates a type guard function for a specific object shape `T`. It checks if a value is a non-null object and verifies that each property specified in `propsTypesToCheck` conforms to its corresponding type guard function.
 
+- **isObject<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>**
+  Alias for `isType` - provides a shorter, more concise name for creating type guards that validate object structures.
+
+- **isObjectWith<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>**
+  Alias for `isType` - provides a more descriptive name for creating type guards that validate object structures with specific properties.
+
 - **guardWithTolerance<T>(data: unknown, typeGuardFn: TypeGuardFn<T>, config?: Nullable<TypeGuardFnConfig>): T**
   Validates data using the provided type guard function. If validation fails, it still returns the data as the expected type but logs errors through the config callback.
 
@@ -780,6 +813,8 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 ### Object Type Guards
 
 - **isNonNullObject** - Checks if a value is a non-null object (excludes arrays)
+- **isObject** - Alias for `isType` - creates type guards for object structures (shorter name)
+- **isObjectWith** - Alias for `isType` - creates type guards for object structures (descriptive name)
 - **isObjectWithEachItem** - Checks if a value is an object where each property value matches a specific type
 - **isPartialOf** - Checks if a value is a partial object matching a specific type
 

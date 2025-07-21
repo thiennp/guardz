@@ -20,6 +20,7 @@ async function runExamples() {
     'nullable-and-special',
     'utility-types',
     'advanced-features',
+    'object-aliases-simple',
   ];
 
   for (const example of examples) {
