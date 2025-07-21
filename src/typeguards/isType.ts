@@ -1,8 +1,10 @@
 import { isNonNullObject } from './isNonNullObject';
+import { validateObject, reportValidationResults } from '../utils/validationUtils';
 
 export interface TypeGuardFnConfig {
   readonly callbackOnError: (errorMessage: string) => void;
   readonly identifier: string;
+  readonly errorMode?: 'single' | 'multi' | 'json';
 }
 
 export type TypeGuardFn<T> = (
@@ -31,6 +33,22 @@ export function isType<T>(propsTypesToCheck: {
   [P in keyof T]: TypeGuardFn<T[P]>;
 }): TypeGuardFn<T> {
   return function (value, config): value is T {
+    const errorMode = config?.errorMode || 'single';
+    
+    // For multi or json modes, use the validation utils
+    if (errorMode === 'multi' || errorMode === 'json') {
+      const context = {
+        path: config?.identifier || 'root',
+        config: config || null
+      };
+      
+      const result = validateObject(value, propsTypesToCheck, context);
+      reportValidationResults(result, config || null);
+      
+      return result.valid;
+    }
+    
+    // Original single error mode behavior (default)
     if (!isNonNullObject(value, config)) {
       return false;
     }

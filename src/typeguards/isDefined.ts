@@ -36,7 +36,7 @@ export const isDefined: TypeGuardFn<NonNullable<unknown>> = function (
   value,
   config
 ): value is NonNullable<unknown> {
-  if (isNil(value)) {
+  if (isNil(value, null)) {
     if (config) {
       config.callbackOnError(
         generateTypeGuardError(value, config.identifier, 'isDefined')

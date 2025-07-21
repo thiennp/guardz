@@ -37,7 +37,7 @@ export const isInteger: TypeGuardFn<number> = function (
   value,
   config
 ): value is number {
-  if (!isNumber(value) || !Number.isInteger(value)) {
+  if (!isNumber(value, null) || !Number.isInteger(value)) {
     if (config) {
       config.callbackOnError(
         generateTypeGuardError(value, config.identifier, 'integer')

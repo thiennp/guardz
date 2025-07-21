@@ -135,4 +135,30 @@ describe('isObjectWith', () => {
     // Both should return the same result
     expect(isUser(testObject)).toBe(true);
   });
+
+  it('should collect multiple errors instead of stopping at first failure', () => {
+    const errors: string[] = [];
+    const config = {
+      identifier: 'user',
+      callbackOnError: (error: string) => errors.push(error),
+      errorMode: 'multi' as const,
+    };
+
+    const invalidUser = {
+      id: '1', // should be number
+      name: 123, // should be string
+      email: true, // should be string
+      isActive: 'yes', // should be boolean
+    };
+
+    isUser(invalidUser, config);
+
+    // Should collect all errors, not just the first one
+    // Note: In the current implementation, we get both individual errors and the JSON tree
+    expect(errors.length).toBeGreaterThanOrEqual(4);
+    expect(errors).toContain('Expected user.id ("1") to be "number"');
+    expect(errors).toContain('Expected user.name (123) to be "string"');
+    expect(errors).toContain('Expected user.email (true) to be "string"');
+    expect(errors).toContain('Expected user.isActive ("yes") to be "boolean"');
+  });
 }); 

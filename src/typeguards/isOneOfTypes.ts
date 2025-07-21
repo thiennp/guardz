@@ -51,7 +51,13 @@ export function isOneOfTypes<T>(
   ...typeGuards: TypeGuardFn<T>[]
 ): TypeGuardFn<T> {
   return function (value: unknown, config): value is T {
-    const isValid = typeGuards.some(typeGuard => typeGuard(value, null));
+    // Collect validation results to avoid duplicate checks
+    const validationResults = typeGuards.map(typeGuard => ({
+      typeGuard,
+      isValid: typeGuard(value, null)
+    }));
+    
+    const isValid = validationResults.some(result => result.isValid);
 
     if (!isValid && config) {
       const valueString = stringify(value);
@@ -64,7 +70,8 @@ export function isOneOfTypes<T>(
         `Expected ${displayValue} type to match one of "${typeGuards.map(fn => fn.name).join(' | ')}"`,
       ];
 
-      typeGuards.forEach(typeGuard =>
+      // Use the validation results we already collected
+      validationResults.forEach(({ typeGuard }) =>
         typeGuard(value, {
           ...config,
           callbackOnError: error => {

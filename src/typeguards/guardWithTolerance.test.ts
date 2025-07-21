@@ -193,6 +193,7 @@ describe('guardWithTolerance', () => {
       const config = {
         callbackOnError: (error: string) => errors.push(error),
         identifier: 'user',
+        errorMode: 'multi' as const, // Use multi mode to get detailed nested errors
       };
 
       const invalidData = {

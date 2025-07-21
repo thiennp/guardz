@@ -29,8 +29,8 @@ describe('Performance Benchmarks', () => {
     const iterations = 10000;
     const startTime = performance.now();
 
-    for (let i = 0; i < iterations; i++) {
-      isTestUser(validUser);
+    for (const _ of Array.from({ length: iterations })) {
+      isTestUser(validUser, null);
     }
 
     const endTime = performance.now();
@@ -45,8 +45,8 @@ describe('Performance Benchmarks', () => {
     const iterations = 10000;
     const startTime = performance.now();
 
-    for (let i = 0; i < iterations; i++) {
-      isTestUser(invalidUser);
+    for (const _ of Array.from({ length: iterations })) {
+      isTestUser(invalidUser, null);
     }
 
     const endTime = performance.now();

@@ -4,18 +4,21 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
 
-A powerful TypeScript type guard library with **structured error handling** for runtime type validation.
+A powerful TypeScript type guard library with **comprehensive error handling** and **functional programming patterns** for runtime type validation.
 
-> **Runtime type guards with detailed error messages — not just validation, but actionable feedback.**
+> **Runtime type guards with detailed error messages — not just validation, but actionable feedback with multiple error reporting modes.**
 
 ### Sample
 
 [Codesandbox](https://codesandbox.io/p/live/c8c7f6fd-480e-43f2-b211-bd9962f54be5)
 
 Guardz is a comprehensive runtime type-checking library that goes beyond simple validation.  
-It provides **detailed, structured error messages** that help you identify exactly what went wrong and where.
+It provides **detailed, actionable error messages** that help you identify exactly what went wrong and where, with **three distinct error reporting modes** for different use cases.
 
-- ✅ **Structured Error Messages** - Know exactly what failed and why
+- ✅ **Comprehensive Error Messages** - Know exactly what failed and why
+- ✅ **Multiple Error Modes** - Single, Multi, and JSON tree error reporting
+- ✅ **Functional Programming** - Pure functions with Higher-Order Functions (HoF)
+- ✅ **Performance Optimized** - Fast single-error mode for production
 - ✅ Zero transformation
 - ✅ Fully type-safe
 - ✅ Human-readable guards
@@ -26,15 +29,47 @@ It provides **detailed, structured error messages** that help you identify exact
 
 ## 🚀 Why Guardz?
 
-TypeScript types vanish at runtime. That’s where Guardz steps in.  
+TypeScript types vanish at runtime. That's where Guardz steps in.  
 Unlike schema validators that require re-declaring types, Guardz uses **your existing TS types as the source of truth**, matching values without coercion.
 
 **But Guardz goes further:**
 
-- 🛑 **Structured error messages**: Instantly know what failed, where, and why. Every type guard can provide detailed, field-specific error messages for debugging, logging, and user feedback.
+- 🛑 **Comprehensive error messages**: Instantly know what failed, where, and why. Every type guard can provide detailed, field-specific error messages for debugging, logging, and user feedback.
+- 🔄 **Multiple error modes**: Choose between single-error (fast), multi-error (comprehensive), or JSON-tree (structured) error reporting.
 - 🔗 **Custom error handling**: Integrate with your logging, monitoring, or UI error display with a simple callback.
+- ⚡ **Functional programming**: Built with pure functions and Higher-Order Functions for composable, maintainable code.
 
 📚 [Read: "Assert Nothing, Guard Everything"](https://medium.com/p/0b3e4388ae78)
+
+---
+
+## 🎯 Error Messages: The Heart of Guardz
+
+Guardz's error handling is what sets it apart from other type guard libraries. Instead of just returning `true` or `false`, Guardz provides **detailed, actionable error messages** that tell you exactly what went wrong.
+
+### What Makes Guardz Error Messages Special
+
+- **🔍 Precise Location**: Know exactly which field failed validation
+- **📊 Clear Context**: See the actual value that failed and what was expected
+- **🛠️ Actionable**: Error messages guide you to the exact fix needed
+- **🌳 Nested Support**: Track errors through complex object structures
+- **⚡ Performance**: Choose between fast single-error or comprehensive multi-error modes
+
+### Example Error Messages
+
+```typescript
+// Simple validation error
+Expected user.age ("30") to be "number"
+
+// Nested object error
+Expected user.details.email (123) to be "string"
+
+// Array element error
+Expected users[2].name (null) to be "string"
+
+// Complex path error
+Expected config.database.connection.pool.max ("10") to be "number"
+```
 
 ---
 
@@ -44,7 +79,7 @@ Guardz is more than just a type guard library - it's a complete ecosystem for ru
 
 ### Core Package: `guardz`
 
-The foundation of the ecosystem, providing comprehensive type guards with structured error handling.
+The foundation of the ecosystem, providing comprehensive type guards with detailed error handling and functional programming patterns.
 
 ### HTTP Client: `guardz-axios`
 
@@ -121,6 +156,32 @@ npm install guardz-generator
 npm install guardz
 # or
 yarn add guardz
+```
+
+## Quick Start: Error Messages in Action
+
+See Guardz's error handling in action with a simple example:
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+const errors: string[] = [];
+const isUser = isType({
+  name: isString,
+  age: isNumber,
+});
+
+const user = { name: 123, age: "30" }; // Invalid data
+const isValid = isUser(user, {
+  identifier: 'user',
+  callbackOnError: (error) => errors.push(error),
+});
+
+console.log(errors);
+// Output: [
+//   'Expected user.name (123) to be "string"',
+//   'Expected user.age ("30") to be "number"'
+// ]
 ```
 
 ## Usage
@@ -722,15 +783,108 @@ if (isNonPositiveInteger(floorLevel)) {
 }
 ```
 
-## 🛑 Structured Error Handling (Core Feature)
+## 🛑 Error Handling: Three Powerful Modes
 
-One of Guardz's most powerful features is its **structured error messages**. Every type guard can provide detailed, field-specific error messages that tell you:
+One of Guardz's most powerful features is its **detailed error messages** with **three distinct error reporting modes**. Every type guard can provide actionable, field-specific error messages that tell you:
 
 - **What failed** (the value and its field)
 - **Where it failed** (the property path)
 - **What was expected** (the type or constraint)
 
+### Error Modes
+
+Guardz provides three error reporting modes to suit different use cases:
+
+#### 1. **Single Error Mode** (Default - Fastest)
+Stops at the first validation failure for maximum performance.
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+const errors: string[] = [];
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+const user = { id: "1", name: 123, email: true };
+const isValid = isUser(user, {
+  identifier: 'user',
+  callbackOnError: (error) => errors.push(error),
+  errorMode: 'single' // Default mode
+});
+
+console.log(errors);
+// Output: ['Expected user.id ("1") to be "number"']
+// Only the first error is reported
+```
+
+#### 2. **Multi Error Mode** (Comprehensive)
+Collects all validation errors as strings.
+
+```typescript
+const errors: string[] = [];
+const isValid = isUser(user, {
+  identifier: 'user',
+  callbackOnError: (error) => errors.push(error),
+  errorMode: 'multi'
+});
+
+console.log(errors);
+// Output: [
+//   'Expected user.id ("1") to be "number"',
+//   'Expected user.name (123) to be "string"',
+//   'Expected user.email (true) to be "string"'
+// ]
+// All errors are collected
+```
+
+#### 3. **JSON Error Mode** (Structured)
+Provides a structured JSON tree with detailed validation information.
+
+```typescript
+const errors: string[] = [];
+const isValid = isUser(user, {
+  identifier: 'user',
+  callbackOnError: (error) => errors.push(error),
+  errorMode: 'json'
+});
+
+console.log(errors);
+// Output: [
+//   'Expected user.id ("1") to be "number"',
+//   'Expected user.name (123) to be "string"',
+//   'Expected user.email (true) to be "string"',
+//   '{
+//     "user": {
+//       "valid": false,
+//       "value": {
+//         "id": {
+//           "valid": false,
+//           "value": "1",
+//           "expectedType": "number"
+//         },
+//         "name": {
+//           "valid": false,
+//           "value": 123,
+//           "expectedType": "string"
+//         },
+//         "email": {
+//           "valid": false,
+//           "value": true,
+//           "expectedType": "string"
+//         }
+//       }
+//     }
+//   }'
+// ]
+// Individual errors + structured JSON tree
+```
+
 ### Error Message Format
+
+Every error message follows a clear, consistent format:
 
 ```
 Expected {identifier} ({value}) to be "{expectedType}"
@@ -741,16 +895,18 @@ Expected {identifier} ({value}) to be "{expectedType}"
 - `Expected user.age ("30") to be "number"`
 - `Expected items ([]) to be "NonEmptyArray"`
 - `Expected config.port ("abc") to be "PositiveInteger"`
+- `Expected user.details.email (123) to be "string"`
 
 ### How to Use
 
-Every type guard accepts an optional config with an `identifier` and a `callbackOnError`:
+Every type guard accepts an optional config with an `identifier`, `callbackOnError`, and `errorMode`:
 
 ```typescript
 const errors: string[] = [];
 const config = {
   identifier: 'user',
   callbackOnError: (error: string) => errors.push(error),
+  errorMode: 'single' as const, // 'single' | 'multi' | 'json'
 };
 
 const isUser = isType({ name: isString, age: isNumber });
@@ -758,12 +914,20 @@ const result = isUser({ name: 'John', age: '30' }, config);
 // errors now contains: [ 'Expected user.age ("30") to be "number"' ]
 ```
 
-### Why It Matters
+### Performance Considerations
+
+- **Single Mode**: Fastest - stops at first error (default for production)
+- **Multi Mode**: Medium - collects all errors as strings
+- **JSON Mode**: Most detailed - provides structured tree (best for debugging)
+
+### Why Error Messages Matter
 
 - **Debugging**: Instantly see which field failed and why
 - **User Feedback**: Show clear, actionable error messages in your UI
 - **Logging/Monitoring**: Integrate with your error tracking systems
 - **Testing**: Assert on specific error messages in your tests
+- **Performance**: Choose the right mode for your use case
+- **Development Experience**: Clear feedback speeds up development and reduces frustration
 
 ### Advanced: Nested and Multiple Errors
 
@@ -771,6 +935,48 @@ Guardz tracks errors even in deeply nested structures, using dot/bracket notatio
 
 - `Expected user.details.age ("thirty") to be "number"`
 - `Expected users[2].email (123) to be "string"`
+- `Expected config.database.connection.pool.max ("10") to be "number"`
+
+---
+
+## 🔄 Functional Programming Features
+
+Guardz is built with functional programming principles, providing:
+
+### Pure Functions
+All type guards are pure functions with no side effects and predictable outputs.
+
+### Higher-Order Functions (HoF)
+Type guards can be composed and combined using Higher-Order Functions:
+
+```typescript
+import { isType, isString, isNumber, isArrayWithEachItem } from 'guardz';
+
+// Compose type guards
+const isUser = isType({
+  name: isString,
+  age: isNumber,
+});
+
+const isUserList = isArrayWithEachItem(isUser);
+
+// Use composed guards
+const users: unknown = [
+  { name: 'John', age: 30 },
+  { name: 'Jane', age: 25 }
+];
+
+if (isUserList(users)) {
+  // users is typed as User[]
+  users.forEach(user => console.log(`${user.name} is ${user.age}`));
+}
+```
+
+### Immutable Data
+All validation functions create new data structures without mutating inputs.
+
+### Functional Composition
+Logic flows through function composition rather than imperative statements.
 
 ---
 
@@ -791,6 +997,17 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 - **guardWithTolerance<T>(data: unknown, typeGuardFn: TypeGuardFn<T>, config?: Nullable<TypeGuardFnConfig>): T**
   Validates data using the provided type guard function. If validation fails, it still returns the data as the expected type but logs errors through the config callback.
+
+### Error Configuration
+
+- **TypeGuardFnConfig**
+  ```typescript
+  interface TypeGuardFnConfig {
+    readonly callbackOnError: (errorMessage: string) => void;
+    readonly identifier: string;
+    readonly errorMode?: 'single' | 'multi' | 'json';
+  }
+  ```
 
 ### Primitive Type Guards
 
@@ -939,12 +1156,13 @@ The Guardz ecosystem consists of three complementary packages:
 
 ### 📦 `guardz` (Core)
 
-The foundation package providing comprehensive type guards with structured error handling.
+The foundation package providing comprehensive type guards with detailed error handling and functional programming patterns.
 
 **Features:**
 
 - 60+ built-in type guards
-- Structured error messages
+- Comprehensive error messages with 3 modes (single, multi, json)
+- Functional programming with Higher-Order Functions
 - Custom error handling
 - Zero dependencies
 - Full TypeScript support

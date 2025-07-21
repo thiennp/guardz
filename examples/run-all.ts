@@ -21,6 +21,8 @@ async function runExamples() {
     'utility-types',
     'advanced-features',
     'object-aliases-simple',
+    'multiple-errors-simple',
+    'json-tree-errors-simple',
   ];
 
   for (const example of examples) {

@@ -93,6 +93,12 @@ npx ts-node -r tsconfig-paths/register examples/advanced-features.ts
 
 # Object aliases example
 npx ts-node -r tsconfig-paths/register examples/object-aliases-simple.ts
+
+# Multiple error collection example
+npx ts-node -r tsconfig-paths/register examples/multiple-errors-simple.ts
+
+# JSON tree error format example
+npx ts-node -r tsconfig-paths/register examples/json-tree-errors-simple.ts
 ```
 
 ### Method 2: Run All Examples at Once

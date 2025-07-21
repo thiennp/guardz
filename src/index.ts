@@ -89,6 +89,9 @@ export { isEqualTo } from './typeguards/isEqualTo';
 // Type guard error generation
 export { generateTypeGuardError } from './typeguards/generateTypeGuardError';
 
+// Validation types and utilities (for multi and json error modes)
+export type { ValidationError, ValidationTree, ValidationResult, ValidationContext } from './utils/validationUtils';
+
 // Utility types
 export type { NonEmptyArray } from './types/NonEmptyArray';
 export type { NonEmptyString } from './types/NonEmptyString';

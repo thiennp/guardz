@@ -43,9 +43,8 @@ export function isIntersectionOf<T extends readonly unknown[]>(
     value: unknown,
     config
   ): value is T[number] extends TypeGuardFn<infer U> ? U : never {
-    for (let i = 0; i < typeGuards.length; i++) {
-      const typeGuard = typeGuards[i] as TypeGuardFn<unknown>;
-      if (!typeGuard(value, config)) {
+    for (const typeGuard of typeGuards) {
+      if (!(typeGuard as TypeGuardFn<unknown>)(value, config)) {
         return false;
       }
     }
