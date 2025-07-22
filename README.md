@@ -315,19 +315,34 @@ interface Employee {
   department: string;
 }
 
-type PersonEmployee = Person & Employee;
+interface Manager {
+  teamSize: number;
+  reportsTo: string;
+}
 
 const isPerson = isType<Person>({ name: isString, age: isNumber });
 const isEmployee = isType<Employee>({
   employeeId: isString,
   department: isString,
 });
+const isManager = isType<Manager>({ teamSize: isNumber, reportsTo: isString });
+
+// Single type guard
+const isPersonOnly = isIntersectionOf(isPerson);
+// Type: TypeGuardFn<Person>
+
+// Two type guards - exact intersection type
 const isPersonEmployee = isIntersectionOf(isPerson, isEmployee);
+// Type: TypeGuardFn<Person & Employee>
+
+// Three type guards - exact intersection type
+const isPersonEmployeeManager = isIntersectionOf(isPerson, isEmployee, isManager);
+// Type: TypeGuardFn<Person & Employee & Manager>
 
 const data: unknown = getDataFromSomewhere();
-if (isPersonEmployee(data)) {
-  // data type is narrowed to PersonEmployee
-  console.log(`${data.name} works in ${data.department}`);
+if (isPersonEmployeeManager(data)) {
+  // data type is narrowed to Person & Employee & Manager
+  console.log(`${data.name} manages ${data.teamSize} people in ${data.department}`);
 }
 
 // For inheritance patterns (Interface B extends Interface A)
@@ -1078,7 +1093,7 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 ### Composite Type Guards
 
-- **isIntersectionOf** - Validates a value against multiple type guards (intersection types: `A & B`)
+- **isIntersectionOf** - Validates a value against multiple type guards (intersection types: `A & B`). Supports 1-10 type guards with exact intersection type inference.
 - **isExtensionOf** - Validates inheritance patterns where one type extends another (`interface B extends A`)
 
 ### Nullable/Optional Type Guards
