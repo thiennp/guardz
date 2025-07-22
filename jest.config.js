@@ -30,4 +30,8 @@ module.exports = {
   },
   verbose: true,
   testTimeout: 10000,
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'src/index.ts'
+  ],
 }; 

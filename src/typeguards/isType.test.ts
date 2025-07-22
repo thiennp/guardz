@@ -705,4 +705,235 @@ describe('isType', () => {
       expect(isSimpleUser(nullProtoObject)).toBe(true);
     });
   });
+
+  describe('config edge cases', () => {
+    const isSimpleUser = isType<SimpleUser>({
+      name: isString,
+      age: isNumber,
+    });
+
+    it('should handle null config in multi error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'multi' as const,
+      };
+
+      // Test with null config
+      const result = isSimpleUser({ name: 'John', age: 30 }, null);
+      expect(result).toBe(true);
+
+      // Test with invalid object and null config
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, null);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle undefined config in multi error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'multi' as const,
+      };
+
+      // Test with undefined config
+      const result = isSimpleUser({ name: 'John', age: 30 }, undefined);
+      expect(result).toBe(true);
+
+      // Test with invalid object and undefined config
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, undefined);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle null config in json error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'json' as const,
+      };
+
+      // Test with null config
+      const result = isSimpleUser({ name: 'John', age: 30 }, null);
+      expect(result).toBe(true);
+
+      // Test with invalid object and null config
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, null);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle undefined config in json error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'json' as const,
+      };
+
+      // Test with undefined config
+      const result = isSimpleUser({ name: 'John', age: 30 }, undefined);
+      expect(result).toBe(true);
+
+      // Test with invalid object and undefined config
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, undefined);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle config without identifier in multi error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'test',
+        errorMode: 'multi' as const,
+      };
+
+      const result = isSimpleUser({ name: 'John', age: 30 }, config);
+      expect(result).toBe(true);
+
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle config without identifier in json error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'test',
+        errorMode: 'json' as const,
+      };
+
+      const result = isSimpleUser({ name: 'John', age: 30 }, config);
+      expect(result).toBe(true);
+
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle config with falsy identifier in multi error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: '',
+        errorMode: 'multi' as const,
+      };
+
+      const result = isSimpleUser({ name: 'John', age: 30 }, config);
+      expect(result).toBe(true);
+
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle config with falsy identifier in json error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: '',
+        errorMode: 'json' as const,
+      };
+
+      const result = isSimpleUser({ name: 'John', age: 30 }, config);
+      expect(result).toBe(true);
+
+      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
+      expect(invalidResult).toBe(false);
+    });
+
+
+
+    it('should handle non-object values with null config in multi error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'multi' as const,
+      };
+
+      const result = isSimpleUser('not an object', null);
+      expect(result).toBe(false);
+    });
+
+    it('should handle non-object values with undefined config in json error mode', () => {
+      const config = {
+        callbackOnError: jest.fn(),
+        identifier: 'user',
+        errorMode: 'json' as const,
+      };
+
+      const result = isSimpleUser('not an object', undefined);
+      expect(result).toBe(false);
+    });
+
+    it('should handle nested objects with null config in multi error mode', () => {
+      interface NestedUser {
+        name: string;
+        details: {
+          age: number;
+          email: string;
+        };
+      }
+
+      const isNestedUser = isType<NestedUser>({
+        name: isString,
+        details: isType({
+          age: isNumber,
+          email: isString,
+        }),
+      });
+
+      const validUser = {
+        name: 'John',
+        details: {
+          age: 30,
+          email: 'john@example.com',
+        },
+      };
+
+      const result = isNestedUser(validUser, null);
+      expect(result).toBe(true);
+
+      const invalidUser = {
+        name: 'John',
+        details: {
+          age: '30', // should be number
+          email: 'john@example.com',
+        },
+      };
+
+      const invalidResult = isNestedUser(invalidUser, null);
+      expect(invalidResult).toBe(false);
+    });
+
+    it('should handle nested objects with undefined config in json error mode', () => {
+      interface NestedUser {
+        name: string;
+        details: {
+          age: number;
+          email: string;
+        };
+      }
+
+      const isNestedUser = isType<NestedUser>({
+        name: isString,
+        details: isType({
+          age: isNumber,
+          email: isString,
+        }),
+      });
+
+      const validUser = {
+        name: 'John',
+        details: {
+          age: 30,
+          email: 'john@example.com',
+        },
+      };
+
+      const result = isNestedUser(validUser, undefined);
+      expect(result).toBe(true);
+
+      const invalidUser = {
+        name: 'John',
+        details: {
+          age: '30', // should be number
+          email: 'john@example.com',
+        },
+      };
+
+      const invalidResult = isNestedUser(invalidUser, undefined);
+      expect(invalidResult).toBe(false);
+    });
+  });
 });
