@@ -1,6 +1,6 @@
 {
   "name": "guardz",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "description": "A simple and lightweight TypeScript type guard library for runtime type validation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -44,6 +44,32 @@
     "url": "https://github.com/thiennp/guardz/issues"
   },
   "homepage": "https://github.com/thiennp/guardz#readme",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/thiennp"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/guardz"
+    },
+    {
+      "type": "ko-fi",
+      "url": "https://ko-fi.com/nguyenphongthien"
+    },
+    {
+      "type": "tidelift",
+      "url": "https://tidelift.com/funding/github/npm/guardz"
+    },
+    {
+      "type": "issuehunt",
+      "url": "https://issuehunt.io/r/thiennp/guardz"
+    },
+    {
+      "type": "liberapay",
+      "url": "https://liberapay.com/~1889616"
+    }
+  ],
   "devDependencies": {
     "@types/jest": "^29.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
