@@ -9,7 +9,7 @@ export const createSimplifiedTree = (tree: ValidationTree): Record<string, any> 
   const rootKey = tree.path.split('.').pop() || 'root';
   const result: Record<string, any> = {};
   
-  if (tree.children && Object.keys(tree.children).length > 0) {
+  if (tree.children && Object.keys(tree.children).length) {
     // Object with properties
     const value: Record<string, any> = {};
     Object.entries(tree.children).forEach(([key, childTree]) => {

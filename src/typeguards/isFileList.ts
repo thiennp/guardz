@@ -39,35 +39,9 @@ export const isFileList: TypeGuardFn<FileList> = function (
   config
 ): value is FileList {
   // Check if we're in a browser environment where FileList is available
-  try {
-    // Try to access FileList constructor
-    const FileListConstructor = (globalThis as any).FileList;
-    if (typeof FileListConstructor === 'undefined') {
-      // FileList is not available in this environment (e.g., Node.js)
-      if (config) {
-        config.callbackOnError(
-          generateTypeGuardError(
-            value,
-            config.identifier,
-            'FileList (not available in this environment)'
-          )
-        );
-      }
-      return false;
-    }
-
-    if (!(value instanceof FileListConstructor)) {
-      if (config) {
-        config.callbackOnError(
-          generateTypeGuardError(value, config.identifier, 'FileList')
-        );
-      }
-      return false;
-    }
-
-    return true;
-  } catch {
-    // If accessing FileList fails, it's not available in this environment
+  const FileListConstructor = (globalThis as any).FileList;
+  if (typeof FileListConstructor === 'undefined') {
+    // FileList is not available in this environment (e.g., Node.js)
     if (config) {
       config.callbackOnError(
         generateTypeGuardError(
@@ -79,4 +53,15 @@ export const isFileList: TypeGuardFn<FileList> = function (
     }
     return false;
   }
+
+  if (!(value instanceof FileListConstructor)) {
+    if (config) {
+      config.callbackOnError(
+        generateTypeGuardError(value, config.identifier, 'FileList')
+      );
+    }
+    return false;
+  }
+
+  return true;
 };

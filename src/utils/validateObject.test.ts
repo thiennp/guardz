@@ -156,7 +156,7 @@ describe('validateObject', () => {
         '': isString,
         name: isString,
       };
-      const user = { name: 'John' };
+      const user = { name: 'John', '': 'empty key value' };
 
       const result = validateObject(user, schemaWithEmptyKeys, context);
 
@@ -223,6 +223,23 @@ describe('validateObject', () => {
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
+    });
+
+    it('should handle single property schema to cover remainingKeys.length === 0 branch', () => {
+      const context = createContext('user', 'single');
+      const singlePropertySchema = {
+        name: isString,
+      };
+      const user = {
+        name: 'John',
+      };
+
+      const result = validateObject(user, singlePropertySchema, context);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+      expect(result.tree).toBeDefined();
+      expect(result.tree?.valid).toBe(true);
     });
 
 

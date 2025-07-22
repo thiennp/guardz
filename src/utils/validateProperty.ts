@@ -23,7 +23,7 @@ export const validateProperty = <T>(
   const propertyContext: ValidationContext = {
     path: propertyPath,
     config: context.config || null,
-    ...(context.parentTree !== undefined && { parentTree: context.parentTree })
+    ...(context.parentTree && { parentTree: context.parentTree })
   };
 
   // Unified validation function to avoid duplicate checks

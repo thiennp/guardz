@@ -41,28 +41,31 @@ export const validateObject = <T>(
 
   // Handle single error mode functionally
   const handleSingleErrorMode = (): ValidationResult => {
+    const keys = Object.keys(propsTypesToCheck);
+    
+    // Handle empty schema case
+    if (keys.length === 0) {
+      return createValidationResult(true, [], createTreeNode(context.path, true, 'object', value));
+    }
+    
     const findFirstError = (keys: string[]): ValidationResult => {
-      if (keys.length === 0) {
-        return createValidationResult(true, [], createTreeNode(context.path, true, 'object', value));
-      }
-      
       const [key, ...remainingKeys] = keys;
-      if (!key) {
-        return findFirstError(remainingKeys);
-      }
-      
-      const typeGuard = propsTypesToCheck[key as keyof T];
-      const propertyValue = (value as any)[key];
+      // Object.keys() only returns string keys, so key is guaranteed to be a string
+      const keyStr = key as string;
+      const typeGuard = propsTypesToCheck[keyStr as keyof T];
+      const propertyValue = (value as any)[keyStr];
       
       // Use validateProperty to avoid duplicate validation logic
-      const propertyResult = validateProperty(key, propertyValue, typeGuard, context);
+      const propertyResult = validateProperty(keyStr, propertyValue, typeGuard, context);
       
       return propertyResult.valid 
-        ? findFirstError(remainingKeys)
+        ? (remainingKeys.length === 0 
+            ? createValidationResult(true, [], createTreeNode(context.path, true, 'object', value))
+            : findFirstError(remainingKeys))
         : propertyResult;
     };
     
-    return findFirstError(Object.keys(propsTypesToCheck));
+    return findFirstError(keys);
   };
 
   // Handle multi/json error mode functionally
