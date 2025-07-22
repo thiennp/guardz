@@ -1,7 +1,8 @@
 import { TypeGuardFnConfig } from '../typeguards/isType';
 import { ValidationResult, ValidationTree } from './validationTypes';
 import { createSimplifiedTree } from './createSimplifiedTree';
-import { isDefined, isNil } from 'guardz';
+import { isDefined } from '../typeguards/isDefined';
+import { isNil } from '../typeguards/isNil';
 
 /**
  * Report validation results using functional approach
