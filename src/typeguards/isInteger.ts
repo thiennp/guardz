@@ -1,4 +1,4 @@
-import { Integer } from 'guardz';
+import { Integer } from '../types/Integer';
 import { generateTypeGuardError } from './generateTypeGuardError';
 import { isNumber } from './isNumber';
 import type { TypeGuardFn } from './isType';
