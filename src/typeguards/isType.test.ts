@@ -396,10 +396,12 @@ describe('isType', () => {
 
       expect(result).toBe(false);
       // In JSON tree mode, we get both individual errors and the tree
-      expect(errors.length).toBeGreaterThan(1);
+      expect(errors.length).toBe(1);
+
+      console.log(errors);
       
       // Find the JSON tree error (it will be the last one)
-      const jsonTreeError = errors[errors.length - 1];
+      const jsonTreeError = errors[0];
       const errorTree = JSON.parse(jsonTreeError);
       expect(errorTree).toMatchObject({
         user: {

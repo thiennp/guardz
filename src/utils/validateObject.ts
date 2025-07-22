@@ -52,7 +52,6 @@ export const validateObject = <T>(
       }
       
       const typeGuard = propsTypesToCheck[key as keyof T];
-      const propertyPath = `${context.path}.${key}`;
       const propertyValue = (value as any)[key];
       
       // Use validateProperty to avoid duplicate validation logic

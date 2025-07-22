@@ -1,6 +1,7 @@
 import { TypeGuardFnConfig } from '../typeguards/isType';
-import { ValidationResult } from './validationTypes';
+import { ValidationResult, ValidationTree } from './validationTypes';
 import { createSimplifiedTree } from './createSimplifiedTree';
+import { isDefined, isNil } from 'guardz';
 
 /**
  * Report validation results using functional approach
@@ -11,37 +12,39 @@ export const reportValidationResults = (
   result: ValidationResult, 
   config?: TypeGuardFnConfig | null
 ): void => {
-  const reportJsonMode = () => {
-    result.errors.forEach(error => {
-      config!.callbackOnError(error.message);
-    });
-    const simplifiedTree = createSimplifiedTree(result.tree!);
-    config!.callbackOnError(JSON.stringify(simplifiedTree, null, 2));
-  };
+  if (result.valid === true || isNil(config)) {
+    return;
+  }
+  const errorMode = config.errorMode || 'single';
 
-  const reportMultiMode = () => {
-    result.errors.forEach(error => {
-      config!.callbackOnError(error.message);
-    });
-  };
-
-  const reportSingleMode = () => {
-    const firstError = result.errors[0];
-    if (firstError) {
-      config!.callbackOnError(firstError.message);
+  const reportJsonMode = (config: TypeGuardFnConfig, resultTree: ValidationTree) => {
+    if (isDefined(resultTree)) {
+      config.callbackOnError(JSON.stringify(createSimplifiedTree(resultTree), null, 2));
     }
   };
 
-  // Use functional composition to determine reporting strategy
-  const shouldReport = result.valid === false && config !== null;
-  
-  shouldReport && (() => {
-    const errorMode = config!.errorMode || 'single';
-    
-    return errorMode === 'json' && result.tree
-      ? reportJsonMode()
-      : errorMode === 'multi'
-      ? reportMultiMode()
-      : reportSingleMode();
-  })();
-}; 
+  const reportMultiMode = (config: TypeGuardFnConfig) => {
+    if (result.errors && Array.isArray(result.errors)) {
+      result.errors.forEach(error => {
+        config.callbackOnError(error.message);
+      });
+    }
+  };
+
+  const reportSingleMode = (config: TypeGuardFnConfig) => {
+    if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+      const firstError = result.errors[0];
+      if (firstError) {
+        config.callbackOnError(firstError.message);
+      }
+    }
+  };
+
+  if (errorMode === 'json' && isDefined(result.tree)) {
+    reportJsonMode(config, result.tree);
+  } else if (errorMode === 'multi') {
+    reportMultiMode(config);
+  } else {
+    reportSingleMode(config);
+  }
+};
