@@ -41,7 +41,7 @@ import type { TypeGuardFn } from './isType';
  */
 export function isExtensionOf<T extends U, U>(
   baseTypeGuard: TypeGuardFn<U>,
-  extendedTypeGuard: TypeGuardFn<T>
+  extendedTypeGuard: TypeGuardFn<Omit<T, keyof U>>
 ): TypeGuardFn<T> {
   return function (value: unknown, config): value is T {
     // First check if it satisfies the base type
