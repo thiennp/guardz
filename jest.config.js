@@ -35,4 +35,8 @@ module.exports = {
     '/node_modules/',
     'src/index.ts'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/benchmarks/'
+  ],
 }; 
