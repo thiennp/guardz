@@ -15,6 +15,7 @@
 ## 📋 Table of Contents
 
 - [🚀 Quick Start](#-quick-start)
+- [🔧 Creating Custom Guards](#-creating-custom-guards)
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
 - [🎯 Core Concepts](#-core-concepts)
@@ -22,6 +23,7 @@
 - [🔧 API Reference](#-api-reference)
 - [⚡ Performance](#-performance)
 - [🌐 Ecosystem](#-ecosystem)
+- [🎯 For Best Results: Use guardz-generator](#-for-best-results-use-guardz-generator)
 - [🤝 Contributing](#-contributing)
 
 ---
@@ -61,6 +63,33 @@ const invalidData = { name: 'John', age: '30' }; // age should be number
 isUser(invalidData, config);
 // errors: ['Expected user.age ("30") to be "number"']
 ```
+
+---
+
+## 🔧 **Creating Custom Guards**
+
+For most use cases, we recommend using `guardz-generator` to automatically generate type guards from your TypeScript interfaces. However, when you need custom validation logic or are working with third-party types, you can create custom guards.
+
+**When to create custom guards:**
+- ✅ You need custom validation logic beyond type checking
+- ✅ You're working with third-party types that can't be generated
+- ✅ You need performance optimizations for specific use cases
+- ✅ You want to add business logic validation
+
+**Basic pattern:**
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+export function isCustomType(value: unknown): value is CustomType {
+  return isType<CustomType>({
+    // Define your validation schema here
+    id: isNumber,
+    name: isString,
+  })(value);
+}
+```
+
+See the [Examples](#-examples) section for more detailed patterns including recursive types.
 
 ---
 
@@ -286,6 +315,52 @@ const isEntity = isType({
   status: isStatus,
   name: isString,
 });
+```
+
+### **Custom Guards**
+
+```typescript
+import { isType, isString, isNumber, isBoolean, type TypeGuardFnConfig } from 'guardz';
+
+// Simple custom guard
+export function isUser(value: unknown, config: TypeGuardFnConfig): value is User {
+  return isType<User>({
+    id: isNumber,
+    name: isString,
+    email: isString,
+    isActive: isBoolean,
+  })(value, config);
+}
+
+// With optional fields
+export function isProfile(value: unknown, config: TypeGuardFnConfig): value is Profile {
+  return isType<Profile>({
+    name: isString,
+    age: isNumber,
+    bio: isUndefinedOr(isString), // Optional field
+  })(value, config);
+}
+```
+
+### **Recursive Types**
+
+```typescript
+import { isType, isString, isNumber, isUndefinedOr, isArrayWithEachItem, type TypeGuardFnConfig } from 'guardz';
+
+// Simple recursive type
+interface Comment {
+  id: number;
+  text: string;
+  replies?: Comment[]; // Optional recursive array
+}
+
+export function isComment(value: unknown, config: TypeGuardFnConfig): value is Comment {
+  return isType<Comment>({
+    id: isNumber,
+    text: isString,
+    replies: isUndefinedOr(isArrayWithEachItem(isComment)),
+  })(value, config);
+}
 ```
 
 ### **Error Handling with Configuration**
@@ -649,6 +724,55 @@ Automatically generate type guards from TypeScript interfaces.
 
 ```bash
 npm install guardz-generator
+```
+
+---
+
+## 🎯 **For Best Results: Use guardz-generator**
+
+**💡 Pro Tip:** For the best developer experience, use `guardz-generator` to automatically generate type guards from your TypeScript interfaces. This ensures perfect type safety and eliminates manual guard creation.
+
+```bash
+npm install guardz-generator
+```
+
+**Why use guardz-generator?**
+- ✅ **Automatic generation** from TypeScript interfaces
+- ✅ **Perfect type safety** - no manual type mapping
+- ✅ **Handles complex types** including unions, intersections, and generics
+- ✅ **Supports recursive types** with proper circular reference handling
+- ✅ **Zero configuration** - works out of the box
+- ✅ **Framework agnostic** - generates guards for any TypeScript project
+
+**Example with guardz-generator:**
+```typescript
+// Your TypeScript interface
+interface Employee {
+  id: number;
+  name: string;
+  manager?: Employee; // Recursive reference
+  subordinates: Employee[];
+}
+
+// Generated automatically by guardz-generator
+const isEmployee = isType<Employee>({
+  id: isNumber,
+  name: isString,
+  manager: isUndefinedOr(isEmployee), // Handles optional recursive reference
+  subordinates: isArrayWithEachItem(isEmployee), // Handles array of recursive references
+});
+```
+
+**Get started with guardz-generator:**
+```bash
+# Install the generator
+npm install guardz-generator
+
+# Generate guards from your TypeScript files
+npx guardz-generator src/types/*.ts --output src/guards/
+
+# Use the generated guards
+import { isEmployee } from './guards/employee.guard';
 ```
 
 ---
