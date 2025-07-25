@@ -324,7 +324,7 @@ describe('validationUtils', () => {
       const result = Validation.object(object, schema, context);
       
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
+      expect(result.errors).toHaveLength(2); // Both errors in multi mode (default)
     });
 
     it('should create and report validation results', () => {

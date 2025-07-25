@@ -5,16 +5,16 @@
 [![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/thiennp?style=flat)](https://github.com/sponsors/thiennp)
 
-A powerful TypeScript type guard library with **structured error handling** for runtime type validation.
+**The easiest way to add runtime type safety to your TypeScript projects.**
 
-> **Runtime type guards with detailed error messages — not just validation, but actionable feedback.**
+> **Lightweight, zero-dependency type guards that just work — no complex schemas, no heavy dependencies.**
 
-- ✅ **Structured Error Messages** - Know exactly what failed and why
-- ✅ Zero transformation  
-- ✅ Fully type-safe  
-- ✅ Human-readable guards  
-- ✅ Tiny and dependency-free
-- ✅ **Custom Error Handling** - Integrate with your logging and monitoring  
+- 🚀 **Super Simple** - Just import and use, no setup required
+- 📦 **Tiny & Fast** - Zero dependencies, minimal bundle size
+- 🎯 **Type-Safe** - Full TypeScript support with perfect type inference
+- 🛡️ **Structured Errors** - Know exactly what failed and why
+- 🔧 **Flexible** - Works with your existing code, no refactoring needed
+- 🌐 **Ecosystem** - Extends to event handling, HTTP clients, and code generation  
 
 ---
 
@@ -43,6 +43,7 @@ const errors: string[] = [];
 const config = {
   identifier: 'user',
   callbackOnError: (error: string) => errors.push(error),
+  // errorMode: 'multi' (default) - collects all errors in a single message
 };
 
 const isUser = isType({ name: isString, age: isNumber });
@@ -60,6 +61,278 @@ Expected user.age ("30") to be "number"
 Guardz tracks errors even in deeply nested structures, using dot/bracket notation for property paths:
 - `Expected user.details.age ("thirty") to be "number"`
 - `Expected users[2].email (123) to be "string"`
+
+### 🎯 **Default Multi-Mode Behavior**
+
+Guardz uses **multi mode as the default** for better user experience and easier error detection:
+
+```typescript
+// By default, all validation errors are combined into a single message
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => console.log(error),
+  // errorMode: 'multi' (default)
+};
+
+const invalidUser = { 
+  name: 123,        // should be string
+  age: '30',        // should be number
+  isActive: 'yes'   // should be boolean
+};
+
+isUser(invalidUser, config);
+// Output: "Expected user.name (123) to be "string"; Expected user.age ("30") to be "number"; Expected user.isActive ("yes") to be "boolean""
+```
+
+**Benefits of Default Multi Mode:**
+- 🚀 **Better UX** - Users see all validation issues at once
+- 🔍 **Easier Debugging** - Complete picture of what needs to be fixed
+- 📝 **Cleaner Logs** - Single error message instead of multiple callbacks
+- 🎯 **Consistent Behavior** - No confusion about "first error only"
+- ⚡ **Easy Detection** - All errors in one place for quick identification
+
+### 🎯 **JSON Tree Error Feedback (Advanced)**
+
+Guardz provides **structured JSON tree feedback** for comprehensive error analysis and debugging. This is especially powerful for complex nested objects and integration with monitoring systems. Unlike other modes, JSON tree shows **both valid and invalid branches**, making it perfect for analyzing complex DTOs with related fields.
+
+#### **Basic JSON Tree Example**
+
+```typescript
+import { isType, isString, isNumber, isBoolean } from 'guardz';
+
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+  errorMode: 'json' as const, // Enable JSON tree mode
+};
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  isActive: boolean;
+}
+
+const isUser = isType<User>({
+  id: isNumber,
+  name: isString,
+  email: isString,
+  isActive: isBoolean,
+});
+
+const invalidUser = {
+  id: '1', // should be number
+  name: 123, // should be string
+  email: true, // should be string
+  isActive: 'yes', // should be boolean
+};
+
+const result = isUser(invalidUser, config);
+
+// errors[0] contains the JSON tree:
+console.log(errors[0]);
+```
+
+**Output:**
+```json
+{
+  "user": {
+    "valid": false,
+    "value": {
+      "id": {
+        "valid": false,
+        "value": "1",
+        "expectedType": "number"
+      },
+      "name": {
+        "valid": false,
+        "value": 123,
+        "expectedType": "string"
+      },
+      "email": {
+        "valid": false,
+        "value": true,
+        "expectedType": "string"
+      },
+      "isActive": {
+        "valid": false,
+        "value": "yes",
+        "expectedType": "boolean"
+      }
+    }
+  }
+}
+```
+
+#### **Nested Object JSON Tree Example**
+
+```typescript
+import { isSchema, isString, isNumber, isBoolean } from 'guardz';
+
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+  errorMode: 'json' as const,
+};
+
+interface NestedUser {
+  name: string;
+  profile: {
+    age: number;
+    email: string;
+  };
+  settings: {
+    notifications: boolean;
+  };
+}
+
+const isNestedUser = isSchema<NestedUser>({
+  name: isString,
+  profile: {
+    age: isNumber,
+    email: isString,
+  },
+  settings: {
+    notifications: isBoolean,
+  },
+});
+
+const invalidUser = {
+  name: 123, // should be string
+  profile: {
+    age: '25', // should be number
+    email: true, // should be string
+  },
+  settings: {
+    notifications: 'yes', // should be boolean
+  },
+};
+
+const result = isNestedUser(invalidUser, config);
+```
+
+**Output:**
+```json
+{
+  "user": {
+    "valid": false,
+    "value": {
+      "name": {
+        "valid": false,
+        "value": 123,
+        "expectedType": "string"
+      },
+      "profile": {
+        "valid": false,
+        "value": {
+          "age": "25",
+          "email": true
+        },
+        "expectedType": "object"
+      },
+      "settings": {
+        "valid": false,
+        "value": {
+          "notifications": "yes"
+        },
+        "expectedType": "object"
+      }
+    }
+  }
+}
+```
+
+#### **Error Mode Configuration**
+
+Guardz supports three error modes with **multi mode as the default** for better user experience and easier error detection:
+
+```typescript
+// Multi error mode (default) - collects all errors in a single message
+const multiConfig = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  // errorMode: 'multi' (default)
+};
+
+// Single error mode - stops at first error (explicit)
+const singleConfig = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  errorMode: 'single' as const,
+};
+
+// JSON tree mode - provides structured JSON feedback
+const jsonConfig = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  errorMode: 'json' as const,
+};
+```
+
+> **💡 Performance Note:** Single mode is fastest (fails fast), multi mode balances performance and usability, while JSON tree mode provides the most comprehensive analysis but has higher overhead.
+
+#### **Integration with Monitoring Systems**
+
+JSON tree feedback is perfect for integration with error monitoring and logging systems:
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+const config = {
+  identifier: 'api_response',
+  callbackOnError: (error: string) => {
+    // Send to monitoring system
+    monitoringService.captureError({
+      type: 'validation_error',
+      data: JSON.parse(error), // Parse JSON tree
+      timestamp: new Date().toISOString(),
+    });
+  },
+  errorMode: 'json' as const,
+};
+
+const isApiResponse = isType({
+  status: isString,
+  data: isType({
+    id: isNumber,
+    name: isString,
+  }),
+});
+
+// Invalid API response
+const invalidResponse = {
+  status: 200, // should be string
+  data: {
+    id: '123', // should be number
+    name: 456, // should be string
+  },
+};
+
+const result = isApiResponse(invalidResponse, config);
+```
+
+#### **Template Literal Format**
+
+The JSON tree is formatted as a template literal for easy debugging and logging:
+
+```typescript
+const jsonTreeError = errors[0];
+const errorTree = JSON.parse(jsonTreeError);
+
+// Access specific validation results
+console.log('Root valid:', errorTree.user.valid);
+console.log('Name field valid:', errorTree.user.value.name.valid);
+console.log('Expected type for age:', errorTree.user.value.age.expectedType);
+```
+
+**Key Benefits of JSON Tree Feedback:**
+- 🎯 **Structured Analysis** - Complete validation state in JSON format
+- 🔍 **Deep Inspection** - See exactly which nested fields failed
+- 📊 **Monitoring Integration** - Perfect for error tracking systems
+- 🐛 **Debugging** - Clear visualization of validation failures
+- 🔧 **Programmatic Access** - Parse and process validation results
 
 ---
 
@@ -95,7 +368,7 @@ Your support helps maintain and improve Guardz for the TypeScript community! ❤
 Guardz is more than just a type guard library - it's a complete ecosystem for runtime type safety in TypeScript applications.
 
 ### Core Package: `guardz`
-The foundation of the ecosystem, providing comprehensive type guards with structured error handling.
+The foundation of the ecosystem, providing **lightweight, zero-dependency type guards** with structured error handling.
 
 ### HTTP Client: `guardz-axios`
 Type-safe HTTP requests with runtime validation built on top of Axios.
@@ -168,7 +441,66 @@ npm install guardz
 yarn add guardz
 ```
 
-## Usage
+> **💡 Ecosystem Tip**: Guardz is part of a larger ecosystem including `guardz-event` for safe event handling, `guardz-axios` for type-safe HTTP clients, and `guardz-generator` for automatic type guard generation. See the [Ecosystem Packages](#-ecosystem-packages) section below.
+
+### 📦 **Bundle Size & Performance**
+
+Guardz is **incredibly lightweight**:
+
+- **Bundle Size**: ~1.7KB gzipped (~11.7KB uncompressed)
+- **Dependencies**: Zero (pure TypeScript)
+- **Tree-shakeable**: Only import what you use
+- **Runtime Performance**: Minimal overhead
+
+```bash
+# Check bundle size
+npm install --save-dev bundle-analyzer
+npx bundle-analyzer dist/index.js
+```
+
+## 🚀 Getting Started (It's Super Simple!)
+
+Guardz is designed to be **incredibly easy to use**. If you know TypeScript, you already know Guardz.
+
+### **Quick Start - 30 Seconds**
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+// That's it! You're ready to go.
+const isUser = isType({
+  name: isString,
+  age: isNumber,
+});
+
+const data: unknown = { name: 'John', age: 30 };
+if (isUser(data)) {
+  // TypeScript knows this is safe
+  console.log(data.name.toUpperCase()); // ✅ Works
+  console.log(data.age.toFixed(2));     // ✅ Works
+}
+```
+
+### **Why It's So Easy**
+
+- 🎯 **No Setup Required** - Just import and use
+- 📚 **Familiar Syntax** - Works exactly like TypeScript types
+- 🔧 **Zero Configuration** - No complex schemas or setup
+- ⚡ **Instant Results** - Start validating immediately
+
+### **Why Guardz?**
+
+**Guardz is designed for simplicity and zero friction:**
+
+- 🚀 **Zero Setup** - Just import and use, no schema definitions required
+- 📦 **Ultra Lightweight** - Zero dependencies, minimal bundle impact
+- 🎯 **TypeScript Native** - Works directly with your existing types
+- 🔧 **Drop-in Ready** - No refactoring needed, works with existing code
+- 📚 **Familiar Syntax** - If you know TypeScript, you already know Guardz
+
+**Perfect for projects that need runtime type safety without the complexity of schema validators.**
+
+## 📖 Examples & Patterns
 
 ### Basic Type Guards
 
@@ -453,7 +785,7 @@ if (isUndefinedOr(isNullOr(isString))(data)) { // data type is narrowed to strin
 
 ### Complex Nested Type Guards
 
-Create type guards for deeply nested structures:
+Create type guards for deeply nested structures using the traditional `isType` approach:
 
 ```typescript
 import { isUndefinedOr, isString, isEnum, isEqualTo, isNumber, isOneOfTypes, isArrayWithEachItem, isType } from 'guardz';
@@ -503,6 +835,67 @@ if (isBook(data)) { // data type is narrowed to Book
   return data;
 }
 ```
+
+### Simplified Nested Type Guards with `isSchema`
+
+The new `isSchema` function provides a more concise way to handle nested structures:
+
+```typescript
+import { isSchema, isString, isEnum, isEqualTo, isNumber, isOneOfTypes, isArrayWithEachItem } from 'guardz';
+
+enum PriceTypeEnum {
+  FREE = 'free',
+  PAID = 'paid'
+}
+
+type Book = {
+  title: string;
+  price: PriceTypeEnum,
+  author: {
+    name: string;
+    email?: string;
+  };
+  chapters: Array<{
+    content: string;
+    startPage: number;
+  }>;
+  rating: Array<{
+    userId: string;
+    average: number | 'N/A';
+  }>
+}
+
+const data: unknown = getDataFromSomewhere()
+
+// More concise with isSchema - no need for explicit isType calls
+const isBook = isSchema<Book>({
+  title: isString,
+  price: isEnum(PriceTypeEnum),
+  author: {
+    name: isString,
+    email: isUndefinedOr(isString),
+  },
+  chapters: [{
+    content: isString,
+    startPage: isNumber,
+  }],
+  rating: [{
+    userId: isString,
+    average: isOneOfTypes<number | 'N/A'>(isNumber, isEqualTo('N/A'))
+  }],
+})
+
+if (isBook(data)) { // data type is narrowed to Book
+  return data;
+}
+```
+
+**Key benefits of `isSchema`:**
+- **More concise**: No need for explicit `isType` calls for nested objects
+- **Better readability**: Inline object definitions are more intuitive
+- **Backward compatible**: Works with existing type guards
+- **Same validation**: Produces identical validation results to `isType`
+- **Multiple aliases**: Available as `isSchema`, `isShape`, and `isNestedType` for flexibility
 
 ### When to Use Generic Type Guards
 
@@ -869,6 +1262,15 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 - **isType<T>(propsTypesToCheck: { [P in keyof T]: TypeGuardFn<T[P]> }): TypeGuardFn<T>**
   Creates a type guard function for a specific object shape `T`. It checks if a value is a non-null object and verifies that each property specified in `propsTypesToCheck` conforms to its corresponding type guard function.
 
+- **isSchema<T>(schema: any): TypeGuardFn<T>**
+  Creates a type guard function for object schemas with improved nested type support. Automatically handles nested type guards without requiring explicit `isType` calls for each level. Supports both inline object definitions and existing type guards.
+
+- **isShape<T>(schema: any): TypeGuardFn<T>**
+  Alias for `isSchema` - creates a type guard function for object shapes.
+
+- **isNestedType<T>(schema: any): TypeGuardFn<T>**
+  Alias for `isSchema` - creates a type guard function for nested object structures.
+
 - **guardWithTolerance<T>(data: unknown, typeGuardFn: TypeGuardFn<T>, config?: Nullable<TypeGuardFnConfig>): T**
   Validates data using the provided type guard function. If validation fails, it still returns the data as the expected type but logs errors through the config callback.
 
@@ -958,6 +1360,152 @@ Below is a comprehensive list of all type guards provided by `guardz`.
 
 - **generateTypeGuardError** - Generates standardized error messages for type guard failures with configurable formatting
 
+### Configuration and Error Modes
+
+Guardz provides flexible configuration options for error handling through the `TypeGuardFnConfig` interface:
+
+```typescript
+interface TypeGuardFnConfig {
+  callbackOnError: (error: string) => void;
+  identifier?: string;
+  errorMode?: 'single' | 'multi' | 'json';
+}
+```
+
+#### **Configuration Options**
+
+- **`callbackOnError`** (required): Function called when validation errors occur
+- **`identifier`** (optional): Prefix for error messages (e.g., 'user', 'api_response')
+- **`errorMode`** (optional): Controls how errors are collected and formatted
+
+#### **Error Modes**
+
+##### **Multi Error Mode (default)**
+Collects all validation errors in a single combined message - this is the **default behavior** for better user experience and easier error detection:
+
+```typescript
+const config = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  // errorMode: 'multi' (default)
+};
+
+// All errors are reported in a single combined message
+// Output: "Expected user.name (123) to be "string"; Expected user.age ("30") to be "number""
+```
+
+**Best for:** General validation, user feedback, and debugging scenarios where you want to see all issues at once.
+
+##### **Single Error Mode**
+Stops validation at the first error encountered (must be explicitly specified):
+
+```typescript
+const config = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  errorMode: 'single' as const,
+};
+
+// Only the first error is reported
+// Output: "Expected user.name (123) to be "string""
+```
+
+**Best for:** Performance-critical scenarios where you want to fail fast and avoid unnecessary validation overhead.
+
+##### **JSON Tree Mode**
+Provides structured JSON feedback for comprehensive error analysis:
+
+```typescript
+const config = {
+  callbackOnError: (error: string) => console.log(error),
+  identifier: 'user',
+  errorMode: 'json' as const,
+};
+
+// Output: Structured JSON tree with complete validation state
+// {
+//   "user": {
+//     "valid": false,
+//     "value": {
+//       "name": {
+//         "valid": false,
+//         "value": 123,
+//         "expectedType": "string"
+//       }
+//     }
+//   }
+// }
+```
+
+**Best for:** Complex DTOs with related fields, monitoring systems, and scenarios where you need to see both valid and invalid branches for comprehensive analysis.
+
+#### **Performance Considerations & When to Use Each Mode**
+
+**🚀 Performance Comparison:**
+- **Single Mode**: Fastest - stops at first error, minimal validation overhead
+- **Multi Mode**: Moderate - validates all fields, combines errors efficiently  
+- **JSON Tree Mode**: Most overhead - builds complete validation tree with all branches
+
+**📋 Usage Guidelines:**
+
+| Mode | Use When | Performance | Use Case |
+|------|----------|-------------|----------|
+| **Multi (Default)** | General validation, user feedback | Moderate | Most scenarios, debugging, form validation |
+| **Single** | Performance-critical, fail-fast | Fastest | API validation, real-time validation, high-frequency operations |
+| **JSON Tree** | Complex analysis, monitoring | Highest overhead | Complex DTOs, error tracking systems, debugging complex structures |
+
+**💡 Pro Tips:**
+- **Start with multi mode** (default) - it's the best balance of performance and usability
+- **Use single mode** for high-frequency validation or when you only need to know if something is valid
+- **Use JSON tree mode** when you need to analyze complex validation failures or integrate with monitoring systems
+
+#### **Usage Examples**
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+// Basic error handling (defaults to multi mode)
+const errors: string[] = [];
+const basicConfig = {
+  callbackOnError: (error: string) => errors.push(error),
+  identifier: 'user',
+};
+
+// Single error mode
+const singleErrors: string[] = [];
+const singleConfig = {
+  callbackOnError: (error: string) => singleErrors.push(error),
+  identifier: 'user',
+  errorMode: 'single' as const,
+};
+
+// JSON tree for monitoring
+const jsonConfig = {
+  callbackOnError: (error: string) => {
+    const errorTree = JSON.parse(error);
+    monitoringService.captureError({
+      type: 'validation_error',
+      data: errorTree,
+      timestamp: new Date().toISOString(),
+    });
+  },
+  identifier: 'api_response',
+  errorMode: 'json' as const,
+};
+
+const isUser = isType({
+  name: isString,
+  age: isNumber,
+});
+
+// Use different configs for different scenarios
+const invalidUser = { name: 123, age: '30' };
+
+isUser(invalidUser, basicConfig);    // Combined errors (default)
+isUser(invalidUser, singleConfig);   // Single error only
+isUser(invalidUser, jsonConfig);     // JSON tree
+```
+
 ### Utility Types
 
 - **NonEmptyArray<T>** - Type for non-empty arrays
@@ -1017,7 +1565,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🛠️ Ecosystem Packages
 
-The Guardz ecosystem consists of three complementary packages:
+The Guardz ecosystem consists of four complementary packages:
 
 ### 📦 `guardz` (Core)
 The foundation package providing comprehensive type guards with structured error handling.
@@ -1028,6 +1576,35 @@ The foundation package providing comprehensive type guards with structured error
 - Custom error handling
 - Zero dependencies
 - Full TypeScript support
+
+### 🎯 `guardz-event`
+Safe event handling library with type validation, security checks, and error handling.
+
+**Features:**
+- Type-safe event handlers for browser events
+- Multiple ergonomic APIs (onEvent, onMessage, safeHandler)
+- Security features (origin validation, source validation)
+- Tolerance mode for graceful degradation
+- Built on top of guardz for robust runtime validation
+
+**Quick Start:**
+```typescript
+import { onMessage, safeHandler } from 'guardz-event';
+
+const isChatMessage = (data: unknown): data is { text: string; userId: string } => {
+  return typeof data === 'object' && data !== null && 
+         typeof (data as any).text === 'string' && 
+         typeof (data as any).userId === 'string';
+};
+
+// Simple usage
+window.addEventListener('message', onMessage(isChatMessage, {
+  onSuccess: (data) => console.log('Received:', data.text),
+  onError: (error) => console.error('Error:', error)
+}));
+```
+
+**[📖 Read the full documentation →](https://github.com/thiennp/guardz/tree/main/guardz-event)**
 
 ### 🌐 `guardz-axios`
 Type-safe HTTP client with runtime validation built on top of Axios.
@@ -1052,6 +1629,25 @@ Automatically generate type guards from TypeScript interfaces and type aliases.
 - CLI and programmatic APIs
 
 **[📖 Read the full documentation →](https://github.com/thiennp/guardz/tree/main/guardz-generator)**
+
+## 🎯 **Ready to Get Started?**
+
+Guardz makes runtime type safety **incredibly simple**. No complex setup, no heavy dependencies, just pure TypeScript goodness.
+
+```typescript
+import { isType, isString, isNumber } from 'guardz';
+
+// That's literally it. You're ready to go.
+const isUser = isType({ name: isString, age: isNumber });
+```
+
+**Why developers love Guardz:**
+- 🚀 **Zero friction** - Works immediately, no configuration needed
+- 📦 **Ultra lightweight** - ~1.7KB gzipped, zero dependencies
+- 🎯 **TypeScript native** - No generated types, no complex schemas
+- 🔧 **Drop-in ready** - Works with your existing code
+- 🛡️ **Smart defaults** - Multi-mode error handling for better UX out of the box
+- ⚡ **Performance optimized** - Choose the right error mode for your use case
 
 ## Support
 

@@ -5,6 +5,9 @@ export {
   type TypeGuardFnConfig,
 } from './typeguards/isType';
 
+// Schema-based type guard functions
+export { isSchema, isShape, isNestedType } from './typeguards/isSchema';
+
 // Object type guard aliases
 export { isObjectWith } from './typeguards/isObjectWith';
 export { isObject } from './typeguards/isObject';

@@ -50,7 +50,10 @@ export const validateProperty = <T>(
 
   // Use functional approach to handle nested vs regular type guards
   const validateNestedTypeGuard = () => {
-    const nestedConfig = context.config ? {
+    // In multi mode, don't pass config to avoid duplicate error reporting
+    // Let the validation utils handle all error reporting
+    const errorMode = context.config?.errorMode || 'multi';
+    const nestedConfig = (context.config && errorMode !== 'multi') ? {
       ...context.config,
       identifier: propertyPath
     } : null;
@@ -59,7 +62,8 @@ export const validateProperty = <T>(
   };
 
   const validateRegularTypeGuard = () => {
-    return validateWithConfig(null); // Don't pass config to avoid duplicate callbacks
+    // Don't pass config to avoid duplicate callbacks when using validation utils
+    return validateWithConfig(null);
   };
 
   // Use functional composition to determine validation strategy

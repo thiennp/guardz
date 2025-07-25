@@ -33,7 +33,7 @@ export const validateObject = <T>(
     treeNode.errors = [error];
     
     // For JSON mode, don't include the error in the result.errors array
-    const errorMode = context.config?.errorMode || 'single';
+    const errorMode = context.config?.errorMode || 'multi';
     return errorMode === 'json' 
       ? createValidationResult(false, [], treeNode)
       : createValidationResult(false, [error], treeNode);
@@ -93,7 +93,7 @@ export const validateObject = <T>(
   return !isNonNullObject(value, null)
     ? handleNonObjectValue()
     : (() => {
-        const errorMode = context.config?.errorMode || 'single';
+        const errorMode = context.config?.errorMode || 'multi';
         return errorMode === 'single' 
           ? handleSingleErrorMode()
           : handleMultiJsonMode();

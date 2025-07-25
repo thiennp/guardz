@@ -16,7 +16,7 @@ export const reportValidationResults = (
   if (result.valid === true || isNil(config)) {
     return;
   }
-  const errorMode = config.errorMode || 'single';
+  const errorMode = config.errorMode || 'multi';
 
   const reportJsonMode = (config: TypeGuardFnConfig, resultTree: ValidationTree) => {
     if (isDefined(resultTree)) {
@@ -26,9 +26,9 @@ export const reportValidationResults = (
 
   const reportMultiMode = (config: TypeGuardFnConfig) => {
     if (result.errors && Array.isArray(result.errors)) {
-      result.errors.forEach(error => {
-        config.callbackOnError(error.message);
-      });
+      const errorMessages = result.errors.map(error => error.message);
+      const combinedMessage = errorMessages.join('; ');
+      config.callbackOnError(combinedMessage);
     }
   };
 

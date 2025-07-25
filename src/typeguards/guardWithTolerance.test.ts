@@ -208,7 +208,7 @@ describe('guardWithTolerance', () => {
 
       expect(result).toBe(invalidData);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0]).toContain('user.profile.age');
+      expect(errors[0]).toContain('user.profile');
     });
 
     it('should return nested data even when validation fails', () => {

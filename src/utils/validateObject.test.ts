@@ -499,8 +499,8 @@ describe('validateObject', () => {
     });
   });
 
-  describe('default error mode (single)', () => {
-    it('should default to single error mode when not specified', () => {
+  describe('default error mode (multi)', () => {
+    it('should default to multi error mode when not specified', () => {
       const context = createContext('user'); // no errorMode specified
       const invalidUser = {
         name: 123, // should be string
@@ -512,10 +512,10 @@ describe('validateObject', () => {
       const result = validateObject(invalidUser, testSchema, context);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1); // Only first error in single mode
+      expect(result.errors).toHaveLength(4); // All errors in multi mode
     });
 
-    it('should default to single error mode when config is null', () => {
+    it('should default to multi error mode when config is null', () => {
       const context: ValidationContext = {
         path: 'user',
         config: null,
@@ -523,12 +523,14 @@ describe('validateObject', () => {
       const invalidUser = {
         name: 123, // should be string
         age: '30', // should be number
+        isActive: undefined, // missing required property
+        tags: undefined, // missing required property
       };
 
       const result = validateObject(invalidUser, testSchema, context);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1); // Only first error in single mode
+      expect(result.errors).toHaveLength(4); // All errors in multi mode
     });
   });
 

@@ -172,12 +172,13 @@ describe('isObject', () => {
 
     isUser(invalidUser, config);
 
-    // Should collect all errors, not just the first one
-    // Note: In the current implementation, we get both individual errors and the JSON tree
-    expect(errors.length).toBeGreaterThanOrEqual(4);
-    expect(errors).toContain('Expected user.id ("1") to be "number"');
-    expect(errors).toContain('Expected user.name (123) to be "string"');
-    expect(errors).toContain('Expected user.email (true) to be "string"');
-    expect(errors).toContain('Expected user.isActive ("yes") to be "boolean"');
+    // Should collect all errors in a single message separated by semicolons
+    expect(errors.length).toBe(1);
+    const combinedError = errors[0];
+    expect(combinedError).toContain('Expected user.id ("1") to be "number"');
+    expect(combinedError).toContain('Expected user.name (123) to be "string"');
+    expect(combinedError).toContain('Expected user.email (true) to be "string"');
+    expect(combinedError).toContain('Expected user.isActive ("yes") to be "boolean"');
+    expect(combinedError).toMatch(/; /); // Should contain semicolon separators
   });
 }); 

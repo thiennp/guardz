@@ -33,7 +33,7 @@ export function isType<T>(propsTypesToCheck: {
   [P in keyof T]: TypeGuardFn<T[P]>;
 }): TypeGuardFn<T> {
   return function (value, config): value is T {
-    const errorMode = config?.errorMode || 'single';
+    const errorMode = config?.errorMode || 'multi';
     
     // For multi or json modes, use the validation utils
     if (errorMode === 'multi' || errorMode === 'json') {

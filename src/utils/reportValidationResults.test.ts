@@ -64,7 +64,7 @@ describe('reportValidationResults', () => {
     });
   });
 
-  describe('Single error mode (default)', () => {
+  describe('Single error mode (explicit)', () => {
     it('should report only the first error in single mode', () => {
       const result: ValidationResult = {
         valid: false,
@@ -74,7 +74,13 @@ describe('reportValidationResults', () => {
         ],
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
       expect(mockCallback).toHaveBeenCalledWith('Name must be a string');
@@ -86,28 +92,15 @@ describe('reportValidationResults', () => {
         errors: [],
       };
 
-      reportValidationResults(result, config);
-
-      expect(mockCallback).not.toHaveBeenCalled();
-    });
-
-    it('should use single mode when errorMode is not specified', () => {
-      const result: ValidationResult = {
-        valid: false,
-        errors: [
-          { path: 'test', expectedType: 'string', actualValue: 123, message: 'Test error' },
-        ],
-      };
-
-      const configWithoutErrorMode: TypeGuardFnConfig = {
+      const singleModeConfig: TypeGuardFnConfig = {
         callbackOnError: mockCallback,
         identifier: 'testValue',
+        errorMode: 'single',
       };
 
-      reportValidationResults(result, configWithoutErrorMode);
+      reportValidationResults(result, singleModeConfig);
 
-      expect(mockCallback).toHaveBeenCalledTimes(1);
-      expect(mockCallback).toHaveBeenCalledWith('Test error');
+      expect(mockCallback).not.toHaveBeenCalled();
     });
 
     it('should explicitly use single mode', () => {
@@ -131,8 +124,30 @@ describe('reportValidationResults', () => {
     });
   });
 
-  describe('Multi error mode', () => {
-    it('should report all errors in multi mode', () => {
+  describe('Default error mode (multi)', () => {
+    it('should use multi mode when errorMode is not specified', () => {
+      const result: ValidationResult = {
+        valid: false,
+        errors: [
+          { path: 'name', expectedType: 'string', actualValue: 123, message: 'Name must be a string' },
+          { path: 'age', expectedType: 'number', actualValue: '25', message: 'Age must be a number' },
+        ],
+      };
+
+      const configWithoutErrorMode: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+      };
+
+      reportValidationResults(result, configWithoutErrorMode);
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledWith('Name must be a string; Age must be a number');
+    });
+  });
+
+  describe('Multi error mode (default)', () => {
+    it('should report all errors combined in multi mode (default)', () => {
       const result: ValidationResult = {
         valid: false,
         errors: [
@@ -150,10 +165,8 @@ describe('reportValidationResults', () => {
 
       reportValidationResults(result, multiModeConfig);
 
-      expect(mockCallback).toHaveBeenCalledTimes(3);
-      expect(mockCallback).toHaveBeenNthCalledWith(1, 'Name must be a string');
-      expect(mockCallback).toHaveBeenNthCalledWith(2, 'Age must be a number');
-      expect(mockCallback).toHaveBeenNthCalledWith(3, 'Email is required');
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      expect(mockCallback).toHaveBeenCalledWith('Name must be a string; Age must be a number; Email is required');
     });
 
     it('should handle empty errors array in multi mode', () => {
@@ -170,7 +183,7 @@ describe('reportValidationResults', () => {
 
       reportValidationResults(result, multiModeConfig);
 
-      expect(mockCallback).not.toHaveBeenCalled();
+      expect(mockCallback).toHaveBeenCalledWith('');
     });
 
     it('should handle single error in multi mode', () => {
@@ -372,7 +385,13 @@ describe('reportValidationResults', () => {
         errors: [],
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).not.toHaveBeenCalled();
     });
@@ -383,7 +402,13 @@ describe('reportValidationResults', () => {
         errors: undefined as any,
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).not.toHaveBeenCalled();
     });
@@ -394,7 +419,13 @@ describe('reportValidationResults', () => {
         errors: null as any,
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).not.toHaveBeenCalled();
     });
@@ -407,7 +438,13 @@ describe('reportValidationResults', () => {
         ],
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
       expect(mockCallback).toHaveBeenCalledWith('');
@@ -421,7 +458,13 @@ describe('reportValidationResults', () => {
         ],
       };
 
-      reportValidationResults(result, config);
+      const singleModeConfig: TypeGuardFnConfig = {
+        callbackOnError: mockCallback,
+        identifier: 'testValue',
+        errorMode: 'single',
+      };
+
+      reportValidationResults(result, singleModeConfig);
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
       expect(mockCallback).toHaveBeenCalledWith(undefined);
@@ -571,11 +614,8 @@ describe('reportValidationResults', () => {
       };
 
       reportValidationResults(result, multiConfig);
-      expect(multiCallback).toHaveBeenCalledTimes(4);
-      expect(multiCallback).toHaveBeenNthCalledWith(1, 'ID must be a number');
-      expect(multiCallback).toHaveBeenNthCalledWith(2, 'Name must be a string');
-      expect(multiCallback).toHaveBeenNthCalledWith(3, 'Invalid email format');
-      expect(multiCallback).toHaveBeenNthCalledWith(4, 'Age must be a number');
+      expect(multiCallback).toHaveBeenCalledTimes(1);
+      expect(multiCallback).toHaveBeenCalledWith('ID must be a number; Name must be a string; Invalid email format; Age must be a number');
 
       // Test JSON mode
       const jsonCallback = jest.fn();
