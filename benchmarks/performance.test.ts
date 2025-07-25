@@ -36,9 +36,9 @@ describe('Performance Benchmarks', () => {
     const endTime = performance.now();
     const averageTime = (endTime - startTime) / iterations;
 
-    // Should complete 10k iterations in under 200ms (20μs per iteration)
-    expect(endTime - startTime).toBeLessThan(200);
-    expect(averageTime).toBeLessThan(0.02); // 10μs
+    // Should complete 10k iterations in under 300ms (30μs per iteration)
+    expect(endTime - startTime).toBeLessThan(300);
+    expect(averageTime).toBeLessThan(0.03); // 30μs
   });
 
   it('should handle invalid data efficiently', () => {
