@@ -1,4 +1,4 @@
-import { isNullOr } from './IsNullOr';
+import { isNullOr } from './isNullOr';
 import { isUndefinedOr } from './isUndefinedOr';
 import type { TypeGuardFn } from './isType';
 

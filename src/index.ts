@@ -80,7 +80,7 @@ export { isIntersectionOf } from './typeguards/isIntersectionOf';
 export { isExtensionOf } from './typeguards/isExtensionOf';
 
 // Nullable/Undefined type guards
-export { isNullOr } from './typeguards/IsNullOr';
+export { isNullOr } from './typeguards/isNullOr';
 export { isUndefinedOr } from './typeguards/isUndefinedOr';
 export { isNilOr } from './typeguards/isNilOr';
 

@@ -1,4 +1,4 @@
-import { isNullOr } from './IsNullOr'; // Note the capitalization
+import { isNullOr } from './isNullOr';
 import { isString } from './isString';
 import { isNumber } from './isNumber';
 

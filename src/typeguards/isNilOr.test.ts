@@ -141,7 +141,7 @@ describe('isNilOr', () => {
     const isStringOrNil = isNilOr(isString);
     const isEquivalent = (value: unknown) => {
       const { isUndefinedOr } = require('./isUndefinedOr');
-      const { isNullOr } = require('./IsNullOr');
+      const { isNullOr } = require('./isNullOr');
       return isUndefinedOr(isNullOr(isString))(value);
     };
 
