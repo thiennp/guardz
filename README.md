@@ -33,10 +33,10 @@
 **Get started in 30 seconds:**
 
 ```typescript
-import { isType, isString, isNumber } from 'guardz';
+import { isSchema, isString, isNumber } from 'guardz';
 
 // Define your type guard
-const isUser = isType({
+const isUser = isSchema({
   name: isString,
   age: isNumber,
 });
@@ -66,6 +66,121 @@ isUser(invalidData, config);
 
 ---
 
+## 🎯 **Schema-Based Validation with `isSchema`**
+
+**`isSchema` is the recommended way to validate objects** - it provides better support for nested structures and improved error messages compared to `isType`.
+
+### **Key Benefits of `isSchema`:**
+- ✅ **Automatic nested type handling** - No need for explicit `isType` calls for each level
+- ✅ **Better error messages** - More descriptive validation failures for nested structures
+- ✅ **Inline object definitions** - Define nested objects directly in the schema
+- ✅ **Array support** - Handle arrays of objects with inline definitions
+- ✅ **Backward compatible** - Works with existing type guard patterns
+
+### **Basic Usage:**
+```typescript
+import { isSchema, isString, isNumber, isBoolean } from 'guardz';
+
+// Simple object validation
+const isUser = isSchema({
+  name: isString,
+  age: isNumber,
+  active: isBoolean,
+});
+
+// Nested object validation (no need for explicit isType calls)
+const isUserProfile = isSchema({
+  id: isNumber,
+  name: isString,
+  address: {
+    street: isString,
+    city: isString,
+    zipCode: isNumber,
+  },
+  preferences: {
+    theme: isString,
+    notifications: isBoolean,
+  },
+});
+
+// Array validation with inline object definitions
+const isUserList = isSchema({
+  users: [{
+    id: isNumber,
+    name: isString,
+    email: isString,
+  }],
+  total: isNumber,
+});
+```
+
+### **Complex Nested Structures:**
+```typescript
+import { isSchema, isString, isNumber, isBoolean } from 'guardz';
+
+const isComplexUser = isSchema({
+  id: isNumber,
+  profile: {
+    name: isString,
+    email: isString,
+    contacts: [{
+      type: isString,
+      value: isString,
+    }],
+  },
+  settings: {
+    theme: isString,
+    notifications: {
+      email: isBoolean,
+      push: isBoolean,
+      sms: isBoolean,
+    },
+  },
+  metadata: {
+    createdAt: isString,
+    updatedAt: isString,
+    tags: [isString],
+  },
+});
+```
+
+### **Error Handling with `isSchema`:**
+```typescript
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+};
+
+const invalidData = {
+  name: 'John',
+  age: '30', // Should be number
+  address: {
+    street: '123 Main St',
+    city: 'Anytown',
+    zipCode: 'ABC123', // Should be number
+  },
+};
+
+isUserProfile(invalidData, config);
+// errors: [
+//   'Expected user.age ("30") to be "number"',
+//   'Expected user.address.zipCode ("ABC123") to be "number"'
+// ]
+```
+
+### **Aliases for Flexibility:**
+```typescript
+import { isSchema, isShape, isNestedType } from 'guardz';
+
+// All three are equivalent - choose the name that fits your style
+const isUser1 = isSchema({ name: isString, age: isNumber });
+const isUser2 = isShape({ name: isString, age: isNumber });
+const isUser3 = isNestedType({ name: isString, age: isNumber });
+```
+
+---
+
 ## 🔧 **Creating Custom Guards**
 
 For most use cases, we recommend using `guardz-generator` to automatically generate type guards from your TypeScript interfaces. However, when you need custom validation logic or are working with third-party types, you can create custom guards.
@@ -78,10 +193,10 @@ For most use cases, we recommend using `guardz-generator` to automatically gener
 
 **Basic pattern:**
 ```typescript
-import { isType, isString, isNumber } from 'guardz';
+import { isSchema, isString, isNumber } from 'guardz';
 
 export function isCustomType(value: unknown): value is CustomType {
-  return isType<CustomType>({
+  return isSchema<CustomType>({
     // Define your validation schema here
     id: isNumber,
     name: isString,
@@ -210,7 +325,7 @@ const config = {
 ### **Basic Object Validation**
 
 ```typescript
-import { isType, isString, isNumber, isBoolean } from 'guardz';
+import { isSchema, isString, isNumber, isBoolean } from 'guardz';
 
 interface User {
   id: number;
@@ -219,7 +334,7 @@ interface User {
   isActive: boolean;
 }
 
-const isUser = isType<User>({
+const isUser = isSchema<User>({
   id: isNumber,
   name: isString,
   email: isString,
@@ -243,15 +358,15 @@ if (isUser(userData)) {
 ### **Nested Object Validation**
 
 ```typescript
-import { isType, isString, isNumber, isArray } from 'guardz';
+import { isSchema, isString, isNumber, isArray } from 'guardz';
 
-const isAddress = isType({
+const isAddress = isSchema({
   street: isString,
   city: isString,
   zipCode: isString,
 });
 
-const isUserProfile = isType({
+const isUserProfile = isSchema({
   name: isString,
   age: isNumber,
   address: isAddress,
@@ -279,13 +394,13 @@ if (isUserProfile(profileData)) {
 ### **Array Validation**
 
 ```typescript
-import { isType, isString, isNumber, isArray } from 'guardz';
+import { isSchema, isString, isNumber, isArray } from 'guardz';
 
 const isStringArray = isArray(isString);
 const isNumberArray = isArray(isNumber);
 
-const isUserList = isType({
-  users: isArray(isType({
+const isUserList = isSchema({
+  users: isArray(isSchema({
     name: isString,
     age: isNumber,
   })),
@@ -683,23 +798,48 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 ### **Core Type Guards**
 
 #### **Object Validation**
-- **`isType<T>(schema)`** - Validate objects against a schema
+- **`isSchema<T>(schema)`** - Validate objects with improved nested type support (recommended)
+  - Automatically handles nested object structures
+  - Better error messages for nested validation failures
+  - Supports inline object definitions and arrays
+- **`isShape<T>(schema)`** - Alias for `isSchema` (alternative naming)
+- **`isNestedType<T>(schema)`** - Alias for `isSchema` (alternative naming)
+- **`isType<T>(schema)`** - Legacy object validation (use `isSchema` for better nested support)
+  - Requires explicit `isType` calls for nested objects
+  - Simpler but less powerful than `isSchema`
 - **`isObject`** - Check if value is a plain object
 - **`isObjectWith<T>(properties)`** - Validate object has specific properties
+- **`isObjectWithEachItem<T>(itemGuard)`** - Validate objects where all values match a type guard
+- **`isPartialOf<T>(schema)`** - Validate objects that match a partial schema
 
 #### **Primitive Type Guards**
 - **`isString`** - Check if value is a string
+- **`isNonEmptyString`** - Check if value is a non-empty string
 - **`isNumber`** - Check if value is a number
 - **`isNumeric`** - Check if value is numeric (number or string number)
+- **`isPositiveNumber`** - Check if value is a positive number
+- **`isNegativeNumber`** - Check if value is a negative number
+- **`isNonNegativeNumber`** - Check if value is a non-negative number
+- **`isNonPositiveNumber`** - Check if value is a non-positive number
+- **`isInteger`** - Check if value is an integer
+- **`isPositiveInteger`** - Check if value is a positive integer
+- **`isNegativeInteger`** - Check if value is a negative integer
+- **`isNonNegativeInteger`** - Check if value is a non-negative integer
+- **`isNonPositiveInteger`** - Check if value is a non-positive integer
 - **`isBooleanLike`** - Check if value is boolean-like (boolean, "true"/"false", 1/0)
 - **`isDateLike`** - Check if value is date-like (Date, date string, timestamp)
 - **`isBoolean`** - Check if value is a boolean
 - **`isNull`** - Check if value is null
 - **`isUndefined`** - Check if value is undefined
+- **`isDefined`** - Check if value is not null or undefined
 - **`isSymbol`** - Check if value is a symbol
 - **`isBigInt`** - Check if value is a BigInt
 
 #### **Array Type Guards**
+- **`isArrayWithEachItem<T>(itemGuard)`** - Validate arrays where all items match a type guard
+- **`isNonEmptyArray`** - Check if value is a non-empty array
+- **`isNonEmptyArrayWithEachItem<T>(itemGuard)`** - Validate non-empty arrays where all items match a type guard
+- **`isTuple<T>(itemGuards)`** - Validate tuples with specific item types
 - **`isArray<T>(itemGuard)`** - Validate arrays with item validation
 - **`isArrayBuffer`** - Check if value is an ArrayBuffer
 - **`isDataView`** - Check if value is a DataView
@@ -711,17 +851,20 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 
 #### **Date & Time Type Guards**
 - **`isDate`** - Check if value is a Date object
-- **`isValidDate`** - Check if value is a valid Date
+- **`isDateLike`** - Check if value is date-like (Date, date string, timestamp)
 
 #### **Collection Type Guards**
 - **`isMap<K, V>(keyGuard, valueGuard)`** - Validate Map objects
 - **`isSet<T>(itemGuard)`** - Validate Set objects
 - **`isIndexSignature<K, V>(keyGuard, valueGuard)`** - Validate objects with index signatures
-- **`isWeakMap`** - Check if value is a WeakMap
-- **`isWeakSet`** - Check if value is a WeakSet
 
-#### **RegExp Type Guards**
-- **`isRegExp`** - Check if value is a RegExp object
+#### **Web API Type Guards**
+- **`isFile`** - Check if value is a File object
+- **`isFileList`** - Check if value is a FileList object
+- **`isBlob`** - Check if value is a Blob object
+- **`isFormData`** - Check if value is a FormData object
+- **`isURL`** - Check if value is a URL object
+- **`isURLSearchParams`** - Check if value is a URLSearchParams object
 
 #### **Error Type Guards**
 - **`isError`** - Check if value is an Error object
@@ -743,7 +886,31 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 - **`isAsserted<T>()`** - Always returns true (for 3rd party types)
 - **`isEnum<T>(enumObj)`** - Check if value matches enum values
 - **`isEqualTo<T>(value)`** - Check if value exactly equals specific value
-- **`isGeneric<T>(guard)`** - Create reusable type guard functions
+- **`guardWithTolerance<T>(guard, tolerance)`** - Create type guards with tolerance for approximate matching
+
+### **Utility Types**
+
+Guardz exports several utility types for enhanced type safety:
+
+```typescript
+// Array types
+type NonEmptyArray<T> = [T, ...T[]];
+type NonEmptyString = string & { readonly length: number };
+
+// Number types
+type PositiveNumber = number & { readonly __brand: 'PositiveNumber' };
+type NegativeNumber = number & { readonly __brand: 'NegativeNumber' };
+type NonNegativeNumber = number & { readonly __brand: 'NonNegativeNumber' };
+type NonPositiveNumber = number & { readonly __brand: 'NonPositiveNumber' };
+type Integer = number & { readonly __brand: 'Integer' };
+type PositiveInteger = number & { readonly __brand: 'PositiveInteger' };
+type NegativeInteger = number & { readonly __brand: 'NegativeInteger' };
+type NonNegativeInteger = number & { readonly __brand: 'NonNegativeInteger' };
+type NonPositiveInteger = number & { readonly __brand: 'NonPositiveInteger' };
+
+// Nullable types
+type Nullable<T> = T | null;
+```
 
 ### **Configuration**
 
@@ -834,7 +1001,7 @@ interface Employee {
 }
 
 // Generated automatically by guardz-generator
-const isEmployee = isType<Employee>({
+const isEmployee = isSchema<Employee>({
   id: isNumber,
   name: isString,
   manager: isUndefinedOr(isEmployee), // Handles optional recursive reference
@@ -927,10 +1094,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 Guardz makes runtime type safety **incredibly simple**. No complex setup, no heavy dependencies, just pure TypeScript goodness.
 
 ```typescript
-import { isType, isString, isNumber } from 'guardz';
+import { isSchema, isString, isNumber } from 'guardz';
 
 // That's literally it. You're ready to go.
-const isUser = isType({ name: isString, age: isNumber });
+const isUser = isSchema({ name: isString, age: isNumber });
 ```
 
 **Why developers love Guardz:**
