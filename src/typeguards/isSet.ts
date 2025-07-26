@@ -1,5 +1,5 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
-import type { TypeGuardFn } from './isType';
+import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
 
 /**
  * Checks if a value is a Set object.
@@ -38,10 +38,10 @@ import type { TypeGuardFn } from './isType';
  * // uniqueValues is now typed as Set<unknown>
  * ```
  */
-export const isSet: TypeGuardFn<Set<unknown>> = function (
-  value,
-  config
-): value is Set<unknown> {
+export const isSet = function<T>(
+  value: unknown,
+  config?: TypeGuardFnConfig | null
+): value is Set<T> {
   if (!(value instanceof Set)) {
     if (config) {
       config.callbackOnError(

@@ -39,6 +39,7 @@ export { isURLSearchParams } from './typeguards/isURLSearchParams';
 // Collection type guards
 export { isMap } from './typeguards/isMap';
 export { isSet } from './typeguards/isSet';
+export { isIndexSignature } from './typeguards/isIndexSignature';
 
 // Error type guards
 export { isError } from './typeguards/isError';
@@ -67,6 +68,9 @@ export { isPositiveInteger } from './typeguards/isPositiveInteger';
 export { isNegativeInteger } from './typeguards/isNegativeInteger';
 export { isNonNegativeInteger } from './typeguards/isNonNegativeInteger';
 export { isNonPositiveInteger } from './typeguards/isNonPositiveInteger';
+export { isNumeric } from './typeguards/isNumeric';
+export { isBooleanLike } from './typeguards/isBooleanLike';
+export { isDateLike } from './typeguards/isDateLike';
 
 // BigInt type guards
 export { isBigInt } from './typeguards/isBigInt';

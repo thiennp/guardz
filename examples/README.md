@@ -49,6 +49,10 @@ Web API type guard examples for File, FileList, Blob, FormData, URL, and URLSear
 
 Advanced features and best practices, including custom error handlers, error aggregation, and error handling in deeply nested structures.
 
+### 10. `index-signature-usage.ts`
+
+Demonstrates how to validate objects with dynamic keys (index signatures) and flexible type validation using `isNumeric`, `isBooleanLike`, and `isDateLike` utilities.
+
 ## Running the Examples
 
 ### Prerequisites
@@ -98,6 +102,9 @@ npx ts-node -r tsconfig-paths/register examples/object-aliases-simple.ts
 npx ts-node -r tsconfig-paths/register examples/multiple-errors-simple.ts
 
 # JSON tree error format example
+
+# Index signature usage example
+npx ts-node -r tsconfig-paths/register examples/index-signature-usage.ts
 npx ts-node -r tsconfig-paths/register examples/json-tree-errors-simple.ts
 ```
 

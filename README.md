@@ -323,7 +323,7 @@ const isEntity = isType({
 import { isType, isString, isNumber, isBoolean, type TypeGuardFnConfig } from 'guardz';
 
 // Simple custom guard
-export function isUser(value: unknown, config: TypeGuardFnConfig): value is User {
+export function isUser(value: unknown, config?: TypeGuardFnConfig): value is User {
   return isType<User>({
     id: isNumber,
     name: isString,
@@ -333,7 +333,7 @@ export function isUser(value: unknown, config: TypeGuardFnConfig): value is User
 }
 
 // With optional fields
-export function isProfile(value: unknown, config: TypeGuardFnConfig): value is Profile {
+export function isProfile(value: unknown, config?: TypeGuardFnConfig): value is Profile {
   return isType<Profile>({
     name: isString,
     age: isNumber,
@@ -354,12 +354,87 @@ interface Comment {
   replies?: Comment[]; // Optional recursive array
 }
 
-export function isComment(value: unknown, config: TypeGuardFnConfig): value is Comment {
+export function isComment(value: unknown, config?: TypeGuardFnConfig): value is Comment {
   return isType<Comment>({
     id: isNumber,
     text: isString,
     replies: isUndefinedOr(isArrayWithEachItem(isComment)),
   })(value, config);
+}
+```
+
+### **Index Signature Validation**
+
+```typescript
+import { isIndexSignature, isString, isNumber, isBoolean, isOneOfTypes } from 'guardz';
+
+// String-keyed objects with number values
+const isStringNumberMap = isIndexSignature(isString, isNumber);
+
+// Number-keyed objects with boolean values  
+const isNumberBooleanMap = isIndexSignature(isNumber, isBoolean);
+
+// Complex value types
+const isStringUnionMap = isIndexSignature(
+  isString, 
+  isOneOfTypes(isString, isNumber, isBoolean)
+);
+
+// Usage examples
+const userAges = { alice: 25, bob: 30, charlie: 35 };
+const featureFlags = { 1: true, 2: false, 3: true };
+const mixedData = { name: "John", age: 30, active: true };
+
+console.log(isStringNumberMap(userAges)); // true
+console.log(isNumberBooleanMap(featureFlags)); // true
+console.log(isStringUnionMap(mixedData)); // true
+
+// Type narrowing
+if (isStringNumberMap(userAges)) {
+  // TypeScript knows userAges is { [key: string]: number }
+  Object.entries(userAges).forEach(([name, age]) => {
+    console.log(`${name}: ${age * 2}`); // Safe arithmetic
+  });
+}
+```
+
+### **Combining Index Signatures with Specific Properties**
+
+```typescript
+import { isIndexSignature, isIntersectionOf, isType, isString, isNumber, isBoolean } from 'guardz';
+
+interface Config {
+  [key: string]: string | number | boolean;
+  name: string;
+  version: string;
+  debug: boolean;
+}
+
+// Define the index signature part
+const isStringIndex = isIndexSignature(isString, isOneOfTypes(isString, isNumber, isBoolean));
+
+// Define the specific properties
+const isConfigProperties = isType({
+  name: isString,
+  version: isString,
+  debug: isBoolean
+});
+
+// Combine them using intersection
+const isConfig = isIntersectionOf(isStringIndex, isConfigProperties);
+
+const config: unknown = {
+  name: "myApp",
+  version: "1.0.0",
+  debug: true,
+  apiUrl: "https://api.example.com",
+  timeout: 5000
+};
+
+if (isConfig(config)) {
+  // TypeScript knows config has both specific properties AND index signature
+  console.log(config.name); // string
+  console.log(config.apiUrl); // string | number | boolean
 }
 ```
 
@@ -615,6 +690,9 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 #### **Primitive Type Guards**
 - **`isString`** - Check if value is a string
 - **`isNumber`** - Check if value is a number
+- **`isNumeric`** - Check if value is numeric (number or string number)
+- **`isBooleanLike`** - Check if value is boolean-like (boolean, "true"/"false", 1/0)
+- **`isDateLike`** - Check if value is date-like (Date, date string, timestamp)
 - **`isBoolean`** - Check if value is a boolean
 - **`isNull`** - Check if value is null
 - **`isUndefined`** - Check if value is undefined
@@ -638,6 +716,7 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 #### **Collection Type Guards**
 - **`isMap<K, V>(keyGuard, valueGuard)`** - Validate Map objects
 - **`isSet<T>(itemGuard)`** - Validate Set objects
+- **`isIndexSignature<K, V>(keyGuard, valueGuard)`** - Validate objects with index signatures
 - **`isWeakMap`** - Check if value is a WeakMap
 - **`isWeakSet`** - Check if value is a WeakSet
 

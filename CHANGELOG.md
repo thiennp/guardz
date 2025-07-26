@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2024-12-20
+
+### ✨ New Features
+- **`isIndexSignature`**: New type guard for validating objects with dynamic keys (index signatures)
+- **`isNumeric`**: New type guard for validating numeric values (numbers and string numbers)
+- **`isBooleanLike`**: New type guard for validating boolean-like values (boolean, "true"/"false", 1/0)
+- **`isDateLike`**: New type guard for validating date-like values (Date objects, date strings, timestamps)
+
+### 🔧 Improvements
+- **Enhanced Object Validation**: Support for objects with both fixed properties and dynamic keys using `isIntersectionOf`
+- **Flexible Type Validation**: New utilities handle common real-world scenarios where data comes in various formats
+- **Better Form Validation**: Support for form inputs that return strings for boolean/numeric values
+- **API Response Validation**: Enhanced validation for API responses with mixed data types
+
+### 📚 Documentation
+- **Comprehensive Examples**: Added `examples/index-signature-usage.ts` with practical usage patterns
+- **Updated README**: Added new utilities to the documentation
+- **Real-world Use Cases**: Examples for form validation, API responses, and configuration files
+
+### 🧪 Testing
+- **Comprehensive Test Coverage**: 48 new tests for the new utilities
+- **Integration Tests**: Verified compatibility with existing composite type guards
+- **Real-world Scenarios**: Tests covering form validation, API responses, and configuration validation
+
+### 🔄 Backward Compatibility
+- **100% Compatible**: All existing code patterns work exactly the same
+- **No Breaking Changes**: All new utilities are additive
+- **Type Safety**: Enhanced TypeScript integration with proper type narrowing
+
 ## [1.10.0] - 2024-12-19
 
 ### 🚀 Performance Optimizations
