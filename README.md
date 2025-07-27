@@ -10,7 +10,7 @@
 
 > **The easiest way to add runtime type safety to your TypeScript projects — works with React, Angular, Vue, Node.js, and more. No complex schemas, no heavy dependencies.**
 
-**Perfect for:** React form validation, Node.js API validation, TypeScript runtime type checking, Express middleware validation, Next.js server-side props, Angular services, Vue.js composition API, and any TypeScript project needing lightweight runtime validation.
+**Perfect for:** TypeScript runtime type checking, e.g. React form validation, Node.js API validation, Express middleware validation, Next.js server-side props, Angular services, Vue.js composition API, and any TypeScript project needing lightweight runtime validation.
 
 ## 📋 Table of Contents
 
@@ -892,6 +892,87 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 
 Guardz exports several utility types for enhanced type safety:
 
+#### **Branded Types for Enhanced Type Safety**
+
+Guardz provides branded types that work seamlessly with type guards to provide both compile-time and runtime type safety:
+
+```typescript
+import { isNumeric, isDateLike, isBooleanLike } from 'guardz';
+import type { Numeric, DateLike, BooleanLike } from 'guardz';
+
+// Numeric values (numbers and numeric strings)
+const validateNumeric = (value: unknown): Numeric | null => {
+  if (isNumeric(value)) {
+    return value; // TypeScript knows this is Numeric
+  }
+  return null;
+};
+
+// Date-like values (Date objects, date strings, timestamps)
+const validateDateLike = (value: unknown): DateLike | null => {
+  if (isDateLike(value)) {
+    return value; // TypeScript knows this is DateLike
+  }
+  return null;
+};
+
+// Boolean-like values (booleans, boolean strings, boolean numbers)
+const validateBooleanLike = (value: unknown): BooleanLike | null => {
+  if (isBooleanLike(value)) {
+    return value; // TypeScript knows this is BooleanLike
+  }
+  return null;
+};
+
+// Usage examples
+const numericValue = validateNumeric("123"); // Numeric | null
+const dateValue = validateDateLike("2023-01-01"); // DateLike | null
+const boolValue = validateBooleanLike("true"); // BooleanLike | null
+```
+
+**Benefits of branded types:**
+- ✅ **Compile-time safety** - TypeScript prevents invalid assignments
+- ✅ **Runtime validation** - Type guards ensure data integrity
+- ✅ **Semantic meaning** - Clear intent about what the value represents
+- ✅ **Flexible input** - Accept multiple input types while maintaining type safety
+
+**Real-world example with form validation:**
+
+```typescript
+import { isSchema, isString, isNumeric, isDateLike, isBooleanLike } from 'guardz';
+import type { Numeric, DateLike, BooleanLike } from 'guardz';
+
+interface FormData {
+  name: string;
+  age: Numeric;
+  birthDate: DateLike;
+  isActive: BooleanLike;
+}
+
+const isFormData = isSchema<FormData>({
+  name: isString,
+  age: isNumeric,
+  birthDate: isDateLike,
+  isActive: isBooleanLike,
+});
+
+// Form data from user input (all strings initially)
+const formInput = {
+  name: "John Doe",
+  age: "25", // String from input field
+  birthDate: "1998-05-15", // String from date picker
+  isActive: "true", // String from checkbox
+};
+
+if (isFormData(formInput)) {
+  // TypeScript knows all fields are properly typed
+  console.log(formInput.name.toUpperCase()); // string
+  console.log(Number(formInput.age)); // Numeric (number | string)
+  console.log(new Date(formInput.birthDate)); // DateLike (Date | string | number)
+  console.log(Boolean(formInput.isActive)); // BooleanLike (boolean | string | number)
+}
+```
+
 ```typescript
 // Array types
 type NonEmptyArray<T> = [T, ...T[]];
@@ -907,6 +988,11 @@ type PositiveInteger = number & { readonly __brand: 'PositiveInteger' };
 type NegativeInteger = number & { readonly __brand: 'NegativeInteger' };
 type NonNegativeInteger = number & { readonly __brand: 'NonNegativeInteger' };
 type NonPositiveInteger = number & { readonly __brand: 'NonPositiveInteger' };
+
+// Utility type guards with branded types
+type Numeric = (number | string) & { readonly __brand: 'Numeric' };
+type DateLike = (Date | string | number) & { readonly __brand: 'DateLike' };
+type BooleanLike = (boolean | string | number) & { readonly __brand: 'BooleanLike' };
 
 // Nullable types
 type Nullable<T> = T | null;

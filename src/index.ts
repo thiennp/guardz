@@ -112,3 +112,8 @@ export type { PositiveInteger } from './types/PositiveInteger';
 export type { NegativeInteger } from './types/NegativeInteger';
 export type { NonNegativeInteger } from './types/NonNegativeInteger';
 export type { NonPositiveInteger } from './types/NonPositiveInteger';
+
+// Utility branded types
+export type { Numeric } from './types/Numeric';
+export type { DateLike } from './types/DateLike';
+export type { BooleanLike } from './types/BooleanLike';

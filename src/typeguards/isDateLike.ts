@@ -1,5 +1,6 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
 import type { TypeGuardFn } from './isType';
+import type { DateLike } from '../types/DateLike';
 
 /**
  * Checks if a value can be treated as a Date.
@@ -30,15 +31,15 @@ import type { TypeGuardFn } from './isType';
  * // With type narrowing
  * const data: unknown = getDataFromAPI();
  * if (isDateLike(data)) {
- *   // data is now typed as Date
+ *   // data is now typed as DateLike
  *   console.log(data.toISOString()); // Safe to use Date methods
  * }
  * ```
  */
-export const isDateLike: TypeGuardFn<Date> = function (
+export const isDateLike: TypeGuardFn<DateLike> = function (
   value,
   config
-): value is Date {
+): value is DateLike {
   // Check if it's already a Date object
   if (value instanceof Date) {
     // Check if it's a valid date (not Invalid Date)

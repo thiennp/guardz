@@ -1,5 +1,6 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
 import type { TypeGuardFn } from './isType';
+import type { Numeric } from '../types/Numeric';
 
 /**
  * Checks if a value is numeric (a number or a string that can be converted to a number).
@@ -30,15 +31,15 @@ import type { TypeGuardFn } from './isType';
  * // With type narrowing
  * const data: unknown = getDataFromAPI();
  * if (isNumeric(data)) {
- *   // data is now typed as number
+ *   // data is now typed as Numeric
  *   console.log(Number(data)); // Safe to convert
  * }
  * ```
  */
-export const isNumeric: TypeGuardFn<number> = function (
+export const isNumeric: TypeGuardFn<Numeric> = function (
   value,
   config
-): value is number {
+): value is Numeric {
   // Check if it's already a number
   if (typeof value === 'number') {
     // Reject NaN

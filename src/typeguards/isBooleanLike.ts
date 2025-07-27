@@ -1,5 +1,6 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
 import type { TypeGuardFn } from './isType';
+import type { BooleanLike } from '../types/BooleanLike';
 
 /**
  * Checks if a value can be treated as a boolean.
@@ -34,15 +35,15 @@ import type { TypeGuardFn } from './isType';
  * // With type narrowing
  * const data: unknown = getDataFromAPI();
  * if (isBooleanLike(data)) {
- *   // data is now typed as boolean
+ *   // data is now typed as BooleanLike
  *   console.log(Boolean(data)); // Safe to convert
  * }
  * ```
  */
-export const isBooleanLike: TypeGuardFn<boolean> = function (
+export const isBooleanLike: TypeGuardFn<BooleanLike> = function (
   value,
   config
-): value is boolean {
+): value is BooleanLike {
   // Check if it's already a boolean
   if (typeof value === 'boolean') {
     return true;
