@@ -21,6 +21,7 @@
 - [🎯 Core Concepts](#-core-concepts)
 - [📖 Examples](#-examples)
 - [🔧 API Reference](#-api-reference)
+- [🔄 Type Converters](#-type-converters)
 - [⚡ Performance](#-performance)
 - [🌐 Ecosystem](#-ecosystem)
 - [🎯 For Best Results: Use guardz-generator](#-for-best-results-use-guardz-generator)
@@ -62,6 +63,23 @@ const config = {
 const invalidData = { name: 'John', age: '30' }; // age should be number
 isUser(invalidData, config);
 // errors: ['Expected user.age ("30") to be "number"']
+```
+
+**With branded types and converters:**
+
+```typescript
+import { isSchema, isString, isNumeric, toNumber } from 'guardz';
+
+const isUser = isSchema({
+  name: isString,
+  age: isNumeric, // Accepts both numbers and numeric strings
+});
+
+const data: unknown = { name: 'John', age: '25' };
+if (isUser(data)) {
+  const age = toNumber(data.age); // Convert to real number
+  console.log(age.toFixed(2)); // "25.00"
+}
 ```
 
 ---
@@ -888,6 +906,11 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 - **`isEqualTo<T>(value)`** - Check if value exactly equals specific value
 - **`guardWithTolerance<T>(guard, tolerance)`** - Create type guards with tolerance for approximate matching
 
+#### **Type Converters**
+- **`toNumber(value: Numeric)`** - Convert Numeric branded type to number
+- **`toDate(value: DateLike)`** - Convert DateLike branded type to Date object
+- **`toBoolean(value: BooleanLike)`** - Convert BooleanLike branded type to boolean
+
 ### **Utility Types**
 
 Guardz exports several utility types for enhanced type safety:
@@ -936,42 +959,7 @@ const boolValue = validateBooleanLike("true"); // BooleanLike | null
 - ✅ **Semantic meaning** - Clear intent about what the value represents
 - ✅ **Flexible input** - Accept multiple input types while maintaining type safety
 
-**Real-world example with form validation:**
 
-```typescript
-import { isSchema, isString, isNumeric, isDateLike, isBooleanLike } from 'guardz';
-import type { Numeric, DateLike, BooleanLike } from 'guardz';
-
-interface FormData {
-  name: string;
-  age: Numeric;
-  birthDate: DateLike;
-  isActive: BooleanLike;
-}
-
-const isFormData = isSchema<FormData>({
-  name: isString,
-  age: isNumeric,
-  birthDate: isDateLike,
-  isActive: isBooleanLike,
-});
-
-// Form data from user input (all strings initially)
-const formInput = {
-  name: "John Doe",
-  age: "25", // String from input field
-  birthDate: "1998-05-15", // String from date picker
-  isActive: "true", // String from checkbox
-};
-
-if (isFormData(formInput)) {
-  // TypeScript knows all fields are properly typed
-  console.log(formInput.name.toUpperCase()); // string
-  console.log(Number(formInput.age)); // Numeric (number | string)
-  console.log(new Date(formInput.birthDate)); // DateLike (Date | string | number)
-  console.log(Boolean(formInput.isActive)); // BooleanLike (boolean | string | number)
-}
-```
 
 ```typescript
 // Array types
@@ -1011,6 +999,164 @@ interface TypeGuardFnConfig {
 - **`callbackOnError`** (required): Function called when validation errors occur
 - **`identifier`** (optional): Prefix for error messages
 - **`errorMode`** (optional): Controls error collection and formatting
+
+---
+
+## 🔄 **Type Converters**
+
+Guardz provides utility functions to safely convert branded types to their real types. These converters are designed to work seamlessly with the branded types and type guards.
+
+### **Available Converters**
+
+#### **`toNumber(value: Numeric): number`**
+Converts a Numeric branded type to a number.
+
+```typescript
+import { toNumber, isNumeric } from 'guardz';
+
+// Safe conversion after validation
+const data: unknown = "123";
+if (isNumeric(data)) {
+  const num = toNumber(data); // TypeScript knows this is safe
+  console.log(num.toFixed(2)); // "123.00"
+}
+
+// Works with both string and number inputs
+const num1 = toNumber("100"); // 100
+const num2 = toNumber(200);   // 200
+const num3 = toNumber("3.14"); // 3.14
+```
+
+#### **`toDate(value: DateLike): Date`**
+Converts a DateLike branded type to a Date object.
+
+```typescript
+import { toDate, isDateLike } from 'guardz';
+
+// Safe conversion after validation
+const data: unknown = "2023-01-01";
+if (isDateLike(data)) {
+  const date = toDate(data); // TypeScript knows this is safe
+  console.log(date.toISOString()); // "2023-01-01T00:00:00.000Z"
+}
+
+// Works with different input types
+const date1 = toDate(new Date()); // Returns the same Date object
+const date2 = toDate("2023-01-01"); // Creates Date from string
+const date3 = toDate(1672531200000); // Creates Date from timestamp
+```
+
+#### **`toBoolean(value: BooleanLike): boolean`**
+Converts a BooleanLike branded type to a boolean.
+
+```typescript
+import { toBoolean, isBooleanLike } from 'guardz';
+
+// Safe conversion after validation
+const data: unknown = "true";
+if (isBooleanLike(data)) {
+  const bool = toBoolean(data); // TypeScript knows this is safe
+  console.log(bool); // true
+}
+
+// Works with different input types
+const bool1 = toBoolean(true);     // true
+const bool2 = toBoolean("true");   // true
+const bool3 = toBoolean("1");      // true
+const bool4 = toBoolean(1);        // true
+const bool5 = toBoolean(false);    // false
+const bool6 = toBoolean("false");  // false
+const bool7 = toBoolean("0");      // false
+const bool8 = toBoolean(0);        // false
+```
+
+### **Real-World Usage Examples**
+
+#### **Form Processing**
+```typescript
+import { isSchema, isString, isNumeric, isDateLike, isBooleanLike, toNumber, toDate, toBoolean } from 'guardz';
+
+const isFormData = isSchema({
+  name: isString,
+  age: isNumeric,
+  birthDate: isDateLike,
+  isActive: isBooleanLike,
+});
+
+const processForm = (formData: unknown) => {
+  if (isFormData(formData)) {
+    // Convert to real types for processing
+    const processedData = {
+      name: formData.name,
+      age: toNumber(formData.age),
+      birthDate: toDate(formData.birthDate),
+      isActive: toBoolean(formData.isActive),
+    };
+    
+    // Now you can use the real types
+    console.log(processedData.age.toFixed(2));
+    console.log(processedData.birthDate.getFullYear());
+    console.log(processedData.isActive);
+    
+    return processedData;
+  }
+  return null;
+};
+```
+
+#### **API Response Processing**
+```typescript
+import { isSchema, isString, isNumeric, isDateLike, toNumber, toDate } from 'guardz';
+
+const isApiResponse = isSchema({
+  id: isNumeric,
+  name: isString,
+  createdAt: isDateLike,
+  updatedAt: isDateLike,
+});
+
+const processApiResponse = (response: unknown) => {
+  if (isApiResponse(response)) {
+    return {
+      id: toNumber(response.id),
+      name: response.name,
+      createdAt: toDate(response.createdAt),
+      updatedAt: toDate(response.updatedAt),
+    };
+  }
+  throw new Error('Invalid API response');
+};
+```
+
+#### **Configuration Parsing**
+```typescript
+import { isSchema, isNumeric, isBooleanLike, toNumber, toBoolean } from 'guardz';
+
+const isConfig = isSchema({
+  port: isNumeric,
+  debug: isBooleanLike,
+  timeout: isNumeric,
+});
+
+const parseConfig = (configData: unknown) => {
+  if (isConfig(configData)) {
+    return {
+      port: toNumber(configData.port),
+      debug: toBoolean(configData.debug),
+      timeout: toNumber(configData.timeout),
+    };
+  }
+  throw new Error('Invalid configuration');
+};
+```
+
+### **Key Benefits**
+
+- ✅ **Type Safety**: Guaranteed to work with branded types
+- ✅ **Performance**: Minimal overhead for conversions
+- ✅ **Flexibility**: Handle multiple input formats
+- ✅ **Real-world Ready**: Perfect for form processing, API responses, and data transformation
+- ✅ **Zero Dependencies**: Lightweight and efficient
 
 ---
 

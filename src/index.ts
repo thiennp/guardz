@@ -117,3 +117,8 @@ export type { NonPositiveInteger } from './types/NonPositiveInteger';
 export type { Numeric } from './types/Numeric';
 export type { DateLike } from './types/DateLike';
 export type { BooleanLike } from './types/BooleanLike';
+
+// Type converters - convert branded types to their real types
+export { toNumber } from './converters/toNumber';
+export { toDate } from './converters/toDate';
+export { toBoolean } from './converters/toBoolean';
