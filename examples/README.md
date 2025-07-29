@@ -1,186 +1,102 @@
-# GuardZ Examples
+# Guardz Examples
 
-> **Structured error messages and custom error handling are core features of GuardZ.**
-> Every type guard can provide detailed, field-specific error messages for debugging, user feedback, and logging.
-
-This folder contains comprehensive examples demonstrating how to use the GuardZ TypeScript type guard library, with a special focus on error handling.
-
-## Why Error Handling is Core
-
-- 🛑 **Structured error messages**: Instantly know what failed, where, and why.
-- 🔗 **Custom error handling**: Integrate with your logging, monitoring, or UI error display with a simple callback.
-- 🧩 **Field-level and nested errors**: Get precise error paths for deeply nested objects.
+This directory contains comprehensive examples demonstrating Guardz's capabilities.
 
 ## Examples Overview
 
-### 1. `basic-usage.ts`
+### Basic Examples
+- **`basic-usage.ts`** - Essential type guard patterns and usage
+- **`string-validation.ts`** - String-specific validation techniques
+- **`number-validation.ts`** - Number validation with constraints
+- **`array-validation.ts`** - Array validation patterns
+- **`object-aliases-simple.ts`** - Object validation with type aliases
 
-Demonstrates fundamental type guard functions for primitive types and shows how to use error handling.
+### Advanced Examples
+- **`advanced-features.ts`** - Complex validation scenarios
+- **`union-and-composite.ts`** - Union types and composite validation
+- **`nullable-and-special.ts`** - Handling null, undefined, and special cases
+- **`utility-types.ts`** - Utility type guard patterns
 
-### 2. `array-validation.ts`
+### Error Handling Examples
+- **`error-modes-demo.ts`** - Different error reporting modes
+- **`error-modes-comprehensive.ts`** - Comprehensive error handling
+- **`multiple-errors-simple.ts`** - Multiple error collection
+- **`json-tree-errors-simple.ts`** - Tree-structured error reporting
 
-Shows how to validate arrays and tuples, and how to collect errors for each item.
+### Performance and Compatibility
+- **`performance-optimizations.ts`** - Performance best practices
+- **`backward-compatibility.ts`** - Backward compatibility patterns
+- **`web-api-validation.ts`** - Web API type validation
 
-### 3. `number-validation.ts`
+## Running Examples
 
-Comprehensive number validation examples, including error reporting for invalid numbers.
-
-### 4. `string-validation.ts`
-
-String validation and formatting examples, with error handling for invalid strings.
-
-### 5. `union-and-composite.ts`
-
-Advanced type composition examples, including error aggregation for union/intersection types.
-
-### 6. `nullable-and-special.ts`
-
-Nullable and special type guard examples, with error messages for null/undefined handling.
-
-### 7. `utility-types.ts`
-
-Demonstrates GuardZ utility types and how to combine them with runtime error reporting.
-
-### 8. `web-api-validation.ts`
-
-Web API type guard examples for File, FileList, Blob, FormData, URL, and URLSearchParams validation with environment-aware detection.
-
-### 9. `advanced-features.ts`
-
-Advanced features and best practices, including custom error handlers, error aggregation, and error handling in deeply nested structures.
-
-### 10. `index-signature-usage.ts`
-
-Demonstrates how to validate objects with dynamic keys (index signatures) and flexible type validation using `isNumeric`, `isBooleanLike`, and `isDateLike` utilities.
-
-## Running the Examples
-
-### Prerequisites
-
-Make sure you have the required dependencies installed:
-
+### Run All Examples
 ```bash
-npm install
+npm run examples
 ```
 
-### Method 1: Run Individual Examples (Recommended)
-
-Use ts-node with path alias resolution to run any example:
-
+### Run Individual Examples
 ```bash
-# Basic usage example
-npx ts-node -r tsconfig-paths/register examples/basic-usage.ts
+# Basic usage
+npx ts-node examples/basic-usage.ts
 
-# Array validation example
-npx ts-node -r tsconfig-paths/register examples/array-validation.ts
+# String validation
+npx ts-node examples/string-validation.ts
 
-# Number validation example
-npx ts-node -r tsconfig-paths/register examples/number-validation.ts
+# Advanced features
+npx ts-node examples/advanced-features.ts
 
-# String validation example
-npx ts-node -r tsconfig-paths/register examples/string-validation.ts
-
-# Union and composite types example
-npx ts-node -r tsconfig-paths/register examples/union-and-composite.ts
-
-# Nullable and special types example
-npx ts-node -r tsconfig-paths/register examples/nullable-and-special.ts
-
-# Utility types example
-npx ts-node -r tsconfig-paths/register examples/utility-types.ts
-
-# Web API validation example
-npx ts-node -r tsconfig-paths/register examples/web-api-validation.ts
-
-# Advanced features example
-npx ts-node -r tsconfig-paths/register examples/advanced-features.ts
-
-# Object aliases example
-npx ts-node -r tsconfig-paths/register examples/object-aliases-simple.ts
-
-# Multiple error collection example
-npx ts-node -r tsconfig-paths/register examples/multiple-errors-simple.ts
-
-# JSON tree error format example
-
-# Index signature usage example
-npx ts-node -r tsconfig-paths/register examples/index-signature-usage.ts
-npx ts-node -r tsconfig-paths/register examples/json-tree-errors-simple.ts
+# Error handling
+npx ts-node examples/error-modes-demo.ts
 ```
 
-### Method 2: Run All Examples at Once
+## Example Categories
 
-Execute all examples sequentially:
+### 🚀 Getting Started
+Start with `basic-usage.ts` to understand core concepts.
 
-```bash
-npx ts-node -r tsconfig-paths/register examples/run-all.ts
-```
+### 🔧 Advanced Patterns
+Explore `advanced-features.ts` and `union-and-composite.ts` for complex scenarios.
 
-### Method 3: Using TypeScript Compiler (Alternative)
+### 🛠️ Error Handling
+Learn error reporting with `error-modes-demo.ts` and `error-modes-comprehensive.ts`.
 
-If you prefer to compile first, then run:
+### ⚡ Performance
+Optimize your code with `performance-optimizations.ts`.
 
-```bash
-# Compile and run a single example
-npx tsc examples/basic-usage.ts && node examples/basic-usage.js
+### 🌐 Web APIs
+Handle web APIs with `web-api-validation.ts`.
 
-# Compile and run all examples
-npx tsc examples/run-all.ts && node examples/run-all.js
-```
+## Contributing Examples
 
-### Important Notes
+When adding new examples:
 
-- **Path Aliases**: The `-r tsconfig-paths/register` flag is **required** to resolve the `@/` path aliases used in the GuardZ source code
-- **Error Output**: Each example demonstrates structured error handling - watch the console output to see detailed error messages
-- **Type Safety**: All examples are fully type-safe and will show TypeScript errors if you modify them incorrectly
+1. Follow the existing naming convention
+2. Include comprehensive comments
+3. Demonstrate real-world usage patterns
+4. Add to the appropriate category in this README
+5. Update the `run-all.ts` file to include your example
 
-## Key Concepts Demonstrated
+## Generic Types
 
-### 1. Structured Error Handling (Core Feature)
+For complex generic type validation, consider using [guardz-generator](https://github.com/your-org/guardz-generator) which handles generic types and conditional properties automatically.
 
-Every type guard can provide detailed, field-specific error messages:
-
+Example pattern for generic types:
 ```typescript
-import { isString, isNumber } from '../src';
+import { isType, isString, isNumber, isUndefinedOr } from 'guardz';
 
-const errors: string[] = [];
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => errors.push(error),
+// Define generic types with conditional properties
+type ApiKeysSelect<T extends boolean = true> = {
+  name: T extends true ? string : string | undefined;
+  // ... other conditional properties
 };
 
-const isUser = isType({ name: isString, age: isNumber });
-const result = isUser({ name: 'John', age: '30' }, config);
-// errors now contains: [ 'Expected user.age ("30") to be "number"' ]
+// Create type guard factory
+export const isApiKeysSelect = <T extends boolean = true>(
+  typeGuardT: TypeGuardFn<T>,
+): TypeGuardFn<ApiKeysSelect<T>> =>
+  isType<ApiKeysSelect<T>>({
+    name: isUndefinedOr(typeGuardT),
+    // ... other properties
+  });
 ```
-
-- **Debugging**: Instantly see which field failed and why
-- **User Feedback**: Show clear, actionable error messages in your UI
-- **Logging/Monitoring**: Integrate with your error tracking systems
-- **Testing**: Assert on specific error messages in your tests
-
-### 2. Type Guard Functions
-
-Type guards validate data at runtime and provide TypeScript type narrowing.
-
-### 3. Higher-Order Type Guards
-
-Reusable type guards for complex validation.
-
-### 4. Union and Intersection Types
-
-Combine multiple type guards for complex validation and error aggregation.
-
-### 5. Utility Types
-
-Use branded types for compile-time safety, combined with runtime error reporting.
-
-## Best Practices
-
-1. **Always use error handling in production**: Pass a config with `callbackOnError` to every type guard.
-2. **Aggregate errors for user feedback**: Collect all errors and display them in your UI or logs.
-3. **Test error messages**: Assert on specific error messages in your tests for robust validation.
-
-## See Also
-
-- Main [README.md](../README.md) for API and philosophy

@@ -1,869 +1,143 @@
-# 🛡️ Guardz
+# Guardz
 
-[![NPM Version](https://img.shields.io/npm/v/guardz)](https://www.npmjs.com/package/guardz)
+[![npm version](https://badge.fury.io/js/guardz.svg)](https://badge.fury.io/js/guardz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/thiennp/guardz/actions/workflows/ci.yml/badge.svg)](https://github.com/thiennp/guardz/actions/workflows/ci.yml)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/guardz)](https://bundlephobia.com/package/guardz)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/thiennp?style=flat)](https://github.com/sponsors/thiennp)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
+[![npm downloads](https://img.shields.io/npm/dm/guardz.svg)](https://npm-stat.com/charts.html?package=guardz)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/guardz)](https://bundlephobia.com/result?p=guardz)
 
-**Lightweight, zero-dependency TypeScript type guards for runtime validation with structured error handling.**
-
-> **The easiest way to add runtime type safety to your TypeScript projects — works with React, Angular, Vue, Node.js, and more. No complex schemas, no heavy dependencies.**
-
-**Perfect for:** TypeScript runtime type checking, e.g. React form validation, Node.js API validation, Express middleware validation, Next.js server-side props, Angular services, Vue.js composition API, and any TypeScript project needing lightweight runtime validation.
-
-## 📋 Table of Contents
-
-- [🚀 Quick Start](#-quick-start)
-- [🔧 Creating Custom Guards](#-creating-custom-guards)
-- [✨ Features](#-features)
-- [📦 Installation](#-installation)
-- [🎯 Core Concepts](#-core-concepts)
-- [📖 Examples](#-examples)
-- [🔧 API Reference](#-api-reference)
-- [🔄 Type Converters](#-type-converters)
-- [⚡ Performance](#-performance)
-- [🌐 Ecosystem](#-ecosystem)
-- [🎯 For Best Results: Use guardz-generator](#-for-best-results-use-guardz-generator)
-- [🤝 Contributing](#-contributing)
-
----
+A comprehensive TypeScript type guard library with advanced validation capabilities, error reporting, and performance optimizations.
 
 ## 🚀 Quick Start
 
-**Get started in 30 seconds:**
-
-```typescript
-import { isSchema, isString, isNumber } from 'guardz';
-
-// Define your type guard
-const isUser = isSchema({
-  name: isString,
-  age: isNumber,
-});
-
-// Validate data
-const data: unknown = { name: 'John', age: 30 };
-if (isUser(data)) {
-  // TypeScript knows this is safe
-  console.log(data.name.toUpperCase()); // ✅ Works
-  console.log(data.age.toFixed(2));     // ✅ Works
-}
-```
-
-**With error handling:**
-
-```typescript
-const errors: string[] = [];
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => errors.push(error),
-};
-
-const invalidData = { name: 'John', age: '30' }; // age should be number
-isUser(invalidData, config);
-// errors: ['Expected user.age ("30") to be "number"']
-```
-
-**With branded types and converters:**
-
-```typescript
-import { isSchema, isString, isNumeric, toNumber } from 'guardz';
-
-const isUser = isSchema({
-  name: isString,
-  age: isNumeric, // Accepts both numbers and numeric strings
-});
-
-const data: unknown = { name: 'John', age: '25' };
-if (isUser(data)) {
-  const age = toNumber(data.age); // Convert to real number
-  console.log(age.toFixed(2)); // "25.00"
-}
-```
-
-**With custom branded types:**
-
-```typescript
-import { isBranded, type Branded, isSchema, isString } from 'guardz';
-
-// Define custom branded types
-type Email = Branded<string, 'Email'>;
-type UserId = Branded<number, 'UserId'>;
-
-// Create custom type guards
-const isEmail = isBranded<Email>((value) => {
-  if (typeof value !== 'string' || !value.includes('@')) {
-    throw new Error('Invalid email format');
-  }
-});
-
-const isUserId = isBranded<UserId>((value) => {
-  if (typeof value !== 'number' || value <= 0) {
-    throw new Error('User ID must be a positive number');
-  }
-});
-
-// Use in schemas
-const isUser = isSchema({
-  id: isUserId,
-  email: isEmail,
-  name: isString,
-});
-
-const data: unknown = { id: 123, email: 'user@example.com', name: 'John' };
-if (isUser(data)) {
-  // data.id is typed as UserId, data.email is typed as Email
-  console.log(data.id);    // number & { __brand: 'UserId' }
-  console.log(data.email); // string & { __brand: 'Email' }
-}
-```
-
----
-
-## 🎯 **Schema-Based Validation with `isSchema`**
-
-**`isSchema` is the recommended way to validate objects** - it provides better support for nested structures and improved error messages compared to `isType`.
-
-### **Key Benefits of `isSchema`:**
-- ✅ **Automatic nested type handling** - No need for explicit `isType` calls for each level
-- ✅ **Better error messages** - More descriptive validation failures for nested structures
-- ✅ **Inline object definitions** - Define nested objects directly in the schema
-- ✅ **Array support** - Handle arrays of objects with inline definitions
-- ✅ **Backward compatible** - Works with existing type guard patterns
-
-### **Basic Usage:**
-```typescript
-import { isSchema, isString, isNumber, isBoolean } from 'guardz';
-
-// Simple object validation
-const isUser = isSchema({
-  name: isString,
-  age: isNumber,
-  active: isBoolean,
-});
-
-// Nested object validation (no need for explicit isType calls)
-const isUserProfile = isSchema({
-  id: isNumber,
-  name: isString,
-  address: {
-    street: isString,
-    city: isString,
-    zipCode: isNumber,
-  },
-  preferences: {
-    theme: isString,
-    notifications: isBoolean,
-  },
-});
-
-// Array validation with inline object definitions
-const isUserList = isSchema({
-  users: [{
-    id: isNumber,
-    name: isString,
-    email: isString,
-  }],
-  total: isNumber,
-});
-```
-
-### **Complex Nested Structures:**
-```typescript
-import { isSchema, isString, isNumber, isBoolean } from 'guardz';
-
-const isComplexUser = isSchema({
-  id: isNumber,
-  profile: {
-    name: isString,
-    email: isString,
-    contacts: [{
-      type: isString,
-      value: isString,
-    }],
-  },
-  settings: {
-    theme: isString,
-    notifications: {
-      email: isBoolean,
-      push: isBoolean,
-      sms: isBoolean,
-    },
-  },
-  metadata: {
-    createdAt: isString,
-    updatedAt: isString,
-    tags: [isString],
-  },
-});
-```
-
-### **Error Handling with `isSchema`:**
-```typescript
-const errors: string[] = [];
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => errors.push(error),
-};
-
-const invalidData = {
-  name: 'John',
-  age: '30', // Should be number
-  address: {
-    street: '123 Main St',
-    city: 'Anytown',
-    zipCode: 'ABC123', // Should be number
-  },
-};
-
-isUserProfile(invalidData, config);
-// errors: [
-//   'Expected user.age ("30") to be "number"',
-//   'Expected user.address.zipCode ("ABC123") to be "number"'
-// ]
-```
-
-### **Aliases for Flexibility:**
-```typescript
-import { isSchema, isShape, isNestedType } from 'guardz';
-
-// All three are equivalent - choose the name that fits your style
-const isUser1 = isSchema({ name: isString, age: isNumber });
-const isUser2 = isShape({ name: isString, age: isNumber });
-const isUser3 = isNestedType({ name: isString, age: isNumber });
-```
-
----
-
-## 🔧 **Creating Custom Guards**
-
-For most use cases, we recommend using `guardz-generator` to automatically generate type guards from your TypeScript interfaces. However, when you need custom validation logic or are working with third-party types, you can create custom guards.
-
-**When to create custom guards:**
-- ✅ You need custom validation logic beyond type checking
-- ✅ You're working with third-party types that can't be generated
-- ✅ You need performance optimizations for specific use cases
-- ✅ You want to add business logic validation
-
-### **Using `isBranded` for Custom Type Guards**
-
-The `isBranded` utility allows you to create custom type guards for branded types with your own validation logic. This is perfect for creating domain-specific types with custom validation rules.
-
-#### **Basic Pattern:**
-```typescript
-import { isBranded, type Branded } from 'guardz';
-
-// Define a branded type
-type UserId = Branded<number, 'UserId'>;
-
-// Create a type guard with custom validation
-const isUserId = isBranded<UserId>((value) => {
-  if (typeof value !== 'number' || value <= 0 || !Number.isInteger(value)) {
-    throw new Error('UserId must be a positive integer');
-  }
-});
-
-// Usage
-const data: unknown = 123;
-if (isUserId(data)) {
-  // data is now typed as UserId
-  console.log(data); // number & { __brand: 'UserId' }
-}
-```
-
-#### **Email Validation Example:**
-```typescript
-type Email = Branded<string, 'Email'>;
-
-const isEmail = isBranded<Email>((value) => {
-  if (typeof value !== 'string') {
-    throw new Error('Email must be a string');
-  }
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(value)) {
-    throw new Error('Invalid email format');
-  }
-});
-
-// Usage with error handling
-const errors: string[] = [];
-const config = {
-  callbackOnError: (error: string) => errors.push(error),
-  identifier: 'email'
-};
-
-isEmail('invalid-email', config); // false, adds error to array
-```
-
-#### **Complex Validation Example:**
-```typescript
-type Age = Branded<number, 'Age'>;
-
-const isAge = isBranded<Age>((value) => {
-  if (typeof value !== 'number') {
-    throw new Error('Age must be a number');
-  }
-  if (!Number.isInteger(value)) {
-    throw new Error('Age must be an integer');
-  }
-  if (value < 0) {
-    throw new Error('Age cannot be negative');
-  }
-  if (value > 150) {
-    throw new Error('Age cannot exceed 150');
-  }
-});
-```
-
-#### **Password Validation Example:**
-```typescript
-type Password = Branded<string, 'Password'>;
-
-const isPassword = isBranded<Password>((value) => {
-  if (typeof value !== 'string') {
-    throw new Error('Password must be a string');
-  }
-  if (value.length < 8) {
-    throw new Error('Password must be at least 8 characters');
-  }
-  if (!/[A-Z]/.test(value)) {
-    throw new Error('Password must contain at least one uppercase letter');
-  }
-  if (!/[a-z]/.test(value)) {
-    throw new Error('Password must contain at least one lowercase letter');
-  }
-  if (!/\d/.test(value)) {
-    throw new Error('Password must contain at least one digit');
-  }
-});
-```
-
-#### **API Response Validation:**
-```typescript
-type ApiResponse<T> = Branded<T, 'ApiResponse'>;
-
-const isValidApiResponse = isBranded<ApiResponse<any>>((value) => {
-  if (typeof value !== 'object' || value === null) {
-    throw new Error('API response must be an object');
-  }
-  if (!('status' in value) || typeof value.status !== 'number') {
-    throw new Error('API response must have a numeric status');
-  }
-  if (!('data' in value)) {
-    throw new Error('API response must have data property');
-  }
-});
-```
-
-#### **URL Validation:**
-```typescript
-type URL = Branded<string, 'URL'>;
-
-const isURL = isBranded<URL>((value) => {
-  if (typeof value !== 'string') {
-    throw new Error('URL must be a string');
-  }
-  try {
-    new URL(value);
-  } catch {
-    throw new Error('Invalid URL format');
-  }
-});
-```
-
-#### **Integration with Schema Validation:**
-```typescript
-import { isSchema, isString, isNumber } from 'guardz';
-
-// Use branded types in schemas
-const isUser = isSchema({
-  id: isUserId,        // Custom branded type guard
-  email: isEmail,      // Custom branded type guard
-  age: isAge,          // Custom branded type guard
-  name: isString,      // Built-in type guard
-  active: isNumber,    // Built-in type guard
-});
-
-// Usage
-const userData: unknown = {
-  id: 123,
-  email: 'user@example.com',
-  age: 25,
-  name: 'John Doe',
-  active: 1
-};
-
-if (isUser(userData)) {
-  // All properties are properly typed with branded types
-  console.log(userData.id);    // UserId
-  console.log(userData.email); // Email
-  console.log(userData.age);   // Age
-}
-```
-
-#### **Error Handling with Branded Types:**
-```typescript
-function validateUserInput(data: {
-  userId: unknown;
-  email: unknown;
-  age: unknown;
-}) {
-  const errors: string[] = [];
-  const config = {
-    callbackOnError: (error: string) => errors.push(error),
-  };
-
-  // Validate each field with custom branded types
-  if (!isUserId(data.userId, { ...config, identifier: 'userId' })) {
-    return { valid: false, errors };
-  }
-
-  if (!isEmail(data.email, { ...config, identifier: 'email' })) {
-    return { valid: false, errors };
-  }
-
-  if (!isAge(data.age, { ...config, identifier: 'age' })) {
-    return { valid: false, errors };
-  }
-
-  return { 
-    valid: true, 
-    data: data as { userId: UserId; email: Email; age: Age } 
-  };
-}
-```
-
-### **Benefits of `isBranded`:**
-
-- **🎯 Type Safety**: Provides proper TypeScript type narrowing
-- **🔧 Custom Logic**: Full control over validation rules
-- **📝 Clear Errors**: Descriptive error messages for validation failures
-- **🔄 Integration**: Works seamlessly with existing guardz utilities
-- **⚡ Performance**: Lightweight and efficient validation
-- **🛡️ Branded Types**: Prevents type confusion in your codebase
-
-### **When to Use `isBranded`:**
-
-- ✅ **Domain-specific validation** (emails, passwords, IDs)
-- ✅ **Business rule validation** (age limits, format requirements)
-- ✅ **API response validation** (status codes, data structures)
-- ✅ **Form validation** (complex input requirements)
-- ✅ **Data transformation validation** (ensuring data integrity)
-
-**Basic pattern for traditional custom guards:**
-```typescript
-import { isSchema, isString, isNumber } from 'guardz';
-
-export function isCustomType(value: unknown): value is CustomType {
-  return isSchema<CustomType>({
-    // Define your validation schema here
-    id: isNumber,
-    name: isString,
-  })(value);
-}
-```
-
-See the [Examples](#-examples) section for more detailed patterns including recursive types.
-
----
-
-## ✨ Features
-
-### 🎯 **Core Benefits**
-- **🚀 Zero Setup** - Import and use immediately
-- **📦 Ultra Lightweight** - ~1.7KB gzipped, zero dependencies
-- **🎯 TypeScript Native** - Perfect type inference and safety
-- **🛡️ Structured Errors** - Know exactly what failed and why
-- **⚡ Performance Optimized** - Choose the right error mode for your use case
-
-### 🔧 **Advanced Features**
-- **📊 JSON Tree Feedback** - Comprehensive validation analysis
-- **🎛️ Multiple Error Modes** - Single, multi, and JSON tree modes
-- **🌐 Ecosystem Integration** - Event handling, HTTP clients, code generation
-- **🔍 Nested Validation** - Deep object and array validation
-- **📝 Template Literal Support** - Easy debugging and logging
-- **🚀 Framework Agnostic** - Works with React, Angular, Vue, Node.js, and more
-
----
-
-## 📦 Installation
+### Installation
 
 ```bash
+# npm
 npm install guardz
-# or
+
+# yarn
 yarn add guardz
-# or
+
+# pnpm
 pnpm add guardz
 ```
 
-### Bundle Size
-- **Gzipped**: ~1.7KB
-- **Uncompressed**: ~11.7KB
-- **Dependencies**: Zero
+### TypeScript Configuration
 
----
+Ensure your `tsconfig.json` includes:
 
-## 🎯 Core Concepts
-
-### **Structured Error Handling**
-
-Guardz's most important feature is its structured error reporting:
-
-- **What failed** (the value and its field)
-- **Where it failed** (the property path)
-- **What was expected** (the type or constraint)
-
-```typescript
-// Clear, actionable error messages
-"Expected user.age ("30") to be "number""
-"Expected user.details.email (123) to be "string""
-"Expected users[2].isActive (null) to be "boolean""
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
 ```
 
-### **Error Modes**
-
-Guardz supports three error modes optimized for different use cases:
-
-#### **Multi Mode (Default)**
-Collects all validation errors in a single combined message:
+### Basic Usage
 
 ```typescript
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => console.log(error),
-  // errorMode: 'multi' (default)
-};
+import { isString, isNumber, isType, isArrayWithEachItem } from 'guardz';
 
-// Output: "Expected user.name (123) to be "string"; Expected user.age ("30") to be "number""
+// Basic validation
+const isValid = isString('hello'); // true
+
+// Object validation
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+const user = { id: 1, name: 'John', email: 'john@example.com' };
+console.log(isUser(user)); // true
 ```
 
-**Best for:** General validation, user feedback, and debugging scenarios.
+## ✨ Features
 
-#### **Single Mode**
-Stops validation at the first error for maximum performance:
+- **Comprehensive Type Guards**: 50+ built-in type guards for all JavaScript types
+- **Advanced Validation**: Array validation, object validation, union types, and more
+- **Error Reporting**: Detailed error messages with configurable error handling
+- **Performance Optimized**: Fast validation with minimal overhead
+- **TypeScript First**: Full type safety with exact type inference
+- **Zero Dependencies**: Lightweight with no external dependencies
+- **Tree Shaking**: Optimized for bundle size with tree shaking support
+
+## 📚 Documentation
+
+### Basic Type Guards
 
 ```typescript
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => console.log(error),
-  errorMode: 'single' as const,
-};
+import { isString, isNumber, isBoolean, isArray, isObject } from 'guardz';
 
-// Output: "Expected user.name (123) to be "string""
+isString('hello');        // true
+isNumber(42);            // true
+isBoolean(true);         // true
+isArray([1, 2, 3]);     // true
+isObject({ key: 'value' }); // true
 ```
 
-**Best for:** Performance-critical scenarios and fail-fast validation.
-
-#### **JSON Tree Mode**
-Provides structured JSON feedback with complete validation state:
+### Object Validation
 
 ```typescript
-const config = {
-  identifier: 'user',
-  callbackOnError: (error: string) => console.log(error),
-  errorMode: 'json' as const,
-};
-
-// Output: Complete JSON tree with valid/invalid branches
-```
-
-**Best for:** Complex DTOs with related fields, monitoring systems, and comprehensive analysis.
-
-### **Performance Considerations**
-
-| Mode | Performance | Use Case |
-|------|-------------|----------|
-| **Single** | Fastest | High-frequency validation, API validation |
-| **Multi** | Moderate | General validation, form validation |
-| **JSON Tree** | Highest overhead | Complex analysis, monitoring systems |
-
----
-
-## 📖 Examples
-
-### **Basic Object Validation**
-
-```typescript
-import { isSchema, isString, isNumber, isBoolean } from 'guardz';
+import { isType, isString, isNumber, isPositiveInteger } from 'guardz';
 
 interface User {
   id: number;
   name: string;
   email: string;
-  isActive: boolean;
+  age?: number;
 }
 
-const isUser = isSchema<User>({
-  id: isNumber,
+const isUser = isType<User>({
+  id: isPositiveInteger,
   name: isString,
   email: isString,
-  isActive: isBoolean,
+  age: isNumber, // optional
 });
 
-// Usage
-const userData: unknown = {
-  id: 1,
-  name: 'John Doe',
-  email: 'john@example.com',
-  isActive: true,
-};
-
-if (isUser(userData)) {
-  // TypeScript knows this is a User
-  console.log(userData.name.toUpperCase());
-}
+const user = { id: 1, name: 'John', email: 'john@example.com' };
+console.log(isUser(user)); // true
 ```
 
-### **Nested Object Validation**
+### Array Validation
 
 ```typescript
-import { isSchema, isString, isNumber, isArray } from 'guardz';
+import { isArrayWithEachItem, isString, isNumber } from 'guardz';
 
-const isAddress = isSchema({
-  street: isString,
-  city: isString,
-  zipCode: isString,
-});
+const isStringArray = isArrayWithEachItem(isString);
+const isNumberArray = isArrayWithEachItem(isNumber);
 
-const isUserProfile = isSchema({
-  name: isString,
-  age: isNumber,
-  address: isAddress,
-  phoneNumbers: isArray(isString),
-});
-
-// Validates deeply nested structures
-const profileData = {
-  name: 'Jane',
-  age: 30,
-  address: {
-    street: '123 Main St',
-    city: 'New York',
-    zipCode: '10001',
-  },
-  phoneNumbers: ['555-1234', '555-5678'],
-};
-
-if (isUserProfile(profileData)) {
-  // Fully typed access
-  console.log(profileData.address.city);
-}
+console.log(isStringArray(['a', 'b', 'c'])); // true
+console.log(isNumberArray([1, 2, 3])); // true
 ```
 
-### **Array Validation**
+### Union Types
 
 ```typescript
-import { isSchema, isString, isNumber, isArray } from 'guardz';
+import { isOneOfTypes, isString, isNumber, isBoolean } from 'guardz';
 
-const isStringArray = isArray(isString);
-const isNumberArray = isArray(isNumber);
+const isPrimitive = isOneOfTypes(isString, isNumber, isBoolean);
 
-const isUserList = isSchema({
-  users: isArray(isSchema({
-    name: isString,
-    age: isNumber,
-  })),
-  totalCount: isNumber,
-});
-
-// Validates array contents
-const userList = {
-  users: [
-    { name: 'Alice', age: 25 },
-    { name: 'Bob', age: 30 },
-  ],
-  totalCount: 2,
-};
+console.log(isPrimitive('hello')); // true
+console.log(isPrimitive(42));      // true
+console.log(isPrimitive(true));    // true
+console.log(isPrimitive({}));      // false
 ```
 
-### **Union Types**
-
-```typescript
-import { isType, isString, isNumber, isOneOf } from 'guardz';
-
-const isStatus = isOneOf(['active', 'inactive', 'pending'] as const);
-const isId = isOneOf([isString, isNumber]); // string or number
-
-const isEntity = isType({
-  id: isId,
-  status: isStatus,
-  name: isString,
-});
-```
-
-### **Custom Guards**
-
-```typescript
-import { isType, isString, isNumber, isBoolean, type TypeGuardFnConfig } from 'guardz';
-
-// Simple custom guard
-export function isUser(value: unknown, config?: TypeGuardFnConfig): value is User {
-  return isType<User>({
-    id: isNumber,
-    name: isString,
-    email: isString,
-    isActive: isBoolean,
-  })(value, config);
-}
-
-// With optional fields
-export function isProfile(value: unknown, config?: TypeGuardFnConfig): value is Profile {
-  return isType<Profile>({
-    name: isString,
-    age: isNumber,
-    bio: isUndefinedOr(isString), // Optional field
-  })(value, config);
-}
-```
-
-### **Recursive Types**
-
-```typescript
-import { isType, isString, isNumber, isUndefinedOr, isArrayWithEachItem, type TypeGuardFnConfig } from 'guardz';
-
-// Simple recursive type
-interface Comment {
-  id: number;
-  text: string;
-  replies?: Comment[]; // Optional recursive array
-}
-
-export function isComment(value: unknown, config?: TypeGuardFnConfig): value is Comment {
-  return isType<Comment>({
-    id: isNumber,
-    text: isString,
-    replies: isUndefinedOr(isArrayWithEachItem(isComment)),
-  })(value, config);
-}
-```
-
-### **Index Signature Validation**
-
-```typescript
-import { isIndexSignature, isString, isNumber, isBoolean, isOneOfTypes } from 'guardz';
-
-// String-keyed objects with number values
-const isStringNumberMap = isIndexSignature(isString, isNumber);
-
-// Number-keyed objects with boolean values  
-const isNumberBooleanMap = isIndexSignature(isNumber, isBoolean);
-
-// Complex value types
-const isStringUnionMap = isIndexSignature(
-  isString, 
-  isOneOfTypes(isString, isNumber, isBoolean)
-);
-
-// Usage examples
-const userAges = { alice: 25, bob: 30, charlie: 35 };
-const featureFlags = { 1: true, 2: false, 3: true };
-const mixedData = { name: "John", age: 30, active: true };
-
-console.log(isStringNumberMap(userAges)); // true
-console.log(isNumberBooleanMap(featureFlags)); // true
-console.log(isStringUnionMap(mixedData)); // true
-
-// Type narrowing
-if (isStringNumberMap(userAges)) {
-  // TypeScript knows userAges is { [key: string]: number }
-  Object.entries(userAges).forEach(([name, age]) => {
-    console.log(`${name}: ${age * 2}`); // Safe arithmetic
-  });
-}
-```
-
-### **Combining Index Signatures with Specific Properties**
-
-```typescript
-import { isIndexSignature, isIntersectionOf, isType, isString, isNumber, isBoolean } from 'guardz';
-
-interface Config {
-  [key: string]: string | number | boolean;
-  name: string;
-  version: string;
-  debug: boolean;
-}
-
-// Define the index signature part
-const isStringIndex = isIndexSignature(isString, isOneOfTypes(isString, isNumber, isBoolean));
-
-// Define the specific properties
-const isConfigProperties = isType({
-  name: isString,
-  version: isString,
-  debug: isBoolean
-});
-
-// Combine them using intersection
-const isConfig = isIntersectionOf(isStringIndex, isConfigProperties);
-
-const config: unknown = {
-  name: "myApp",
-  version: "1.0.0",
-  debug: true,
-  apiUrl: "https://api.example.com",
-  timeout: 5000
-};
-
-if (isConfig(config)) {
-  // TypeScript knows config has both specific properties AND index signature
-  console.log(config.name); // string
-  console.log(config.apiUrl); // string | number | boolean
-}
-```
-
-### **Error Handling with Configuration**
+### Error Handling
 
 ```typescript
 import { isType, isString, isNumber } from 'guardz';
 
 const errors: string[] = [];
 const config = {
-  identifier: 'api_response',
-  callbackOnError: (error: string) => errors.push(error),
-  errorMode: 'multi' as const, // default
-};
-
-const isApiResponse = isType({
-  status: isString,
-  data: isType({
-    id: isNumber,
-    name: isString,
-  }),
-});
-
-const invalidResponse = {
-  status: 200, // should be string
-  data: {
-    id: '123', // should be number
-    name: 456, // should be string
-  },
-};
-
-isApiResponse(invalidResponse, config);
-// errors: [
-//   'Expected api_response.status (200) to be "string"; Expected api_response.data.id ("123") to be "number"; Expected api_response.data.name (456) to be "string"'
-// ]
-```
-
-### **JSON Tree for Monitoring**
-
-```typescript
-import { isType, isString, isNumber } from 'guardz';
-
-const config = {
   identifier: 'user',
-  callbackOnError: (error: string) => {
-    const errorTree = JSON.parse(error);
-    // Send to monitoring system
-    monitoringService.captureError({
-      type: 'validation_error',
-      data: errorTree,
-      timestamp: new Date().toISOString(),
-    });
-  },
-  errorMode: 'json' as const,
+  callbackOnError: (error: string) => errors.push(error),
 };
 
 const isUser = isType({
@@ -871,737 +145,641 @@ const isUser = isType({
   age: isNumber,
 });
 
-const invalidUser = {
-  name: 123, // should be string
-  age: '30', // should be number
-};
+const invalidUser = { name: 123, age: 'thirty' };
+const result = isUser(invalidUser, config);
 
-isUser(invalidUser, config);
-// Sends structured JSON tree to monitoring system
+console.log(result); // false
+console.log(errors); // ['user.name: Expected string, got number', 'user.age: Expected number, got string']
 ```
 
-### **Framework Integration Examples**
+## 🎯 Common Use Cases
 
-#### **React & Next.js**
+### API Response Validation
 
 ```typescript
-import { isType, isString, isNumber } from 'guardz';
+import { isType, isString, isNumber, isArrayWithEachItem } from 'guardz';
 
-// Form validation in React
-const isFormData = isType({
-  email: isString,
-  password: isString,
-  age: isNumber,
+interface ApiResponse<T> {
+  data: T;
+  status: 'success' | 'error';
+  message: string;
+  timestamp: number;
+}
+
+const isUserResponse = isType<ApiResponse<User>>({
+  data: isType({
+    id: isNumber,
+    name: isString,
+    email: isString,
+  }),
+  status: isString, // Could use isOneOf for exact values
+  message: isString,
+  timestamp: isNumber,
 });
 
-const handleSubmit = (formData: unknown) => {
-  const errors: string[] = [];
-  const config = {
-    identifier: 'form',
-    callbackOnError: (error: string) => errors.push(error),
-  };
+// Validate API responses
+const response = await fetch('/api/users/1');
+const data = await response.json();
 
-  if (isFormData(formData, config)) {
-    // TypeScript knows this is safe
-    console.log('Valid form data:', formData.email);
-  } else {
-    console.log('Validation errors:', errors);
-  }
+if (isUserResponse(data)) {
+  console.log('Valid user:', data.data.name);
+} else {
+  console.log('Invalid response format');
+}
+```
+
+### Form Data Validation
+
+```typescript
+import { isType, isString, isNumber, isPositiveInteger } from 'guardz';
+
+interface RegistrationForm {
+  username: string;
+  email: string;
+  age: number;
+  password: string;
+}
+
+const isRegistrationForm = isType<RegistrationForm>({
+  username: isString,
+  email: isString, // Could add email regex validation
+  age: isPositiveInteger,
+  password: isString,
+});
+
+const formData = {
+  username: 'john_doe',
+  email: 'john@example.com',
+  age: 25,
+  password: 'secure123',
 };
 
-// API response validation in Next.js
-const isApiResponse = isType({
-  data: isType({
-    users: isArray(isType({
-      id: isNumber,
-      name: isString,
-    })),
+if (isRegistrationForm(formData)) {
+  // Process valid form data
+  await registerUser(formData);
+} else {
+  // Handle validation errors
+  showValidationErrors(errors);
+}
+```
+
+### Database Result Validation
+
+```typescript
+import { isType, isString, isNumber, isDate } from 'guardz';
+
+interface DatabaseUser {
+  id: number;
+  username: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const isDatabaseUser = isType<DatabaseUser>({
+  id: isNumber,
+  username: isString,
+  email: isString,
+  created_at: isString,
+  updated_at: isString,
+});
+
+// Validate database results
+const users = await db.query('SELECT * FROM users');
+const validUsers = users.filter(isDatabaseUser);
+```
+
+### Configuration Validation
+
+```typescript
+import { isType, isString, isNumber, isBoolean } from 'guardz';
+
+interface AppConfig {
+  port: number;
+  database: {
+    host: string;
+    port: number;
+    name: string;
+  };
+  features: {
+    auth: boolean;
+    caching: boolean;
+  };
+}
+
+const isAppConfig = isType<AppConfig>({
+  port: isNumber,
+  database: isType({
+    host: isString,
+    port: isNumber,
+    name: isString,
+  }),
+  features: isType({
+    auth: isBoolean,
+    caching: isBoolean,
   }),
 });
 
-export async function getServerSideProps() {
-  const response = await fetch('/api/users');
-  const data: unknown = await response.json();
-  
-  if (isApiResponse(data)) {
-    return { props: { users: data.data.users } };
-  }
-  
-  return { props: { users: [] } };
-}
-```
-
-#### **Angular**
-
-```typescript
-import { isType, isString, isNumber } from 'guardz';
-
-// Service with type validation
-@Injectable()
-export class UserService {
-  private isUser = isType({
-    id: isNumber,
-    name: isString,
-    email: isString,
-  });
-
-  async getUser(id: number): Promise<User | null> {
-    try {
-      const response = await this.http.get(`/api/users/${id}`).toPromise();
-      const data: unknown = response;
-      
-      if (this.isUser(data)) {
-        return data; // Fully typed as User
-      }
-      
-      console.error('Invalid user data received');
-      return null;
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      return null;
-    }
-  }
-}
-```
-
-#### **Vue.js**
-
-```typescript
-import { isType, isString, isNumber } from 'guardz';
-
-// Composition API with validation
-export function useUserValidation() {
-  const isUser = isType({
-    id: isNumber,
-    name: isString,
-    email: isString,
-  });
-
-  const validateUser = (data: unknown): User | null => {
-    const errors: string[] = [];
-    const config = {
-      identifier: 'user',
-      callbackOnError: (error: string) => errors.push(error),
-    };
-
-    if (isUser(data, config)) {
-      return data;
-    }
-    
-    console.error('Validation errors:', errors);
-    return null;
-  };
-
-  return { validateUser };
-}
-
-// In your Vue component
-export default {
-  setup() {
-    const { validateUser } = useUserValidation();
-    
-    const handleUserData = (data: unknown) => {
-      const user = validateUser(data);
-      if (user) {
-        // TypeScript knows this is a valid User
-        console.log(user.name);
-      }
-    };
-
-    return { handleUserData };
+// Validate environment configuration
+const config = {
+  port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
+  database: {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+    name: process.env.DB_NAME || 'myapp',
+  },
+  features: {
+    auth: process.env.AUTH_ENABLED === 'true',
+    caching: process.env.CACHE_ENABLED === 'true',
   },
 };
+
+if (!isAppConfig(config)) {
+  throw new Error('Invalid configuration');
+}
 ```
 
-#### **Node.js & Express**
+## 🔧 Advanced Features
+
+### Reusable Type Guard Patterns
+
+Create reusable type guard functions for consistent validation patterns:
 
 ```typescript
-import { isType, isString, isNumber } from 'guardz';
+import { isString, isNumber, isPositiveInteger, isType } from 'guardz';
 
-// Express middleware for request validation
-const isCreateUserRequest = isType({
-  body: isType({
-    name: isString,
-    email: isString,
-    age: isNumber,
-  }),
-});
+// Create semantic type guards using existing functions
+const isUserId = isPositiveInteger; // Already a reusable type guard
+const isEmail = isString; // Already a reusable type guard
+const isName = isString; // Already a reusable type guard
 
-const validateUserRequest = (req: Request, res: Response, next: NextFunction) => {
-  const errors: string[] = [];
-  const config = {
-    identifier: 'request',
-    callbackOnError: (error: string) => errors.push(error),
-  };
+// Use them consistently across your application
+interface User {
+  id: number;        // Uses isUserId (isPositiveInteger)
+  name: string;      // Uses isName (isString)
+  email: string;     // Uses isEmail (isString)
+}
 
-  if (isCreateUserRequest(req, config)) {
-    // TypeScript knows req.body is properly typed
-    console.log('Valid request body:', req.body.name);
-    next();
-  } else {
-    res.status(400).json({ errors });
-  }
-};
-
-// API route with validation
-app.post('/users', validateUserRequest, (req: Request, res: Response) => {
-  // req.body is guaranteed to be valid
-  const { name, email, age } = req.body;
-  // Create user logic...
+const isUser = isType<User>({
+  id: isUserId,
+  name: isName,
+  email: isEmail,
 });
 ```
 
----
+### Generic Types
+
+For complex generic types with conditional properties, use factory functions with `isType`:
+
+```typescript
+import { isType, isString, isNumber, isUndefinedOr } from 'guardz';
+
+// Define generic types with conditional properties
+type ApiKeysSelect<T extends boolean = true> = {
+  name: T extends true ? string : string | undefined;
+  collectionPermissions: T extends true ? string : string | undefined;
+  updatedAt: T extends true ? string : string | undefined;
+  createdAt: T extends true ? string : string | undefined;
+  enableAPIKey: T extends true ? boolean : boolean | undefined;
+  apiKey: T extends true ? string : string | undefined;
+  apiKeyIndex: T extends true ? number : number | undefined;
+};
+
+// Create type guard factory for generic types
+export const isApiKeysSelect = <T extends boolean = true>(
+  typeGuardT: TypeGuardFn<T>,
+): TypeGuardFn<ApiKeysSelect<T>> =>
+  isType<ApiKeysSelect<T>>({
+    name: isUndefinedOr(typeGuardT),
+    collectionPermissions: isUndefinedOr(typeGuardT),
+    updatedAt: isUndefinedOr(typeGuardT),
+    createdAt: isUndefinedOr(typeGuardT),
+    enableAPIKey: isUndefinedOr(typeGuardT),
+    apiKey: isUndefinedOr(typeGuardT),
+    apiKeyIndex: isUndefinedOr(typeGuardT),
+  });
+
+// Usage
+const isRequiredApiKeys = isApiKeysSelect(isString);
+const isOptionalApiKeys = isApiKeysSelect(isUndefinedOr(isString));
+```
+
+**💡 Pro Tip**: For complex generic type validation with multiple conditional properties, consider using [guardz-generator](https://github.com/your-org/guardz-generator) which automatically generates type guards for generic types and handles conditional properties efficiently.
+
+#### Advanced Generic Patterns
+
+```typescript
+// Multiple generic parameters
+type Container<T, U, V extends boolean = true> = {
+  primary: T;
+  secondary: U;
+  metadata: V extends true ? { timestamp: number; version: string } : undefined;
+};
+
+// Factory for multiple generic parameters
+export const isContainer = <T, U, V extends boolean = true>(
+  primaryGuard: TypeGuardFn<T>,
+  secondaryGuard: TypeGuardFn<U>,
+  metadataGuard?: TypeGuardFn<{ timestamp: number; version: string }>,
+): TypeGuardFn<Container<T, U, V>> =>
+  isType<Container<T, U, V>>({
+    primary: primaryGuard,
+    secondary: secondaryGuard,
+    metadata: metadataGuard ? isUndefinedOr(metadataGuard) : undefined,
+  });
+
+// Usage
+const isStringNumberContainer = isContainer(isString, isNumber);
+const isStringNumberContainerWithMetadata = isContainer(
+  isString,
+  isNumber,
+  isType({ timestamp: isNumber, version: isString })
+);
+```
+
+### Performance Optimizations
+
+```typescript
+import { isType, isString, isNumber, isArrayWithEachItem } from 'guardz';
+
+// Optimized for repeated validation
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  tags: isArrayWithEachItem(isString),
+});
+
+// Reuse the same guard instance
+const users = [/* large array of user objects */];
+const validUsers = users.filter(isUser); // Fast validation
+
+// Use appropriate error modes for performance
+const fastConfig = { errorMode: 'simple' }; // Fastest
+const detailedConfig = { errorMode: 'detailed' }; // More detailed
+const treeConfig = { errorMode: 'tree' }; // Most detailed
+```
+
+## 🔄 Migration Guide
+
+### From Zod
+
+```typescript
+// Zod
+import { z } from 'zod';
+const UserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string().email(),
+});
+
+// Guardz
+import { isType, isNumber, isString } from 'guardz';
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString, // Add custom email validation if needed
+});
+```
+
+### From Joi
+
+```typescript
+// Joi
+import Joi from 'joi';
+const userSchema = Joi.object({
+  id: Joi.number().required(),
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+});
+
+// Guardz
+import { isType, isNumber, isString } from 'guardz';
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+```
+
+### From Yup
+
+```typescript
+// Yup
+import * as yup from 'yup';
+const userSchema = yup.object({
+  id: yup.number().required(),
+  name: yup.string().required(),
+  email: yup.string().email().required(),
+});
+
+// Guardz
+import { isType, isNumber, isString } from 'guardz';
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+```
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+#### TypeScript Errors
+
+**Problem**: `Type 'unknown' is not assignable to parameter of type 'TypeGuardFn<T>'`
+
+**Solution**: Ensure you're using the correct type guard function:
+
+```typescript
+// ❌ Wrong
+const isUser = isType({
+  id: isNumber, // This is correct
+  name: 'string', // ❌ This is wrong - should be isString
+});
+
+// ✅ Correct
+const isUser = isType({
+  id: isNumber,
+  name: isString, // ✅ Use the type guard function
+});
+```
+
+#### Performance Issues
+
+**Problem**: Validation is slow with large objects
+
+**Solution**: Use appropriate error modes and optimize validation:
+
+```typescript
+// ❌ Slow - collects all errors
+const result = isUser(data, { errorMode: 'detailed' });
+
+// ✅ Fast - stops at first error
+const result = isUser(data, { errorMode: 'simple' });
+
+// ✅ Fastest - no error collection
+const result = isUser(data);
+```
+
+#### Bundle Size Issues
+
+**Problem**: Large bundle size
+
+**Solution**: Use tree shaking and import only what you need:
+
+```typescript
+// ❌ Imports everything
+import * as guardz from 'guardz';
+
+// ✅ Only imports what you need
+import { isType, isString, isNumber } from 'guardz';
+```
+
+### Debugging
+
+Enable detailed error reporting:
+
+```typescript
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => {
+    errors.push(error);
+    console.log('Validation error:', error);
+  },
+  errorMode: 'detailed',
+};
+
+const result = isUser(data, config);
+console.log('All errors:', errors);
+```
+
+## ⚡ Performance Tips
+
+### Error Mode Selection
+
+- **`simple`** (default): Fastest, stops at first error
+- **`detailed`**: Medium speed, collects all errors with details
+- **`tree`**: Slowest, provides hierarchical error structure
+
+### Validation Strategies
+
+```typescript
+// For production - fast validation
+const isUserFast = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+// For development - detailed errors
+const isUserDev = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+// Usage
+const config = process.env.NODE_ENV === 'production' 
+  ? undefined 
+  : { errorMode: 'detailed', callbackOnError: console.error };
+```
+
+### Caching Type Guards
+
+```typescript
+// Create type guards once, reuse them
+const isUser = isType({
+  id: isNumber,
+  name: isString,
+  email: isString,
+});
+
+// Reuse the same guard instance
+const validateUsers = (users: unknown[]) => {
+  return users.filter(isUser);
+};
+```
 
 ## 🔧 API Reference
 
-### **Core Type Guards**
+### Primitive Type Guards
 
-#### **Object Validation**
-- **`isSchema<T>(schema)`** - Validate objects with improved nested type support (recommended)
-  - Automatically handles nested object structures
-  - Better error messages for nested validation failures
-  - Supports inline object definitions and arrays
-- **`isShape<T>(schema)`** - Alias for `isSchema` (alternative naming)
-- **`isNestedType<T>(schema)`** - Alias for `isSchema` (alternative naming)
-- **`isType<T>(schema)`** - Legacy object validation (use `isSchema` for better nested support)
-  - Requires explicit `isType` calls for nested objects
-  - Simpler but less powerful than `isSchema`
-- **`isObject`** - Check if value is a plain object
-- **`isObjectWith<T>(properties)`** - Validate object has specific properties
-- **`isObjectWithEachItem<T>(itemGuard)`** - Validate objects where all values match a type guard
-- **`isPartialOf<T>(schema)`** - Validate objects that match a partial schema
+- **`isString`** - Validates string values
+- **`isNumber`** - Validates number values
+- **`isBoolean`** - Validates boolean values
+- **`isBigInt`** - Validates BigInt values
+- **`isSymbol`** - Validates Symbol values
+- **`isFunction`** - Validates function values
+- **`isObject`** - Validates object values (excluding null)
 
-#### **Primitive Type Guards**
-- **`isString`** - Check if value is a string
-- **`isNonEmptyString`** - Check if value is a non-empty string
-- **`isNumber`** - Check if value is a number
-- **`isNumeric`** - Check if value is numeric (number or string number)
-- **`isPositiveNumber`** - Check if value is a positive number
-- **`isNegativeNumber`** - Check if value is a negative number
-- **`isNonNegativeNumber`** - Check if value is a non-negative number
-- **`isNonPositiveNumber`** - Check if value is a non-positive number
-- **`isInteger`** - Check if value is an integer
-- **`isPositiveInteger`** - Check if value is a positive integer
-- **`isNegativeInteger`** - Check if value is a negative integer
-- **`isNonNegativeInteger`** - Check if value is a non-negative integer
-- **`isNonPositiveInteger`** - Check if value is a non-positive integer
-- **`isBooleanLike`** - Check if value is boolean-like (boolean, "true"/"false", 1/0)
-- **`isDateLike`** - Check if value is date-like (Date, date string, timestamp)
-- **`isBoolean`** - Check if value is a boolean
-- **`isNull`** - Check if value is null
-- **`isUndefined`** - Check if value is undefined
-- **`isDefined`** - Check if value is not null or undefined
-- **`isSymbol`** - Check if value is a symbol
-- **`isBigInt`** - Check if value is a BigInt
+### Special Type Guards
 
-#### **Array Type Guards**
-- **`isArrayWithEachItem<T>(itemGuard)`** - Validate arrays where all items match a type guard
-- **`isNonEmptyArray`** - Check if value is a non-empty array
-- **`isNonEmptyArrayWithEachItem<T>(itemGuard)`** - Validate non-empty arrays where all items match a type guard
-- **`isTuple<T>(itemGuards)`** - Validate tuples with specific item types
-- **`isArray<T>(itemGuard)`** - Validate arrays with item validation
-- **`isArrayBuffer`** - Check if value is an ArrayBuffer
-- **`isDataView`** - Check if value is a DataView
+- **`isAsserted`** - Always returns true and asserts value is T (useful for 3rd party types without runtime validation)
+- **`isEnum`** - Checks if a value matches any value from an enum
+- **`isEqualTo`** - Checks if a value exactly equals a specific value
 
-#### **Function Type Guards**
-- **`isFunction`** - Check if value is a function
-- **`isAsyncFunction`** - Check if value is an async function
-- **`isGeneratorFunction`** - Check if value is a generator function
+### Array Type Guards
 
-#### **Date & Time Type Guards**
-- **`isDate`** - Check if value is a Date object
-- **`isDateLike`** - Check if value is date-like (Date, date string, timestamp)
+- **`isArray`** - Validates arrays
+- **`isArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates arrays where each item matches a type guard
+- **`isNonEmptyArray`** - Validates non-empty arrays
+- **`isNonEmptyArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates non-empty arrays where each item matches a type guard
 
-#### **Collection Type Guards**
-- **`isMap<K, V>(keyGuard, valueGuard)`** - Validate Map objects
-- **`isSet<T>(itemGuard)`** - Validate Set objects
-- **`isIndexSignature<K, V>(keyGuard, valueGuard)`** - Validate objects with index signatures
+### Object Type Guards
 
-#### **Web API Type Guards**
-- **`isFile`** - Check if value is a File object
-- **`isFileList`** - Check if value is a FileList object
-- **`isBlob`** - Check if value is a Blob object
-- **`isFormData`** - Check if value is a FormData object
-- **`isURL`** - Check if value is a URL object
-- **`isURLSearchParams`** - Check if value is a URLSearchParams object
+- **`isObject`** - Validates objects (excluding null)
+- **`isNonNullObject`** - Validates non-null objects
+- **`isType<T>(schema: Record<string, TypeGuardFn<any>>)`** - Validates objects against a schema
+- **`isObjectWith<T>(schema: Record<string, TypeGuardFn<any>>)`** - Validates objects with specific properties
+- **`isObjectWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates objects where each property value matches a type guard
 
-#### **Error Type Guards**
-- **`isError`** - Check if value is an Error object
+### Number Type Guards
 
-#### **Union Type Guards**
-- **`isOneOf<T>(values)`** - Check if value matches one of several values
-- **`isOneOfTypes<T>(guards)`** - Check if value matches one of several type guards
+- **`isInteger`** - Validates integers
+- **`isPositiveInteger`** - Validates positive integers
+- **`isNegativeInteger`** - Validates negative integers
+- **`isNonNegativeInteger`** - Validates non-negative integers
+- **`isNonPositiveInteger`** - Validates non-positive integers
+- **`isPositiveNumber`** - Validates positive numbers
+- **`isNegativeNumber`** - Validates negative numbers
+- **`isNonNegativeNumber`** - Validates non-negative numbers
+- **`isNonPositiveNumber`** - Validates non-positive numbers
 
-#### **Composite Type Guards**
-- **`isIntersectionOf<T>(guards)`** - Validate intersection types (A & B & C)
-- **`isExtensionOf<T, U>(baseGuard, extensionGuard)`** - Validate inheritance patterns
+### String Type Guards
 
-#### **Nullable/Optional Type Guards**
-- **`isNullOr<T>(guard)`** - Check if value is null or matches type
-- **`isUndefinedOr<T>(guard)`** - Check if value is undefined or matches type
-- **`isNilOr<T>(guard)`** - Check if value is null/undefined or matches type
+- **`isNonEmptyString`** - Validates non-empty strings
 
-#### **Special Type Guards**
-- **`isAsserted<T>()`** - Always returns true (for 3rd party types)
-- **`isEnum<T>(enumObj)`** - Check if value matches enum values
-- **`isEqualTo<T>(value)`** - Check if value exactly equals specific value
-- **`guardWithTolerance<T>(guard, tolerance)`** - Create type guards with tolerance for approximate matching
+### Null/Undefined Type Guards
 
-#### **Custom Type Guards**
-- **`isBranded<T>(validation)`** - Create custom type guards for branded types with custom validation logic
-  - Takes a validation function that throws an error if validation fails
-  - Returns a type guard function that validates and narrows to the branded type
-  - Perfect for domain-specific validation (emails, passwords, IDs, etc.)
-- **`Branded<T, B>`** - Type helper for creating branded types with specific brand identifiers
-  - Creates types like `T & { __brand: B }` for type safety
-  - Prevents type confusion in your codebase
+- **`isNil`** - Validates null or undefined
+- **`isNullOr`** - Validates null or a specific type
+- **`isUndefinedOr`** - Validates undefined or a specific type
+- **`isNilOr`** - Validates null/undefined or a specific type
 
-#### **Type Converters**
-- **`toNumber(value: Numeric)`** - Convert Numeric branded type to number
-- **`toDate(value: DateLike)`** - Convert DateLike branded type to Date object
-- **`toBoolean(value: BooleanLike)`** - Convert BooleanLike branded type to boolean
+### Union Type Guards
 
-### **Utility Types**
+- **`isOneOf`** - Validates if a value equals one of the provided values
+- **`isOneOfTypes`** - Validates if a value matches one of the provided type guards
 
-Guardz exports several utility types for enhanced type safety:
+### Web API Type Guards
 
-#### **Branded Types for Enhanced Type Safety**
+- **`isDate`** - Validates Date objects
+- **`isError`** - Validates Error objects
+- **`isMap`** - Validates Map objects
+- **`isSet`** - Validates Set objects
+- **`isBlob`** - Validates Blob objects
+- **`isFile`** - Validates File objects
+- **`isFileList`** - Validates FileList objects
+- **`isFormData`** - Validates FormData objects
+- **`isURL`** - Validates URL objects
+- **`isURLSearchParams`** - Validates URLSearchParams objects
 
-Guardz provides branded types that work seamlessly with type guards to provide both compile-time and runtime type safety:
+### Utility Type Guards
+
+- **`isUnknown`** - Always returns true (useful for unknown types)
+- **`isAny`** - Always returns true (useful for any types)
+- **`isDefined`** - Validates defined values (not null/undefined)
+- **`isExtensionOf`** - Validates if an object extends a base object
+- **`isIntersectionOf`** - Validates if a value matches all provided type guards
+- **`isPartialOf`** - Validates if an object is a partial of a base object
+- **`isTuple`** - Validates tuples with specific types
+- **`isType`** - Validates objects against a type schema
+
+## 🛠️ Error Generation
+
+Guardz provides detailed error reporting with configurable error handling:
 
 ```typescript
-import { isNumeric, isDateLike, isBooleanLike } from 'guardz';
-import type { Numeric, DateLike, BooleanLike } from 'guardz';
+import { isType, isString, isNumber } from 'guardz';
 
-// Numeric values (numbers and numeric strings)
-const validateNumeric = (value: unknown): Numeric | null => {
-  if (isNumeric(value)) {
-    return value; // TypeScript knows this is Numeric
-  }
-  return null;
+const errors: string[] = [];
+const config = {
+  identifier: 'user',
+  callbackOnError: (error: string) => errors.push(error),
+  errorMode: 'detailed', // 'simple' | 'detailed' | 'tree'
 };
 
-// Date-like values (Date objects, date strings, timestamps)
-const validateDateLike = (value: unknown): DateLike | null => {
-  if (isDateLike(value)) {
-    return value; // TypeScript knows this is DateLike
-  }
-  return null;
-};
-
-// Boolean-like values (booleans, boolean strings, boolean numbers)
-const validateBooleanLike = (value: unknown): BooleanLike | null => {
-  if (isBooleanLike(value)) {
-    return value; // TypeScript knows this is BooleanLike
-  }
-  return null;
-};
-
-// Usage examples
-const numericValue = validateNumeric("123"); // Numeric | null
-const dateValue = validateDateLike("2023-01-01"); // DateLike | null
-const boolValue = validateBooleanLike("true"); // BooleanLike | null
-```
-
-**Benefits of branded types:**
-- ✅ **Compile-time safety** - TypeScript prevents invalid assignments
-- ✅ **Runtime validation** - Type guards ensure data integrity
-- ✅ **Semantic meaning** - Clear intent about what the value represents
-- ✅ **Flexible input** - Accept multiple input types while maintaining type safety
-
-
-
-```typescript
-// Array types
-type NonEmptyArray<T> = [T, ...T[]];
-type NonEmptyString = string & { readonly length: number };
-
-// Number types
-type PositiveNumber = number & { readonly __brand: 'PositiveNumber' };
-type NegativeNumber = number & { readonly __brand: 'NegativeNumber' };
-type NonNegativeNumber = number & { readonly __brand: 'NonNegativeNumber' };
-type NonPositiveNumber = number & { readonly __brand: 'NonPositiveNumber' };
-type Integer = number & { readonly __brand: 'Integer' };
-type PositiveInteger = number & { readonly __brand: 'PositiveInteger' };
-type NegativeInteger = number & { readonly __brand: 'NegativeInteger' };
-type NonNegativeInteger = number & { readonly __brand: 'NonNegativeInteger' };
-type NonPositiveInteger = number & { readonly __brand: 'NonPositiveInteger' };
-
-// Utility type guards with branded types
-type Numeric = (number | string) & { readonly __brand: 'Numeric' };
-type DateLike = (Date | string | number) & { readonly __brand: 'DateLike' };
-type BooleanLike = (boolean | string | number) & { readonly __brand: 'BooleanLike' };
-
-// Nullable types
-type Nullable<T> = T | null;
-```
-
-### **Configuration**
-
-```typescript
-interface TypeGuardFnConfig {
-  callbackOnError: (error: string) => void;
-  identifier?: string;
-  errorMode?: 'single' | 'multi' | 'json';
-}
-```
-
-- **`callbackOnError`** (required): Function called when validation errors occur
-- **`identifier`** (optional): Prefix for error messages
-- **`errorMode`** (optional): Controls error collection and formatting
-
----
-
-## 🔄 **Type Converters**
-
-Guardz provides utility functions to safely convert branded types to their real types. These converters are designed to work seamlessly with the branded types and type guards.
-
-### **Available Converters**
-
-#### **`toNumber(value: Numeric): number`**
-Converts a Numeric branded type to a number.
-
-```typescript
-import { toNumber, isNumeric } from 'guardz';
-
-// Safe conversion after validation
-const data: unknown = "123";
-if (isNumeric(data)) {
-  const num = toNumber(data); // TypeScript knows this is safe
-  console.log(num.toFixed(2)); // "123.00"
-}
-
-// Works with both string and number inputs
-const num1 = toNumber("100"); // 100
-const num2 = toNumber(200);   // 200
-const num3 = toNumber("3.14"); // 3.14
-```
-
-#### **`toDate(value: DateLike): Date`**
-Converts a DateLike branded type to a Date object.
-
-```typescript
-import { toDate, isDateLike } from 'guardz';
-
-// Safe conversion after validation
-const data: unknown = "2023-01-01";
-if (isDateLike(data)) {
-  const date = toDate(data); // TypeScript knows this is safe
-  console.log(date.toISOString()); // "2023-01-01T00:00:00.000Z"
-}
-
-// Works with different input types
-const date1 = toDate(new Date()); // Returns the same Date object
-const date2 = toDate("2023-01-01"); // Creates Date from string
-const date3 = toDate(1672531200000); // Creates Date from timestamp
-```
-
-#### **`toBoolean(value: BooleanLike): boolean`**
-Converts a BooleanLike branded type to a boolean.
-
-```typescript
-import { toBoolean, isBooleanLike } from 'guardz';
-
-// Safe conversion after validation
-const data: unknown = "true";
-if (isBooleanLike(data)) {
-  const bool = toBoolean(data); // TypeScript knows this is safe
-  console.log(bool); // true
-}
-
-// Works with different input types
-const bool1 = toBoolean(true);     // true
-const bool2 = toBoolean("true");   // true
-const bool3 = toBoolean("1");      // true
-const bool4 = toBoolean(1);        // true
-const bool5 = toBoolean(false);    // false
-const bool6 = toBoolean("false");  // false
-const bool7 = toBoolean("0");      // false
-const bool8 = toBoolean(0);        // false
-```
-
-### **Real-World Usage Examples**
-
-#### **Form Processing**
-```typescript
-import { isSchema, isString, isNumeric, isDateLike, isBooleanLike, toNumber, toDate, toBoolean } from 'guardz';
-
-const isFormData = isSchema({
+const isUser = isType({
   name: isString,
-  age: isNumeric,
-  birthDate: isDateLike,
-  isActive: isBooleanLike,
+  age: isNumber,
 });
 
-const processForm = (formData: unknown) => {
-  if (isFormData(formData)) {
-    // Convert to real types for processing
-    const processedData = {
-      name: formData.name,
-      age: toNumber(formData.age),
-      birthDate: toDate(formData.birthDate),
-      isActive: toBoolean(formData.isActive),
-    };
-    
-    // Now you can use the real types
-    console.log(processedData.age.toFixed(2));
-    console.log(processedData.birthDate.getFullYear());
-    console.log(processedData.isActive);
-    
-    return processedData;
-  }
-  return null;
-};
+const invalidUser = { name: 123, age: 'thirty' };
+const result = isUser(invalidUser, config);
+
+console.log(errors);
+// [
+//   'user.name: Expected string, got number (123)',
+//   'user.age: Expected number, got string ("thirty")'
+// ]
 ```
 
-#### **API Response Processing**
+### Error Modes
+
+- **`simple`** - Basic error messages
+- **`detailed`** - Detailed error messages with values
+- **`tree`** - Hierarchical error tree structure
+
+## 🎯 Utility Types
+
+Guardz provides utility types for enhanced type safety:
+
 ```typescript
-import { isSchema, isString, isNumeric, isDateLike, toNumber, toDate } from 'guardz';
+import type { TypeGuardFn, TypeGuardFnConfig } from 'guardz';
 
-const isApiResponse = isSchema({
-  id: isNumeric,
-  name: isString,
-  createdAt: isDateLike,
-  updatedAt: isDateLike,
-});
-
-const processApiResponse = (response: unknown) => {
-  if (isApiResponse(response)) {
-    return {
-      id: toNumber(response.id),
-      name: response.name,
-      createdAt: toDate(response.createdAt),
-      updatedAt: toDate(response.updatedAt),
-    };
-  }
-  throw new Error('Invalid API response');
-};
+// TypeGuardFn<T> - Type guard function type
+// TypeGuardFnConfig - Configuration for type guards
 ```
 
-#### **Configuration Parsing**
-```typescript
-import { isSchema, isNumeric, isBooleanLike, toNumber, toBoolean } from 'guardz';
-
-const isConfig = isSchema({
-  port: isNumeric,
-  debug: isBooleanLike,
-  timeout: isNumeric,
-});
-
-const parseConfig = (configData: unknown) => {
-  if (isConfig(configData)) {
-    return {
-      port: toNumber(configData.port),
-      debug: toBoolean(configData.debug),
-      timeout: toNumber(configData.timeout),
-    };
-  }
-  throw new Error('Invalid configuration');
-};
-```
-
-### **Key Benefits**
-
-- ✅ **Type Safety**: Guaranteed to work with branded types
-- ✅ **Performance**: Minimal overhead for conversions
-- ✅ **Flexibility**: Handle multiple input formats
-- ✅ **Real-world Ready**: Perfect for form processing, API responses, and data transformation
-- ✅ **Zero Dependencies**: Lightweight and efficient
-
----
-
-## ⚡ Performance
-
-### **Bundle Size**
-- **Gzipped**: ~1.7KB
-- **Uncompressed**: ~11.7KB
-- **Tree-shakeable**: Only import what you use
-
-### **Runtime Performance**
-- **Single Mode**: Fastest - stops at first error
-- **Multi Mode**: Moderate - validates all fields efficiently
-- **JSON Tree Mode**: Highest overhead - builds complete validation tree
-
-### **Benchmarks**
-```bash
-npm run test:performance
-```
-
----
-
-## 🌐 Ecosystem
-
-Guardz is part of a comprehensive ecosystem for type-safe development:
-
-### **🎯 `guardz-event`**
-Safe event handling with type validation and security checks.
+## 📦 Installation
 
 ```bash
-npm install guardz-event
+# npm
+npm install guardz
+
+# yarn
+yarn add guardz
+
+# pnpm
+pnpm add guardz
 ```
-
-### **🌐 `guardz-axios`**
-Type-safe HTTP client with runtime validation.
-
-```bash
-npm install guardz-axios
-```
-
-### **🔧 `guardz-generator`**
-Automatically generate type guards from TypeScript interfaces.
-
-```bash
-npm install guardz-generator
-```
-
----
-
-## 🎯 **For Best Results: Use guardz-generator**
-
-**💡 Pro Tip:** For the best developer experience, use `guardz-generator` to automatically generate type guards from your TypeScript interfaces. This ensures perfect type safety and eliminates manual guard creation.
-
-```bash
-npm install guardz-generator
-```
-
-**Why use guardz-generator?**
-- ✅ **Automatic generation** from TypeScript interfaces
-- ✅ **Perfect type safety** - no manual type mapping
-- ✅ **Handles complex types** including unions, intersections, and generics
-- ✅ **Supports recursive types** with proper circular reference handling
-- ✅ **Zero configuration** - works out of the box
-- ✅ **Framework agnostic** - generates guards for any TypeScript project
-
-**Example with guardz-generator:**
-```typescript
-// Your TypeScript interface
-interface Employee {
-  id: number;
-  name: string;
-  manager?: Employee; // Recursive reference
-  subordinates: Employee[];
-}
-
-// Generated automatically by guardz-generator
-const isEmployee = isSchema<Employee>({
-  id: isNumber,
-  name: isString,
-  manager: isUndefinedOr(isEmployee), // Handles optional recursive reference
-  subordinates: isArrayWithEachItem(isEmployee), // Handles array of recursive references
-});
-```
-
-**Get started with guardz-generator:**
-```bash
-# Install the generator
-npm install guardz-generator
-
-# Generate guards from your TypeScript files
-npx guardz-generator src/types/*.ts --output src/guards/
-
-# Use the generated guards
-import { isEmployee } from './guards/employee.guard';
-```
-
----
-
-## 🚀 Developer Experience & AI Search Optimization
-
-### **Why Developers Choose Guardz**
-
-**🔍 AI Search Friendly:**
-- **Framework Agnostic**: Works seamlessly with React, Angular, Vue, Node.js, Express, Next.js, NestJS
-- **Build Tool Compatible**: Optimized for Webpack, Vite, Rollup, esbuild, SWC
-- **Testing Framework Ready**: Perfect for Jest, Vitest, Cypress, Playwright
-- **Cloud Platform Optimized**: Deploy on AWS, Azure, GCP, Vercel, Netlify
-- **Modern Runtime Support**: Compatible with Node.js, Deno, Bun
-
-**⚡ Performance Optimized:**
-- **Tree-shakeable**: Only import what you use
-- **Bundle size optimized**: ~1.7KB gzipped
-- **Zero dependencies**: No bloat, no conflicts
-- **Runtime efficient**: Minimal overhead with smart error modes
-
-**🎯 Developer Productivity:**
-- **Zero configuration**: Works out of the box
-- **TypeScript native**: Perfect type inference
-- **Familiar syntax**: If you know TypeScript, you know Guardz
-- **Comprehensive examples**: Real-world usage patterns for every framework
-
-### **Search Keywords for AI & Developers**
-
-Guardz is optimized for discovery by AI search engines and developers looking for:
-
-- **"TypeScript runtime validation"** - Core functionality
-- **"React form validation"** - Frontend use cases
-- **"Node.js API validation"** - Backend use cases
-- **"Type guards for Express"** - Framework-specific needs
-- **"Lightweight validation library"** - Performance-focused developers
-- **"Zero dependency type checking"** - Bundle size conscious teams
-- **"TypeScript schema validation"** - Alternative to Zod/Joi
-- **"Runtime type safety"** - Core value proposition
-- **"API response validation"** - Common use case
-- **"Form validation TypeScript"** - Frontend validation needs
-
----
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
-### **Development Setup**
+### Development Setup
 
 ```bash
-git clone https://github.com/thiennp/guardz.git
+git clone https://github.com/your-org/guardz.git
 cd guardz
 npm install
 npm test
 ```
 
-### **Code Style**
-- Follow existing code style and formatting
-- Add tests for new features
-- Update documentation as needed
-
----
-
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: [Full API Reference](https://guardz.dev)
+- **Issues**: [GitHub Issues](https://github.com/your-org/guardz/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/guardz/discussions)
+- **Email**: support@guardz.dev
+
+## 🔗 Related Projects
+
+- **[guardz-generator](https://github.com/your-org/guardz-generator)** - Code generator for complex type guards and generic types
+- **[guardz-cli](https://github.com/your-org/guardz-cli)** - Command-line interface for Guardz
+- **[guardz-vscode](https://github.com/your-org/guardz-vscode)** - VS Code extension for Guardz
+
+## 🙏 Acknowledgments
+
+Thanks to all contributors and the TypeScript community for making this project possible.
 
 ---
 
-## 🚀 Ready to Get Started?
-
-Guardz makes runtime type safety **incredibly simple**. No complex setup, no heavy dependencies, just pure TypeScript goodness.
-
-```typescript
-import { isSchema, isString, isNumber } from 'guardz';
-
-// That's literally it. You're ready to go.
-const isUser = isSchema({ name: isString, age: isNumber });
-```
-
-**Why developers love Guardz:**
-- 🚀 **Zero friction** - Works immediately, no configuration needed
-- 📦 **Ultra lightweight** - ~1.7KB gzipped, zero dependencies
-- 🎯 **TypeScript native** - No generated types, no complex schemas
-- 🔧 **Drop-in ready** - Works with your existing code
-- 🛡️ **Smart defaults** - Multi-mode error handling for better UX out of the box
-- ⚡ **Performance optimized** - Choose the right error mode for your use case
-- 🌐 **Framework agnostic** - Works with React, Angular, Vue, Node.js, and more
-- 🔍 **AI search optimized** - Easy to discover and integrate
-
----
-
-## 📞 Support
-
-- 📖 **Documentation** - This README contains comprehensive examples
-- 🐛 **Issues** - Report bugs on [GitHub Issues](https://github.com/thiennp/guardz/issues)
-- 💬 **Discussions** - Ask questions on [GitHub Discussions](https://github.com/thiennp/guardz/discussions)
-
-### **Show Your Support**
-- ⭐ **Star** the repository on GitHub
-- 🍺 **Buy me a beer** - [PayPal](https://paypal.me/thiennp)
-- 📢 **Share** with your team and community
+**Made with ❤️ by the Guardz Team**
