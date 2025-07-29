@@ -15,6 +15,9 @@ export { isObject } from './typeguards/isObject';
 // Guard with tolerance
 export { guardWithTolerance } from './typeguards/guardWithTolerance';
 
+// Branded type utilities
+export { isBranded, type Branded } from './typeguards/isBranded';
+
 // Primitive type guards
 export { isAny } from './typeguards/isAny';
 export { isBoolean } from './typeguards/isBoolean';

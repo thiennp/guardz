@@ -82,6 +82,43 @@ if (isUser(data)) {
 }
 ```
 
+**With custom branded types:**
+
+```typescript
+import { isBranded, type Branded, isSchema, isString } from 'guardz';
+
+// Define custom branded types
+type Email = Branded<string, 'Email'>;
+type UserId = Branded<number, 'UserId'>;
+
+// Create custom type guards
+const isEmail = isBranded<Email>((value) => {
+  if (typeof value !== 'string' || !value.includes('@')) {
+    throw new Error('Invalid email format');
+  }
+});
+
+const isUserId = isBranded<UserId>((value) => {
+  if (typeof value !== 'number' || value <= 0) {
+    throw new Error('User ID must be a positive number');
+  }
+});
+
+// Use in schemas
+const isUser = isSchema({
+  id: isUserId,
+  email: isEmail,
+  name: isString,
+});
+
+const data: unknown = { id: 123, email: 'user@example.com', name: 'John' };
+if (isUser(data)) {
+  // data.id is typed as UserId, data.email is typed as Email
+  console.log(data.id);    // number & { __brand: 'UserId' }
+  console.log(data.email); // string & { __brand: 'Email' }
+}
+```
+
 ---
 
 ## 🎯 **Schema-Based Validation with `isSchema`**
@@ -209,7 +246,212 @@ For most use cases, we recommend using `guardz-generator` to automatically gener
 - ✅ You need performance optimizations for specific use cases
 - ✅ You want to add business logic validation
 
-**Basic pattern:**
+### **Using `isBranded` for Custom Type Guards**
+
+The `isBranded` utility allows you to create custom type guards for branded types with your own validation logic. This is perfect for creating domain-specific types with custom validation rules.
+
+#### **Basic Pattern:**
+```typescript
+import { isBranded, type Branded } from 'guardz';
+
+// Define a branded type
+type UserId = Branded<number, 'UserId'>;
+
+// Create a type guard with custom validation
+const isUserId = isBranded<UserId>((value) => {
+  if (typeof value !== 'number' || value <= 0 || !Number.isInteger(value)) {
+    throw new Error('UserId must be a positive integer');
+  }
+});
+
+// Usage
+const data: unknown = 123;
+if (isUserId(data)) {
+  // data is now typed as UserId
+  console.log(data); // number & { __brand: 'UserId' }
+}
+```
+
+#### **Email Validation Example:**
+```typescript
+type Email = Branded<string, 'Email'>;
+
+const isEmail = isBranded<Email>((value) => {
+  if (typeof value !== 'string') {
+    throw new Error('Email must be a string');
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) {
+    throw new Error('Invalid email format');
+  }
+});
+
+// Usage with error handling
+const errors: string[] = [];
+const config = {
+  callbackOnError: (error: string) => errors.push(error),
+  identifier: 'email'
+};
+
+isEmail('invalid-email', config); // false, adds error to array
+```
+
+#### **Complex Validation Example:**
+```typescript
+type Age = Branded<number, 'Age'>;
+
+const isAge = isBranded<Age>((value) => {
+  if (typeof value !== 'number') {
+    throw new Error('Age must be a number');
+  }
+  if (!Number.isInteger(value)) {
+    throw new Error('Age must be an integer');
+  }
+  if (value < 0) {
+    throw new Error('Age cannot be negative');
+  }
+  if (value > 150) {
+    throw new Error('Age cannot exceed 150');
+  }
+});
+```
+
+#### **Password Validation Example:**
+```typescript
+type Password = Branded<string, 'Password'>;
+
+const isPassword = isBranded<Password>((value) => {
+  if (typeof value !== 'string') {
+    throw new Error('Password must be a string');
+  }
+  if (value.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(value)) {
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(value)) {
+    throw new Error('Password must contain at least one lowercase letter');
+  }
+  if (!/\d/.test(value)) {
+    throw new Error('Password must contain at least one digit');
+  }
+});
+```
+
+#### **API Response Validation:**
+```typescript
+type ApiResponse<T> = Branded<T, 'ApiResponse'>;
+
+const isValidApiResponse = isBranded<ApiResponse<any>>((value) => {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('API response must be an object');
+  }
+  if (!('status' in value) || typeof value.status !== 'number') {
+    throw new Error('API response must have a numeric status');
+  }
+  if (!('data' in value)) {
+    throw new Error('API response must have data property');
+  }
+});
+```
+
+#### **URL Validation:**
+```typescript
+type URL = Branded<string, 'URL'>;
+
+const isURL = isBranded<URL>((value) => {
+  if (typeof value !== 'string') {
+    throw new Error('URL must be a string');
+  }
+  try {
+    new URL(value);
+  } catch {
+    throw new Error('Invalid URL format');
+  }
+});
+```
+
+#### **Integration with Schema Validation:**
+```typescript
+import { isSchema, isString, isNumber } from 'guardz';
+
+// Use branded types in schemas
+const isUser = isSchema({
+  id: isUserId,        // Custom branded type guard
+  email: isEmail,      // Custom branded type guard
+  age: isAge,          // Custom branded type guard
+  name: isString,      // Built-in type guard
+  active: isNumber,    // Built-in type guard
+});
+
+// Usage
+const userData: unknown = {
+  id: 123,
+  email: 'user@example.com',
+  age: 25,
+  name: 'John Doe',
+  active: 1
+};
+
+if (isUser(userData)) {
+  // All properties are properly typed with branded types
+  console.log(userData.id);    // UserId
+  console.log(userData.email); // Email
+  console.log(userData.age);   // Age
+}
+```
+
+#### **Error Handling with Branded Types:**
+```typescript
+function validateUserInput(data: {
+  userId: unknown;
+  email: unknown;
+  age: unknown;
+}) {
+  const errors: string[] = [];
+  const config = {
+    callbackOnError: (error: string) => errors.push(error),
+  };
+
+  // Validate each field with custom branded types
+  if (!isUserId(data.userId, { ...config, identifier: 'userId' })) {
+    return { valid: false, errors };
+  }
+
+  if (!isEmail(data.email, { ...config, identifier: 'email' })) {
+    return { valid: false, errors };
+  }
+
+  if (!isAge(data.age, { ...config, identifier: 'age' })) {
+    return { valid: false, errors };
+  }
+
+  return { 
+    valid: true, 
+    data: data as { userId: UserId; email: Email; age: Age } 
+  };
+}
+```
+
+### **Benefits of `isBranded`:**
+
+- **🎯 Type Safety**: Provides proper TypeScript type narrowing
+- **🔧 Custom Logic**: Full control over validation rules
+- **📝 Clear Errors**: Descriptive error messages for validation failures
+- **🔄 Integration**: Works seamlessly with existing guardz utilities
+- **⚡ Performance**: Lightweight and efficient validation
+- **🛡️ Branded Types**: Prevents type confusion in your codebase
+
+### **When to Use `isBranded`:**
+
+- ✅ **Domain-specific validation** (emails, passwords, IDs)
+- ✅ **Business rule validation** (age limits, format requirements)
+- ✅ **API response validation** (status codes, data structures)
+- ✅ **Form validation** (complex input requirements)
+- ✅ **Data transformation validation** (ensuring data integrity)
+
+**Basic pattern for traditional custom guards:**
 ```typescript
 import { isSchema, isString, isNumber } from 'guardz';
 
@@ -905,6 +1147,15 @@ app.post('/users', validateUserRequest, (req: Request, res: Response) => {
 - **`isEnum<T>(enumObj)`** - Check if value matches enum values
 - **`isEqualTo<T>(value)`** - Check if value exactly equals specific value
 - **`guardWithTolerance<T>(guard, tolerance)`** - Create type guards with tolerance for approximate matching
+
+#### **Custom Type Guards**
+- **`isBranded<T>(validation)`** - Create custom type guards for branded types with custom validation logic
+  - Takes a validation function that throws an error if validation fails
+  - Returns a type guard function that validates and narrows to the branded type
+  - Perfect for domain-specific validation (emails, passwords, IDs, etc.)
+- **`Branded<T, B>`** - Type helper for creating branded types with specific brand identifiers
+  - Creates types like `T & { __brand: B }` for type safety
+  - Prevents type confusion in your codebase
 
 #### **Type Converters**
 - **`toNumber(value: Numeric)`** - Convert Numeric branded type to number
