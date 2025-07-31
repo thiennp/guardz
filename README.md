@@ -41,29 +41,53 @@ Ensure your `tsconfig.json` includes:
 ### Basic Usage
 
 ```typescript
-import { isString, isNumber, isType, isArrayWithEachItem } from 'guardz';
+import { isNonEmptyString, isNumber, isString, isType } from 'guardz';
 
-// Basic validation
-const isValid = isString('hello'); // true
+// Basic guard
+const value: unknown = getUnknownValue();
+if(isString(value)) {
+  // TypeScript now knows value is a string - type narrowing in action
+  console.log(value.length); // Safe to access string properties
+}
 
-// Object validation
-const isUser = isType({
+// Simulate getting data from an external source (API, database, etc.)
+const maybeUser: unknown = await getUserInfoFromServer();
+
+// Define a type guard for user type checking
+const isUser = isType<UserDTO>({
   id: isNumber,
-  name: isString,
-  email: isString,
+  name: isNonEmptyString,
+  email: isNonEmptyString,
 });
 
-const user = { id: 1, name: 'John', email: 'john@example.com' };
-console.log(isUser(user)); // true
+// Use type guard for type narrowing
+if (isUser(maybeUser)) {
+  // TypeScript now knows maybeUser is a valid UserDTO
+  console.log(maybeUser.id);
+  console.log(maybeUser.name);
+  console.log(maybeUser.email);
+}
+
+```
+
+## 🎯 Type Guards vs Validators
+
+**Guardz is a type guard library, not a validation library.** This is an important distinction:
+
+- **Type guards** help TypeScript understand types during static analysis and control flow
+- **Validators** check runtime data validity with detailed error reporting
+
+Guardz focuses on providing lightweight, composable type guards that enable TypeScript's type narrowing while maintaining excellent performance. For a detailed explanation of the differences between type guards and validators, see [this comprehensive guide](https://nguyenphongthien.medium.com/distinguishing-type-guards-and-validators-in-typescript-a-practical-and-conceptual-guide-88def286a777).
+
 ```
 
 ## ✨ Features
 
 - **Comprehensive Type Guards**: 50+ built-in type guards for all JavaScript types
-- **Advanced Validation**: Array validation, object validation, union types, and more
-- **Error Reporting**: Detailed error messages with configurable error handling
-- **Performance Optimized**: Fast validation with minimal overhead
-- **TypeScript First**: Full type safety with exact type inference
+- **Advanced Type Narrowing**: Array type guards, object type guards, union types, and more
+- **TypeScript Integration**: Seamless type narrowing with exact type inference
+- **Performance Optimized**: Fast type guards with minimal overhead
+- **TypeScript First**: Full type safety with precise type inference
 - **Zero Dependencies**: Lightweight with no external dependencies
 - **Tree Shaking**: Optimized for bundle size with tree shaking support
 
@@ -72,16 +96,16 @@ console.log(isUser(user)); // true
 ### Basic Type Guards
 
 ```typescript
-import { isString, isNumber, isBoolean, isArray, isObject } from 'guardz';
+import { isString, isNumber, isBoolean, isArrayWithEachItem, isObject } from 'guardz';
 
 isString('hello');        // true
 isNumber(42);            // true
 isBoolean(true);         // true
-isArray([1, 2, 3]);     // true
+isArrayWithEachItem(isNumber)([1, 2, 3]);     // true
 isObject({ key: 'value' }); // true
 ```
 
-### Object Validation
+### Object Type Guards
 
 ```typescript
 import { isType, isString, isNumber, isPositiveInteger } from 'guardz';
@@ -97,14 +121,14 @@ const isUser = isType<User>({
   id: isPositiveInteger,
   name: isString,
   email: isString,
-  age: isNumber, // optional
+  age: isUndefinedOr(isNumber), // Handle optional property
 });
 
 const user = { id: 1, name: 'John', email: 'john@example.com' };
 console.log(isUser(user)); // true
 ```
 
-### Array Validation
+### Array Type Guards
 
 ```typescript
 import { isArrayWithEachItem, isString, isNumber } from 'guardz';
@@ -138,6 +162,7 @@ const errors: string[] = [];
 const config = {
   identifier: 'user',
   callbackOnError: (error: string) => errors.push(error),
+  errorMode: 'multi', // 'single' | 'multi' | 'json'
 };
 
 const isUser = isType({
@@ -149,7 +174,7 @@ const invalidUser = { name: 123, age: 'thirty' };
 const result = isUser(invalidUser, config);
 
 console.log(result); // false
-console.log(errors); // ['user.name: Expected string, got number', 'user.age: Expected number, got string']
+console.log(errors); // ['user.name: Expected string, got number (123)', 'user.age: Expected number, got string ("thirty")']
 ```
 
 ## 🎯 Common Use Cases
@@ -172,7 +197,7 @@ const isUserResponse = isType<ApiResponse<User>>({
     name: isString,
     email: isString,
   }),
-  status: isString, // Could use isOneOf for exact values
+  status: isOneOf('success', 'error'), // Use isOneOf for exact values
   message: isString,
   timestamp: isNumber,
 });
@@ -364,7 +389,7 @@ const isRequiredApiKeys = isApiKeysSelect(isString);
 const isOptionalApiKeys = isApiKeysSelect(isUndefinedOr(isString));
 ```
 
-**💡 Pro Tip**: For complex generic type validation with multiple conditional properties, consider using [guardz-generator](https://github.com/your-org/guardz-generator) which automatically generates type guards for generic types and handles conditional properties efficiently.
+**💡 Pro Tip**: For complex generic type validation with multiple conditional properties, consider using [guardz-generator](https://github.com/thiennp/guardz-generator) which automatically generates type guards for generic types and handles conditional properties efficiently.
 
 #### Advanced Generic Patterns
 
@@ -513,10 +538,10 @@ const isUser = isType({
 
 ```typescript
 // ❌ Slow - collects all errors
-const result = isUser(data, { errorMode: 'detailed' });
+const result = isUser(data, { errorMode: 'multi' });
 
 // ✅ Fast - stops at first error
-const result = isUser(data, { errorMode: 'simple' });
+const result = isUser(data, { errorMode: 'single' });
 
 // ✅ Fastest - no error collection
 const result = isUser(data);
@@ -548,7 +573,7 @@ const config = {
     errors.push(error);
     console.log('Validation error:', error);
   },
-  errorMode: 'detailed',
+  errorMode: 'multi',
 };
 
 const result = isUser(data, config);
@@ -559,9 +584,9 @@ console.log('All errors:', errors);
 
 ### Error Mode Selection
 
-- **`simple`** (default): Fastest, stops at first error
-- **`detailed`**: Medium speed, collects all errors with details
-- **`tree`**: Slowest, provides hierarchical error structure
+- **`single`** (default): Fastest, stops at first error
+- **`multi`**: Medium speed, collects all errors with details
+- **`json`**: Slowest, provides hierarchical error tree structure
 
 ### Validation Strategies
 
@@ -583,7 +608,7 @@ const isUserDev = isType({
 // Usage
 const config = process.env.NODE_ENV === 'production' 
   ? undefined 
-  : { errorMode: 'detailed', callbackOnError: console.error };
+  : { errorMode: 'multi', callbackOnError: console.error };
 ```
 
 ### Caching Type Guards
@@ -606,86 +631,136 @@ const validateUsers = (users: unknown[]) => {
 
 ### Primitive Type Guards
 
-- **`isString`** - Validates string values
-- **`isNumber`** - Validates number values
-- **`isBoolean`** - Validates boolean values
-- **`isBigInt`** - Validates BigInt values
-- **`isSymbol`** - Validates Symbol values
-- **`isFunction`** - Validates function values
-- **`isObject`** - Validates object values (excluding null)
+- **`isString`** - Validates that a value is a string
+- **`isNumber`** - Validates that a value is a valid number (excludes NaN)
+- **`isBoolean`** - Validates that a value is a boolean
+- **`isBigInt`** - Validates that a value is a BigInt
+- **`isFunction`** - Validates that a value is a function (including regular functions, arrow functions, class constructors, and methods)
 
 ### Special Type Guards
 
 - **`isAsserted`** - Always returns true and asserts value is T (useful for 3rd party types without runtime validation)
-- **`isEnum`** - Checks if a value matches any value from an enum
-- **`isEqualTo`** - Checks if a value exactly equals a specific value
+- **`isEnum`** - Creates a type guard that checks if a value matches any value from an enum
+- **`isEqualTo`** - Creates a type guard that checks if a value is exactly equal to a specific value using strict equality (===)
 
 ### Array Type Guards
 
-- **`isArray`** - Validates arrays
-- **`isArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates arrays where each item matches a type guard
-- **`isNonEmptyArray`** - Validates non-empty arrays
-- **`isNonEmptyArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates non-empty arrays where each item matches a type guard
+- **`isArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Creates a type guard that validates arrays where each item matches a specific type
+- **`isNonEmptyArray`** - Validates that a value is a non-empty array
+- **`isNonEmptyArrayWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Creates a type guard that validates non-empty arrays where each item matches a specific type
 
 ### Object Type Guards
 
-- **`isObject`** - Validates objects (excluding null)
-- **`isNonNullObject`** - Validates non-null objects
-- **`isType<T>(schema: Record<string, TypeGuardFn<any>>)`** - Validates objects against a schema
-- **`isObjectWith<T>(schema: Record<string, TypeGuardFn<any>>)`** - Validates objects with specific properties
-- **`isObjectWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Validates objects where each property value matches a type guard
+- **`isNonNullObject`** - Validates that a value is a non-null object (excludes arrays)
+- **`isType<T>(schema: Record<string, TypeGuardFn<any>>)`** - Creates a type guard that validates objects against a schema
+- **`isObject<T>(schema: Record<string, TypeGuardFn<any>>)`** - Alias for isType - creates a type guard for a specific object shape
+- **`isObjectWith<T>(schema: Record<string, TypeGuardFn<any>>)`** - Alias for isType - validates objects with specific properties
+- **`isObjectWithEachItem<T>(typeGuard: TypeGuardFn<T>)`** - Creates a type guard that validates plain objects where each property value matches a specific type (only checks enumerable own properties)
 
 ### Number Type Guards
 
-- **`isInteger`** - Validates integers
-- **`isPositiveInteger`** - Validates positive integers
-- **`isNegativeInteger`** - Validates negative integers
-- **`isNonNegativeInteger`** - Validates non-negative integers
-- **`isNonPositiveInteger`** - Validates non-positive integers
-- **`isPositiveNumber`** - Validates positive numbers
-- **`isNegativeNumber`** - Validates negative numbers
-- **`isNonNegativeNumber`** - Validates non-negative numbers
-- **`isNonPositiveNumber`** - Validates non-positive numbers
+- **`isInteger`** - Validates that a value is an integer (whole number)
+- **`isPositiveInteger`** - Validates that a value is a positive integer (greater than 0 and a whole number)
+- **`isNegativeInteger`** - Validates that a value is a negative integer (less than 0 and a whole number)
+- **`isNonNegativeInteger`** - Validates that a value is a non-negative integer (0 or greater and a whole number)
+- **`isNonPositiveInteger`** - Validates that a value is a non-positive integer (0 or less and a whole number)
+- **`isPositiveNumber`** - Validates that a value is a positive number (greater than 0)
+- **`isNegativeNumber`** - Validates that a value is a negative number (less than 0)
+- **`isNonNegativeNumber`** - Validates that a value is a non-negative number (0 or greater)
+- **`isNonPositiveNumber`** - Validates that a value is a non-positive number (0 or less)
+- **`isNumeric`** - Validates that a value is numeric (a number or a string that can be converted to a number)
+- **`isDateLike`** - Validates that a value can be treated as a Date (Date object, date string, or numeric timestamp)
 
 ### String Type Guards
 
-- **`isNonEmptyString`** - Validates non-empty strings
+- **`isNonEmptyString`** - Validates that a value is a non-empty string (trims whitespace, so strings containing only whitespace are considered empty)
 
 ### Null/Undefined Type Guards
 
-- **`isNil`** - Validates null or undefined
-- **`isNullOr`** - Validates null or a specific type
-- **`isUndefinedOr`** - Validates undefined or a specific type
-- **`isNilOr`** - Validates null/undefined or a specific type
+- **`isNil`** - Validates that a value is null or undefined
+- **`isNullOr`** - Creates a type guard that validates if a value is either null or matches a specific type
+- **`isUndefinedOr`** - Creates a type guard that validates if a value is either undefined or matches a specific type
+- **`isNilOr`** - Creates a type guard that validates if a value is either of type T, null, or undefined
 
 ### Union Type Guards
 
-- **`isOneOf`** - Validates if a value equals one of the provided values
-- **`isOneOfTypes`** - Validates if a value matches one of the provided type guards
+- **`isOneOf`** - Creates a type guard that checks if a value matches one of several specific values using strict equality (===)
+- **`isOneOfTypes`** - Creates a type guard that checks if a value matches at least one of several type guards
 
 ### Web API Type Guards
 
-- **`isDate`** - Validates Date objects
-- **`isError`** - Validates Error objects
-- **`isMap`** - Validates Map objects
-- **`isSet`** - Validates Set objects
-- **`isBlob`** - Validates Blob objects
-- **`isFile`** - Validates File objects
-- **`isFileList`** - Validates FileList objects
-- **`isFormData`** - Validates FormData objects
-- **`isURL`** - Validates URL objects
-- **`isURLSearchParams`** - Validates URLSearchParams objects
+- **`isDate`** - Validates that a value is a valid Date object (excludes invalid dates like `new Date("invalid")`)
+- **`isError`** - Validates that a value is an Error object
+- **`isBlob`** - Validates that a value is a Blob object
+- **`isFile`** - Validates that a value is a File object
+- **`isFileList`** - Validates that a value is a FileList object
+- **`isFormData`** - Validates that a value is a FormData object
+- **`isURL`** - Validates that a value is a URL object
+- **`isURLSearchParams`** - Validates that a value is a URLSearchParams object
+
+### Collection Type Guards
+
+- **`isMap`** - Validates that a value is a Map object
+- **`isSet`** - Validates that a value is a Set object
+- **`isIndexSignature`** - Creates a type guard that validates objects with index signatures (objects with dynamic keys of a specific type and values of a specific type)
 
 ### Utility Type Guards
 
 - **`isUnknown`** - Always returns true (useful for unknown types)
 - **`isAny`** - Always returns true (useful for any types)
-- **`isDefined`** - Validates defined values (not null/undefined)
-- **`isExtensionOf`** - Validates if an object extends a base object
-- **`isIntersectionOf`** - Validates if a value matches all provided type guards
-- **`isPartialOf`** - Validates if an object is a partial of a base object
-- **`isTuple`** - Validates tuples with specific types
-- **`isType`** - Validates objects against a type schema
+- **`isDefined`** - Validates that a value is defined (not null/undefined)
+- **`isBooleanLike`** - Validates that a value can be treated as a boolean (boolean, "true"/"false", "1"/"0", or 1/0)
+- **`isExtensionOf`** - Creates a type guard for types that extend a base type by combining a base type guard with validation for additional properties (useful for inheritance patterns)
+- **`isIntersectionOf`** - Creates a type guard that validates a value against multiple type guards, ensuring the value satisfies all of them
+- **`isPartialOf`** - Creates a type guard that validates partial objects matching a specific type (allows missing properties)
+- **`isTuple`** - Creates a type guard that validates tuples (fixed-length arrays with specific types at each position)
+
+### Schema Type Guards
+
+- **`isSchema`** - Creates a type guard function for object schemas with improved nested type support (automatically handles nested structures)
+- **`isShape`** - Alias for isSchema
+- **`isNestedType`** - Alias for isSchema
+
+### Advanced Type Guards
+
+- **`isBranded`** - Creates a type guard function for a branded type (validates and narrows to branded types)
+- **`guardWithTolerance`** - Validates data against a type guard but returns the data regardless of validation result (useful for logging errors while proceeding with potentially invalid data)
+
+### Type Guard Error Generation
+
+- **`generateTypeGuardError`** - Generates error messages for type guard failures
+
+### Type Converters
+
+- **`toNumber`** - Converts a Numeric value to a number (safely converts validated numeric values)
+- **`toDate`** - Converts a DateLike value to a Date object (safely converts validated date values)
+- **`toBoolean`** - Converts a BooleanLike value to a boolean (safely converts validated boolean values)
+
+### Validation Types
+
+- **`ValidationError`** - Error type for validation failures with path, expected type, actual value, and message
+- **`ValidationTree`** - Tree structure for hierarchical validation errors
+- **`ValidationResult`** - Result type for validation operations with validity status and errors
+- **`ValidationContext`** - Context type for validation operations with path and configuration
+
+### Branded Types
+
+- **`Branded<T, B>`** - Branded type with a specific brand identifier
+- **`NonEmptyArray<T>`** - Array type that cannot be empty
+- **`NonEmptyString`** - String type that cannot be empty
+- **`PositiveNumber`** - Number type that must be positive
+- **`NegativeNumber`** - Number type that must be negative
+- **`NonNegativeNumber`** - Number type that must be non-negative
+- **`NonPositiveNumber`** - Number type that must be non-positive
+- **`PositiveInteger`** - Integer type that must be positive
+- **`NegativeInteger`** - Integer type that must be negative
+- **`NonNegativeInteger`** - Integer type that must be non-negative
+- **`NonPositiveInteger`** - Integer type that must be non-positive
+- **`Integer`** - Integer type
+- **`Nullable<T>`** - Type that can be null
+- **`Numeric`** - Numeric type (number or string that can be converted to number)
+- **`DateLike`** - Date-like type (Date object, date string, or numeric timestamp)
+- **`BooleanLike`** - Boolean-like type (boolean, "true"/"false", "1"/"0", or 1/0)
 
 ## 🛠️ Error Generation
 
@@ -698,7 +773,7 @@ const errors: string[] = [];
 const config = {
   identifier: 'user',
   callbackOnError: (error: string) => errors.push(error),
-  errorMode: 'detailed', // 'simple' | 'detailed' | 'tree'
+  errorMode: 'multi', // 'single' | 'multi' | 'json'
 };
 
 const isUser = isType({
@@ -718,9 +793,9 @@ console.log(errors);
 
 ### Error Modes
 
-- **`simple`** - Basic error messages
-- **`detailed`** - Detailed error messages with values
-- **`tree`** - Hierarchical error tree structure
+- **`single`** - Basic error messages (default)
+- **`multi`** - Detailed error messages with values
+- **`json`** - Hierarchical error tree structure
 
 ## 🎯 Utility Types
 
@@ -753,7 +828,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-org/guardz.git
+git clone https://github.com/thiennp/guardz.git
 cd guardz
 npm install
 npm test
@@ -765,16 +840,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Documentation**: [Full API Reference](https://guardz.dev)
-- **Issues**: [GitHub Issues](https://github.com/your-org/guardz/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/guardz/discussions)
-- **Email**: support@guardz.dev
+- **Documentation**: [GitHub README](https://github.com/thiennp/guardz#readme)
+- **Issues**: [GitHub Issues](https://github.com/thiennp/guardz/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/thiennp/guardz/discussions)
+- **Email**: nguyenphongthien@gmail.com
 
 ## 🔗 Related Projects
 
-- **[guardz-generator](https://github.com/your-org/guardz-generator)** - Code generator for complex type guards and generic types
-- **[guardz-cli](https://github.com/your-org/guardz-cli)** - Command-line interface for Guardz
-- **[guardz-vscode](https://github.com/your-org/guardz-vscode)** - VS Code extension for Guardz
+- **[guardz-generator](https://github.com/thiennp/guardz-generator)** - Code generator for complex type guards and generic types
+- **[guardz-cli](https://github.com/thiennp/guardz-cli)** - Command-line interface for Guardz
+- **[guardz-vscode](https://github.com/thiennp/guardz-vscode)** - VS Code extension for Guardz
 
 ## 🙏 Acknowledgments
 
