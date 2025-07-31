@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.8] - 2024-12-20
+
+### 📚 Documentation Enhancements
+- **Comprehensive Showcases**: Added complete TypeScript type guard examples covering all possible cases
+- **Real-World Scenarios**: Added practical examples for API responses, form validation, configuration
+- **Advanced Patterns**: Added examples for conditional validation, recursive types, index signatures
+- **Error Handling**: Added detailed examples for multiple error modes and reporting
+- **Performance Optimizations**: Added caching strategies and lazy validation examples
+- **Documentation Structure**: Created docs/README.md as navigation index
+- **Updated Main README**: Added documentation section with links to showcases and examples
+
+### 🎯 Showcases Coverage
+- **Primitive Types**: String, number, boolean, BigInt with specializations
+- **Object Types**: Complex objects, nested structures, optional properties
+- **Array Types**: Arrays with specific item types, tuples, non-empty arrays
+- **Union/Intersection**: Complex type combinations and narrowing
+- **Generic Types**: Reusable type guards with constraints
+- **Branded Types**: Type-safe domain-specific types
+- **Web APIs**: Browser-specific type validation
+- **Error Handling**: Multiple error modes with detailed examples
+- **Performance**: Optimization strategies and best practices
+
+### 🧪 Testing
+- **All Tests Passing**: 1026 tests across 68 test suites
+- **Clean Build**: TypeScript compilation successful
+- **No Breaking Changes**: 100% backward compatible
+
 ## [1.11.7] - 2024-12-20
 
 ### 📚 Documentation Enhancements

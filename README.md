@@ -72,10 +72,7 @@ if (isUser(maybeUser)) {
 
 ## 🎯 Type Guards vs Validators
 
-**Guardz is a type guard library, not a validation library.** This is an important distinction:
-
-- **Type guards** help TypeScript understand types during static analysis and control flow
-- **Validators** check runtime data validity with detailed error reporting
+**Guardz is a type guard library, not a validation library.**
 
 Guardz focuses on providing lightweight, composable type guards that enable TypeScript's type narrowing while maintaining excellent performance. For a detailed explanation of the differences between type guards and validators, see [this comprehensive guide](https://nguyenphongthien.medium.com/distinguishing-type-guards-and-validators-in-typescript-a-practical-and-conceptual-guide-88def286a777).
 
