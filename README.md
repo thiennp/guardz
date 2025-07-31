@@ -79,7 +79,6 @@ if (isUser(maybeUser)) {
 
 Guardz focuses on providing lightweight, composable type guards that enable TypeScript's type narrowing while maintaining excellent performance. For a detailed explanation of the differences between type guards and validators, see [this comprehensive guide](https://nguyenphongthien.medium.com/distinguishing-type-guards-and-validators-in-typescript-a-practical-and-conceptual-guide-88def286a777).
 
-```
 
 ## ✨ Features
 
@@ -838,9 +837,15 @@ npm test
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 📚 Documentation
+
+- **API Reference**: [GitHub README](https://github.com/thiennp/guardz#readme)
+- **Showcases**: [Complete TypeScript Examples](docs/showcases.md) - All possible TypeScript cases and real-world scenarios
+- **Examples**: [Practical Usage Examples](examples/) - Ready-to-run code samples
+- **CHANGELOG**: [Version History](CHANGELOG.md) - Latest updates and changes
+
 ## 🆘 Support
 
-- **Documentation**: [GitHub README](https://github.com/thiennp/guardz#readme)
 - **Issues**: [GitHub Issues](https://github.com/thiennp/guardz/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/thiennp/guardz/discussions)
 - **Email**: nguyenphongthien@gmail.com
