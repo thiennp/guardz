@@ -87,7 +87,7 @@ Guardz focuses on providing lightweight, composable type guards that enable Type
 - **Zero Dependencies**: Lightweight with no external dependencies
 - **Tree Shaking**: Optimized for bundle size with tree shaking support
 
-## 📚 Documentation
+## 📖 Basic Examples
 
 ### Basic Type Guards
 
@@ -104,7 +104,7 @@ isObject({ key: 'value' }); // true
 ### Object Type Guards
 
 ```typescript
-import { isType, isString, isNumber, isPositiveInteger } from 'guardz';
+import { isType, isString, isNumber, isPositiveInteger, isUndefinedOr } from 'guardz';
 
 interface User {
   id: number;
@@ -173,12 +173,70 @@ console.log(result); // false
 console.log(errors); // ['user.name: Expected string, got number (123)', 'user.age: Expected number, got string ("thirty")']
 ```
 
+### Pattern Validation
+
+```typescript
+import { isRegex, isPattern } from 'guardz';
+import type { Pattern } from 'guardz';
+
+// Validate RegExp objects
+const patterns: unknown[] = [/^[a-z]+$/, new RegExp('\\d+'), 'not a regex'];
+patterns.forEach(pattern => {
+  if (isRegex(pattern)) {
+    console.log(`Valid RegExp: ${pattern.source} (flags: ${pattern.flags})`);
+  }
+});
+
+// Create branded types for pattern-matched strings
+type Email = Pattern<'Email'>;
+type PhoneNumber = Pattern<'PhoneNumber'>;
+type URL = Pattern<'URL'>;
+
+const isEmail = isPattern<'Email'>(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+const isPhoneNumber = isPattern<'PhoneNumber'>('^\\+?[\\d\\s\\-()]{10,}$');
+const isUrl = isPattern<'URL'>('^https?:\\/\\/.+');
+
+// Validate strings against patterns
+const email: unknown = 'user@example.com';
+if (isEmail(email)) {
+  // email is now typed as Email (branded string)
+  console.log(`Valid email: ${email}`);
+}
+
+const phone: unknown = '+1-555-123-4567';
+if (isPhoneNumber(phone)) {
+  // phone is now typed as PhoneNumber (branded string)
+  console.log(`Valid phone: ${phone}`);
+}
+
+// Type safety with branded types
+function processEmail(email: Email) {
+  // This function only accepts validated email strings
+  console.log(`Processing email: ${email}`);
+}
+
+function processPhoneNumber(phone: PhoneNumber) {
+  // This function only accepts validated phone number strings
+  console.log(`Processing phone: ${phone}`);
+}
+
+// These work with type safety:
+const validEmail: unknown = 'user@example.com';
+if (isEmail(validEmail)) {
+  processEmail(validEmail); // TypeScript knows this is safe
+}
+
+// These would cause TypeScript errors:
+// processEmail('invalid-email'); // Error: Argument of type 'string' is not assignable to parameter of type 'Email'
+// processPhoneNumber('123'); // Error: Argument of type 'string' is not assignable to parameter of type 'PhoneNumber'
+```
+
 ## 🎯 Common Use Cases
 
 ### API Response Validation
 
 ```typescript
-import { isType, isString, isNumber, isArrayWithEachItem } from 'guardz';
+import { isType, isString, isNumber, isArrayWithEachItem, isOneOf } from 'guardz';
 
 interface ApiResponse<T> {
   data: T;
@@ -435,9 +493,9 @@ const users = [/* large array of user objects */];
 const validUsers = users.filter(isUser); // Fast validation
 
 // Use appropriate error modes for performance
-const fastConfig = { errorMode: 'simple' }; // Fastest
-const detailedConfig = { errorMode: 'detailed' }; // More detailed
-const treeConfig = { errorMode: 'tree' }; // Most detailed
+const fastConfig = { errorMode: 'single' }; // Fastest
+const detailedConfig = { errorMode: 'multi' }; // More detailed
+const treeConfig = { errorMode: 'json' }; // Most detailed
 ```
 
 ## 🔄 Migration Guide
@@ -638,6 +696,8 @@ const validateUsers = (users: unknown[]) => {
 - **`isAsserted`** - Always returns true and asserts value is T (useful for 3rd party types without runtime validation)
 - **`isEnum`** - Creates a type guard that checks if a value matches any value from an enum
 - **`isEqualTo`** - Creates a type guard that checks if a value is exactly equal to a specific value using strict equality (===)
+- **`isRegex`** - Validates that a value is a RegExp object
+- **`isPattern<P>`** - Creates a type guard that validates strings against a regex pattern and returns a branded type
 
 ### Array Type Guards
 
@@ -719,12 +779,16 @@ const validateUsers = (users: unknown[]) => {
 
 ### Advanced Type Guards
 
-- **`isBranded`** - Creates a type guard function for a branded type (validates and narrows to branded types)
+- **`isBranded`** - Creates a type guard function for a branded type using a predicate function (validates and narrows to branded types)
 - **`guardWithTolerance`** - Validates data against a type guard but returns the data regardless of validation result (useful for logging errors while proceeding with potentially invalid data)
 
 ### Type Guard Error Generation
 
 - **`generateTypeGuardError`** - Generates error messages for type guard failures
+
+### Utility Types
+
+- **`PredicateFn`** - A predicate function that validates a value and returns true if valid, false otherwise
 
 ### Type Converters
 
@@ -757,6 +821,7 @@ const validateUsers = (users: unknown[]) => {
 - **`Numeric`** - Numeric type (number or string that can be converted to number)
 - **`DateLike`** - Date-like type (Date object, date string, or numeric timestamp)
 - **`BooleanLike`** - Boolean-like type (boolean, "true"/"false", "1"/"0", or 1/0)
+- **`Pattern<P>`** - Branded string type that matches a specific regex pattern
 
 ## 🛠️ Error Generation
 
@@ -804,18 +869,7 @@ import type { TypeGuardFn, TypeGuardFnConfig } from 'guardz';
 // TypeGuardFnConfig - Configuration for type guards
 ```
 
-## 📦 Installation
 
-```bash
-# npm
-npm install guardz
-
-# yarn
-yarn add guardz
-
-# pnpm
-pnpm add guardz
-```
 
 ## 🤝 Contributing
 

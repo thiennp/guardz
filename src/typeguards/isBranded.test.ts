@@ -22,9 +22,7 @@ describe('isBranded', () => {
   describe('isBranded function', () => {
     describe('basic functionality', () => {
       const isUserId = isBranded<UserId>((value) => {
-        if (typeof value !== 'number' || value <= 0 || !Number.isInteger(value)) {
-          throw new Error('UserId must be a positive integer');
-        }
+        return typeof value === 'number' && value > 0 && Number.isInteger(value);
       });
 
       it('should return true for valid branded values', () => {
@@ -54,13 +52,9 @@ describe('isBranded', () => {
 
     describe('string validation', () => {
       const isEmail = isBranded<Email>((value) => {
-        if (typeof value !== 'string') {
-          throw new Error('Email must be a string');
-        }
+        if (typeof value !== 'string') return false;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          throw new Error('Invalid email format');
-        }
+        return emailRegex.test(value);
       });
 
       it('should validate email format correctly', () => {
@@ -87,18 +81,11 @@ describe('isBranded', () => {
 
     describe('complex validation', () => {
       const isAge = isBranded<Age>((value) => {
-        if (typeof value !== 'number') {
-          throw new Error('Age must be a number');
-        }
-        if (!Number.isInteger(value)) {
-          throw new Error('Age must be an integer');
-        }
-        if (value < 0) {
-          throw new Error('Age cannot be negative');
-        }
-        if (value > 150) {
-          throw new Error('Age cannot exceed 150');
-        }
+        if (typeof value !== 'number') return false;
+        if (!Number.isInteger(value)) return false;
+        if (value < 0) return false;
+        if (value > 150) return false;
+        return true;
       });
 
       it('should validate age correctly', () => {
@@ -119,12 +106,7 @@ describe('isBranded', () => {
 
     describe('error handling', () => {
       const isPositiveNumber = isBranded<PositiveNumber>((value) => {
-        if (typeof value !== 'number') {
-          throw new Error('Value must be a number');
-        }
-        if (value <= 0) {
-          throw new Error('Value must be positive');
-        }
+        return typeof value === 'number' && value > 0;
       });
 
       it('should call error callback when validation fails', () => {
@@ -136,7 +118,7 @@ describe('isBranded', () => {
 
         expect(isPositiveNumber(-1, config)).toBe(false);
         expect(errorCallback).toHaveBeenCalledWith(
-          expect.stringContaining('Value must be positive')
+          expect.stringContaining('branded type validation')
         );
       });
 
@@ -164,12 +146,7 @@ describe('isBranded', () => {
 
     describe('string validation with empty check', () => {
       const isNonEmptyString = isBranded<NonEmptyString>((value) => {
-        if (typeof value !== 'string') {
-          throw new Error('Value must be a string');
-        }
-        if (value.length === 0) {
-          throw new Error('String cannot be empty');
-        }
+        return typeof value === 'string' && value.length > 0;
       });
 
       it('should validate non-empty strings', () => {
@@ -192,12 +169,7 @@ describe('isBranded', () => {
     describe('edge cases', () => {
       it('should handle validation functions that throw different error types', () => {
         const isCustom = isBranded<PositiveNumber>((value) => {
-          if (typeof value !== 'number') {
-            throw 'Custom error string';
-          }
-          if (value <= 0) {
-            throw new TypeError('Custom TypeError');
-          }
+          return typeof value === 'number' && value > 0;
         });
 
         const errorCallback = jest.fn();
@@ -205,18 +177,19 @@ describe('isBranded', () => {
 
         expect(isCustom('not a number', config)).toBe(false);
         expect(errorCallback).toHaveBeenCalledWith(
-          expect.stringContaining('Custom error string')
+          expect.stringContaining('branded type validation')
         );
 
         expect(isCustom(-1, config)).toBe(false);
         expect(errorCallback).toHaveBeenCalledWith(
-          expect.stringContaining('Custom TypeError')
+          expect.stringContaining('branded type validation')
         );
       });
 
       it('should handle validation functions that never throw', () => {
-        const isAlwaysValid = isBranded<PositiveNumber>((value) => {
-          // This function never throws, so it always validates successfully
+        const isAlwaysValid = isBranded<PositiveNumber>(() => {
+          // This function always returns true, so it always validates successfully
+          return true;
         });
 
         expect(isAlwaysValid(123)).toBe(true);
@@ -231,15 +204,10 @@ describe('isBranded', () => {
         type ApiResponse<T> = Branded<T, 'ApiResponse'>;
         
         const isValidApiResponse = isBranded<ApiResponse<any>>((value) => {
-          if (typeof value !== 'object' || value === null) {
-            throw new Error('API response must be an object');
-          }
-          if (!('status' in value) || typeof value.status !== 'number') {
-            throw new Error('API response must have a numeric status');
-          }
-          if (!('data' in value)) {
-            throw new Error('API response must have data property');
-          }
+          if (typeof value !== 'object' || value === null) return false;
+          if (!('status' in value) || typeof value.status !== 'number') return false;
+          if (!('data' in value)) return false;
+          return true;
         });
 
         const validResponse = { status: 200, data: { id: 1 } };
@@ -253,21 +221,12 @@ describe('isBranded', () => {
         type Password = Branded<string, 'Password'>;
         
         const isPassword = isBranded<Password>((value) => {
-          if (typeof value !== 'string') {
-            throw new Error('Password must be a string');
-          }
-          if (value.length < 8) {
-            throw new Error('Password must be at least 8 characters');
-          }
-          if (!/[A-Z]/.test(value)) {
-            throw new Error('Password must contain at least one uppercase letter');
-          }
-          if (!/[a-z]/.test(value)) {
-            throw new Error('Password must contain at least one lowercase letter');
-          }
-          if (!/\d/.test(value)) {
-            throw new Error('Password must contain at least one digit');
-          }
+          if (typeof value !== 'string') return false;
+          if (value.length < 8) return false;
+          if (!/[A-Z]/.test(value)) return false;
+          if (!/[a-z]/.test(value)) return false;
+          if (!/\d/.test(value)) return false;
+          return true;
         });
 
         expect(isPassword('ValidPass123')).toBe(true);

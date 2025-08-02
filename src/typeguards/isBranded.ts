@@ -1,5 +1,13 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
-import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
+import type { TypeGuardFn } from './isType';
+
+/**
+ * A predicate function that validates a value and returns true if valid, false otherwise.
+ * 
+ * @param value - The value to validate
+ * @returns True if the value is valid, false otherwise
+ */
+export type PredicateFn = (value: unknown) => boolean;
 
 /**
  * Branded type helper - creates a branded type with a specific brand identifier.
@@ -20,11 +28,11 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * Creates a type guard function for a branded type.
  * 
  * This utility allows developers to create custom type guards for branded types
- * by providing a validation function that throws an error if validation fails.
+ * by providing a predicate function that returns true if the value is valid.
  * 
  * @template T - The base type
  * @template U - The branded type (extends Branded<T, any>)
- * @param validation - A function that validates the value and throws an error if invalid
+ * @param predicate - A PredicateFn that validates the value and returns true if valid, false otherwise
  * @returns A type guard function that validates and narrows to the branded type
  * 
  * @example
@@ -36,9 +44,7 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * 
  * // Create a type guard for UserId
  * const isUserId = isBranded<UserId>((value) => {
- *   if (typeof value !== 'number' || value <= 0 || !Number.isInteger(value)) {
- *     throw new Error('UserId must be a positive integer');
- *   }
+ *   return typeof value === 'number' && value > 0 && Number.isInteger(value);
  * });
  * 
  * // Usage
@@ -62,13 +68,9 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * type Email = Branded<string, 'Email'>;
  * 
  * const isEmail = isBranded<Email>((value) => {
- *   if (typeof value !== 'string') {
- *     throw new Error('Email must be a string');
- *   }
+ *   if (typeof value !== 'string') return false;
  *   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
- *   if (!emailRegex.test(value)) {
- *     throw new Error('Invalid email format');
- *   }
+ *   return emailRegex.test(value);
  * });
  * 
  * // Usage
@@ -85,36 +87,26 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * type Age = Branded<number, 'Age'>;
  * 
  * const isAge = isBranded<Age>((value) => {
- *   if (typeof value !== 'number') {
- *     throw new Error('Age must be a number');
- *   }
- *   if (!Number.isInteger(value)) {
- *     throw new Error('Age must be an integer');
- *   }
- *   if (value < 0) {
- *     throw new Error('Age cannot be negative');
- *   }
- *   if (value > 150) {
- *     throw new Error('Age cannot exceed 150');
- *   }
+ *   if (typeof value !== 'number') return false;
+ *   if (!Number.isInteger(value)) return false;
+ *   if (value < 0) return false;
+ *   if (value > 150) return false;
+ *   return true;
  * });
  * ```
  */
 export function isBranded<T extends Branded<any, any>>(
-  validation: (value: unknown) => void
+  predicate: PredicateFn
 ): TypeGuardFn<T> {
   return function (value, config): value is T {
-    try {
-      validation(value);
-      return true;
-    } catch (error) {
+    if (!predicate(value)) {
       if (config) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
         config.callbackOnError(
-          generateTypeGuardError(value, config.identifier, errorMessage)
+          generateTypeGuardError(value, config.identifier, 'branded type validation')
         );
       }
       return false;
     }
+    return true;
   };
 }

@@ -16,7 +16,7 @@ export { isObject } from './typeguards/isObject';
 export { guardWithTolerance } from './typeguards/guardWithTolerance';
 
 // Branded type utilities
-export { isBranded, type Branded } from './typeguards/isBranded';
+export { isBranded, type Branded, type PredicateFn } from './typeguards/isBranded';
 
 // Primitive type guards
 export { isAny } from './typeguards/isAny';
@@ -95,6 +95,8 @@ export { isNilOr } from './typeguards/isNilOr';
 export { isAsserted } from './typeguards/isAsserted';
 export { isEnum } from './typeguards/isEnum';
 export { isEqualTo } from './typeguards/isEqualTo';
+export { isRegex } from './typeguards/isRegex';
+export { isPattern } from './typeguards/isPattern';
 
 // Type guard error generation
 export { generateTypeGuardError } from './typeguards/generateTypeGuardError';
@@ -120,6 +122,7 @@ export type { NonPositiveInteger } from './types/NonPositiveInteger';
 export type { Numeric } from './types/Numeric';
 export type { DateLike } from './types/DateLike';
 export type { BooleanLike } from './types/BooleanLike';
+export type { Pattern } from './types/Pattern';
 
 // Type converters - convert branded types to their real types
 export { toNumber } from './converters/toNumber';
