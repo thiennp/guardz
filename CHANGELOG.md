@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2024-12-20
+
+### ✨ New Features
+- **`by` Function**: New array utility to solve parameter mismatch between type guards and array methods
+- **Array Method Compatibility**: Type guards now work directly with filter, find, findIndex, some, every, map
+- **Simplified API**: Clean syntax with `users.filter(by(isUser))` instead of complex workarounds
+- **Type Safety**: Full TypeScript support with proper type narrowing for array methods
+
+### 🔧 Array Utilities
+- **Parameter Mismatch Solution**: Handles `(value, config)` vs `(value, index, array)` mismatch
+- **Universal Compatibility**: Works with all array methods and type guards
+- **Minimal Overhead**: Simple parameter conversion with no performance impact
+- **Intuitive Usage**: Natural reading flow - "filter by isUser"
+
+### 📚 Documentation & Examples
+- **Array Utilities Section**: Added comprehensive documentation in README
+- **Complete Examples**: Added `examples/array-utilities.ts` with full usage demonstrations
+- **Integration Examples**: Shows usage with all array methods and complex type guards
+- **Best Practices**: Clear guidance on when to use `by` vs `isArrayWithEachItem`
+
+### 🧪 Testing
+- **Comprehensive Tests**: 8 tests covering all array utility functionality
+- **All Tests Passing**: 1077 tests across 71 test suites
+- **Clean Build**: TypeScript compilation successful
+- **No Breaking Changes**: 100% backward compatible
+
 ## [1.11.8] - 2024-12-20
 
 ### 📚 Documentation Enhancements
