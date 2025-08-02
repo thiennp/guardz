@@ -18,6 +18,9 @@ export { guardWithTolerance } from './typeguards/guardWithTolerance';
 // Branded type utilities
 export { isBranded, type Branded, type PredicateFn } from './typeguards/isBranded';
 
+// Brand symbols for unique symbol branded types
+export { BrandSymbols, type BrandedWith } from './types/BrandSymbols';
+
 // Primitive type guards
 export { isAny } from './typeguards/isAny';
 export { isBoolean } from './typeguards/isBoolean';
@@ -131,3 +134,6 @@ export type { Pattern } from './types/Pattern';
 export { toNumber } from './converters/toNumber';
 export { toDate } from './converters/toDate';
 export { toBoolean } from './converters/toBoolean';
+
+// Symbol type guard
+export { isSymbol } from './typeguards/isSymbol';

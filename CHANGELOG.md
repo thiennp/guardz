@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1] - 2024-12-20
+
+### ✨ New Features
+- **isSymbol**: Type guard for symbol and unique symbol values
+
 ## [1.12.0] - 2024-12-20
 
 ### ✨ New Features
@@ -12,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Array Method Compatibility**: Type guards now work directly with filter, find, findIndex, some, every, map
 - **Simplified API**: Clean syntax with `users.filter(by(isUser))` instead of complex workarounds
 - **Type Safety**: Full TypeScript support with proper type narrowing for array methods
+- **Unique Symbol Branded Types**: Enhanced branded type support with unique symbols
+- **Predefined Brand Symbols**: Common brand symbols for easy branded type creation
+- **BrandedWith Utility**: Type utility for creating branded types with predefined symbols
 
 ### 🔧 Array Utilities
 - **Parameter Mismatch Solution**: Handles `(value, config)` vs `(value, index, array)` mismatch
@@ -24,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Complete Examples**: Added `examples/array-utilities.ts` with full usage demonstrations
 - **Integration Examples**: Shows usage with all array methods and complex type guards
 - **Best Practices**: Clear guidance on when to use `by` vs `isArrayWithEachItem`
+
+### 🔐 Branded Type Enhancements
+- **Unique Symbol Support**: Branded types now support both string and unique symbol brands
+- **Type Safety**: Better type safety with unique symbols preventing string literal conflicts
+- **Predefined Symbols**: Common brand symbols for UserId, Email, Password, Age, etc.
+- **Backward Compatibility**: Existing string-based branded types continue to work
+- **Enhanced Examples**: Comprehensive examples showing both approaches
 
 ### 🧪 Testing
 - **Comprehensive Tests**: 8 tests covering all array utility functionality

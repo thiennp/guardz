@@ -12,17 +12,27 @@ export type PredicateFn = (value: unknown) => boolean;
 /**
  * Branded type helper - creates a branded type with a specific brand identifier.
  * 
+ * Supports both string literal types and unique symbols for maximum flexibility.
+ * 
  * @template T - The base type
- * @template B - The brand identifier (string literal type)
+ * @template B - The brand identifier (string literal type or unique symbol)
  * @returns A branded type that extends T with a brand property
  * 
  * @example
  * ```typescript
+ * // String-based brands (current approach)
  * type UserId = Branded<number, 'UserId'>;
  * type Email = Branded<string, 'Email'>;
+ * 
+ * // Symbol-based brands (unique symbol approach)
+ * const UserIdBrand = Symbol('UserId') as unique symbol;
+ * type UserIdSymbol = Branded<number, typeof UserIdBrand>;
+ * 
+ * const EmailBrand = Symbol('Email') as unique symbol;
+ * type EmailSymbol = Branded<string, typeof EmailBrand>;
  * ```
  */
-export type Branded<T, B extends string> = T & { __brand: B };
+export type Branded<T, B extends string | symbol> = T & { readonly brand: B };
 
 /**
  * Creates a type guard function for a branded type.
@@ -39,7 +49,7 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * ```typescript
  * import { isBranded } from 'guardz';
  * 
- * // Define a branded type
+ * // String-based branded type
  * type UserId = Branded<number, 'UserId'>;
  * 
  * // Create a type guard for UserId
@@ -51,7 +61,7 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * const id: unknown = 123;
  * if (isUserId(id)) {
  *   // id is now typed as UserId
- *   console.log(id); // number & { __brand: 'UserId' }
+ *   console.log(id); // number & { readonly brand: 'UserId' }
  * }
  * 
  * // With error handling
@@ -64,7 +74,7 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * 
  * @example
  * ```typescript
- * // Email validation
+ * // Email validation with string brand
  * type Email = Branded<string, 'Email'>;
  * 
  * const isEmail = isBranded<Email>((value) => {
@@ -77,7 +87,25 @@ export type Branded<T, B extends string> = T & { __brand: B };
  * const email: unknown = 'user@example.com';
  * if (isEmail(email)) {
  *   // email is now typed as Email
- *   console.log(email); // string & { __brand: 'Email' }
+ *   console.log(email); // string & { readonly brand: 'Email' }
+ * }
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // Unique symbol branded types
+ * const UserIdBrand = Symbol('UserId') as unique symbol;
+ * type UserIdSymbol = Branded<number, typeof UserIdBrand>;
+ * 
+ * const isUserIdSymbol = isBranded<UserIdSymbol>((value) => {
+ *   return typeof value === 'number' && value > 0 && Number.isInteger(value);
+ * });
+ * 
+ * // Usage
+ * const id: unknown = 456;
+ * if (isUserIdSymbol(id)) {
+ *   // id is now typed as UserIdSymbol
+ *   console.log(id); // number & { readonly brand: typeof UserIdBrand }
  * }
  * ```
  * 

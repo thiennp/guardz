@@ -92,13 +92,26 @@ Guardz focuses on providing lightweight, composable type guards that enable Type
 ### Basic Type Guards
 
 ```typescript
-import { isString, isNumber, isBoolean, isArrayWithEachItem, isObject } from 'guardz';
+import { isString, isNumber, isBoolean, isSymbol, isArrayWithEachItem, isObject } from 'guardz';
 
 isString('hello');        // true
-isNumber(42);            // true
-isBoolean(true);         // true
+isNumber(42);             // true
+isBoolean(true);          // true
+isSymbol(Symbol('a'));    // true
 isArrayWithEachItem(isNumber)([1, 2, 3]);     // true
-isObject({ key: 'value' }); // true
+isObject({ a: 1 });       // true
+```
+
+#### isSymbol Example
+
+```typescript
+import { isSymbol } from 'guardz';
+
+const value: unknown = Symbol('test');
+if (isSymbol(value)) {
+  // value is now typed as symbol
+  console.log(value.toString());
+}
 ```
 
 ### Object Type Guards
@@ -711,6 +724,7 @@ const validateUsers = (users: unknown[]) => {
 - **`isBoolean`** - Validates that a value is a boolean
 - **`isBigInt`** - Validates that a value is a BigInt
 - **`isFunction`** - Validates that a value is a function (including regular functions, arrow functions, class constructors, and methods)
+- **`isSymbol`** - Validates that a value is a Symbol
 
 ### Special Type Guards
 
@@ -826,7 +840,9 @@ const validateUsers = (users: unknown[]) => {
 
 ### Branded Types
 
-- **`Branded<T, B>`** - Branded type with a specific brand identifier
+- **`Branded<T, B>`** - Branded type with a specific brand identifier (supports string and unique symbol brands)
+- **`BrandSymbols`** - Predefined brand symbols for common use cases
+- **`BrandedWith<T, K>`** - Utility type to create branded types with predefined symbols
 - **`NonEmptyArray<T>`** - Array type that cannot be empty
 - **`NonEmptyString`** - String type that cannot be empty
 - **`PositiveNumber`** - Number type that must be positive
@@ -888,6 +904,37 @@ import type { TypeGuardFn, TypeGuardFnConfig } from 'guardz';
 
 // TypeGuardFn<T> - Type guard function type
 // TypeGuardFnConfig - Configuration for type guards
+```
+
+## 🔐 Unique Symbol Branded Types
+
+Guardz supports branded types with unique symbols for enhanced type safety:
+
+```typescript
+import { isBranded, Branded, BrandSymbols, type BrandedWith } from 'guardz';
+
+// Custom unique symbol brands
+const UserIdBrand = Symbol('UserId');
+type UserId = Branded<number, typeof UserIdBrand>;
+
+const isUserId = isBranded<UserId>((value) => {
+  return typeof value === 'number' && value > 0 && Number.isInteger(value);
+});
+
+// Predefined brand symbols
+type Email = BrandedWith<string, 'Email'>;
+const isEmail = isBranded<Email>((value) => {
+  if (typeof value !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(value);
+});
+
+// Usage
+const id: unknown = 123;
+if (isUserId(id)) {
+  // id is now typed as UserId (number & { readonly brand: typeof UserIdBrand })
+  console.log(id);
+}
 ```
 
 
