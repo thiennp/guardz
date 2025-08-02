@@ -136,6 +136,27 @@ console.log(isStringArray(['a', 'b', 'c'])); // true
 console.log(isNumberArray([1, 2, 3])); // true
 ```
 
+### Array Utilities
+
+```typescript
+import { isString, isNumber, isType, by } from 'guardz';
+
+const isUser = isType({ name: isString, age: isNumber });
+
+const users = [
+  { name: 'Alice', age: 25 },
+  { name: 'Bob', age: '30' }, // invalid
+  { name: 'Charlie', age: 35 },
+];
+
+// ❌ This won't work due to parameter mismatch
+// const validUsers = users.filter(isUser);
+
+// ✅ Use by for simple filtering
+const validUsers = users.filter(by(isUser));
+console.log('Valid users:', validUsers);
+```
+
 ### Union Types
 
 ```typescript

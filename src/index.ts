@@ -101,6 +101,9 @@ export { isPattern } from './typeguards/isPattern';
 // Type guard error generation
 export { generateTypeGuardError } from './typeguards/generateTypeGuardError';
 
+// Array utilities for type guard compatibility
+export { by } from './utils/arrayUtils';
+
 // Validation types and utilities (for multi and json error modes)
 export type { ValidationError, ValidationTree, ValidationResult, ValidationContext } from './utils/validationUtils';
 
