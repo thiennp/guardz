@@ -8,11 +8,16 @@ import { TypeGuardFn } from '../typeguards/isType';
 export const getExpectedTypeName = (typeGuardFn: TypeGuardFn<any>): string => {
   const fnName = typeGuardFn.name;
   if (fnName.startsWith('is')) {
-    return fnName.slice(2).toLowerCase();
+    const typeName = fnName.slice(2);
+    // Special case for Array to maintain proper casing
+    if (typeName === 'Array') {
+      return 'Array';
+    }
+    return typeName.toLowerCase();
   }
   // For nested isType calls (which have empty names), return 'object' instead of 'unknown'
   if (!fnName) {
     return 'object';
   }
   return 'unknown';
-}; 
+};

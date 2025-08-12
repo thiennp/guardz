@@ -36,7 +36,7 @@ import type { TypeGuardFn } from './isType';
 export function isArrayWithEachItem<T>(
   predicate: TypeGuardFn<T>
 ): TypeGuardFn<T[]> {
-  return function (value, config): value is T[] {
+  const arrayGuard = function (value: unknown, config?: import('./isType').TypeGuardFnConfig | null): value is T[] {
     if (!Array.isArray(value)) {
       if (config) {
         config.callbackOnError(
@@ -58,4 +58,13 @@ export function isArrayWithEachItem<T>(
       )
     );
   };
+  
+  // Set the name property so getExpectedTypeName can identify it as an Array type guard
+  Object.defineProperty(arrayGuard, 'name', {
+    value: 'isArray',
+    writable: false,
+    configurable: true
+  });
+  
+  return arrayGuard;
 }

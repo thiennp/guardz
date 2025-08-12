@@ -7,7 +7,6 @@ import {
   isNumber,
   isBoolean,
   isNonNullObject,
-  isObjectWithEachItem,
   isType,
 } from '../src';
 
@@ -139,3 +138,10 @@ const invalidUsersArray = [
 const valid = isUserArray(invalidUsersArray, arrayConfig);
 console.log('Validation result:', valid); // false
 console.log('Collected errors:', arrayErrors); // [ ... ]
+
+const data: number[] | string = [1, 2, 3];
+if (isNonEmptyArray(data)) {
+  console.log('data is narrowed', data);
+} else {
+  console.log('data is not narrowed', data);
+}

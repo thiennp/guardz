@@ -16,6 +16,12 @@ describe('getExpectedTypeName', () => {
     it('should extract type name from isBoolean', () => {
       expect(getExpectedTypeName(isBoolean)).toBe('boolean');
     });
+
+    it('should extract type name from isArrayWithEachItem', () => {
+      const { isArrayWithEachItem } = require('../typeguards/isArrayWithEachItem');
+      const isStringArray = isArrayWithEachItem(isString);
+      expect(getExpectedTypeName(isStringArray)).toBe('Array');
+    });
   });
 
   describe('custom type guards', () => {
@@ -93,6 +99,7 @@ describe('getExpectedTypeName', () => {
   describe('performance', () => {
     it('should handle large number of calls efficiently', () => {
       const start = performance.now();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       for (const _ of Array.from({ length: 10000 })) {
         getExpectedTypeName(isString);
       }

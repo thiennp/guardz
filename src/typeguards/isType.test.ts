@@ -298,7 +298,7 @@ describe('isType', () => {
       expect(combinedError).toContain('Expected user.name (123) to be "string"');
       expect(combinedError).toContain('Expected user.age ("30") to be "number"');
       expect(combinedError).toContain('Expected user.isActive ("yes") to be "boolean"');
-      expect(combinedError).toContain('Expected user.tags ("not an array") to be "object"');
+      expect(combinedError).toContain('Expected user.tags ("not an array") to be "Array"');
       expect(combinedError).toContain('Expected user.profile (456) to be "object"');
       expect(combinedError).toMatch(/; /); // Should contain semicolon separators
     });
@@ -875,11 +875,6 @@ describe('isType', () => {
     });
 
     it('should handle null config in multi error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'multi' as const,
-      };
 
       // Test with null config
       const result = isSimpleUser({ name: 'John', age: 30 }, null);
@@ -891,11 +886,6 @@ describe('isType', () => {
     });
 
     it('should handle undefined config in multi error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'multi' as const,
-      };
 
       // Test with undefined config
       const result = isSimpleUser({ name: 'John', age: 30 }, undefined);
@@ -907,11 +897,6 @@ describe('isType', () => {
     });
 
     it('should handle null config in json error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'json' as const,
-      };
 
       // Test with null config
       const result = isSimpleUser({ name: 'John', age: 30 }, null);
@@ -923,11 +908,6 @@ describe('isType', () => {
     });
 
     it('should handle undefined config in json error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'json' as const,
-      };
 
       // Test with undefined config
       const result = isSimpleUser({ name: 'John', age: 30 }, undefined);
@@ -997,22 +977,12 @@ describe('isType', () => {
 
 
     it('should handle non-object values with null config in multi error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'multi' as const,
-      };
 
       const result = isSimpleUser('not an object', null);
       expect(result).toBe(false);
     });
 
     it('should handle non-object values with undefined config in json error mode', () => {
-      const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'user',
-        errorMode: 'json' as const,
-      };
 
       const result = isSimpleUser('not an object', undefined);
       expect(result).toBe(false);
