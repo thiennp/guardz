@@ -60,6 +60,7 @@ export { isTuple } from './typeguards/isTuple';
 export { isNonNullObject } from './typeguards/isNonNullObject';
 export { isObjectWithEachItem } from './typeguards/isObjectWithEachItem';
 export { isPartialOf } from './typeguards/isPartialOf';
+export { isPick } from './typeguards/isPick';
 
 // String type guards
 export { isNonEmptyString } from './typeguards/isNonEmptyString';

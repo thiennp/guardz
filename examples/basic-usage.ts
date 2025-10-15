@@ -89,3 +89,5 @@ const invalidUser = { name: 123, age: 'thirty' };
 const result = isUser(invalidUser, config);
 console.log('Validation result:', result); // false
 console.log('Collected errors:', errors); // [ 'Expected input.name (123) to be "string"', 'Expected input.age ("thirty") to be "number"' ]
+
+type a = Pick<User, 'name' | 'age'>
