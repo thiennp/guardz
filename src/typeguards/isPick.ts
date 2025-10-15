@@ -22,6 +22,8 @@ export function isPick<T, K extends keyof T>(
 
     for (const key of pickedKeys) {
       if (!Object.prototype.hasOwnProperty.call(value, key as PropertyKey)) {
+        // Delegate to base type guard to produce the correct expected type message
+        if (config) _baseTypeGuard(value, config);
         return false;
       }
     }

@@ -68,7 +68,42 @@ describe('isPick', () => {
 
     // missing picked key
     isPickName({} as any, config);
-    expect(mockCallback).not.toHaveBeenCalled();
+    const messages1 = mockCallback.mock.calls.map((c) => c[0]);
+    expect(messages1[0]).toEqual('Expected profile.name (undefined) to be "string"; Expected profile.age (undefined) to be "number"; Expected profile.isActive (undefined) to be "boolean"');
+  });
+
+  it('should work with nested isPick composition', () => {
+    interface User {
+      name: string;
+      email: string;
+      profile: {
+        city: string;
+        country: string;
+      };
+    }
+
+    const isUser = isType<User>({
+      name: isString,
+      email: isString,
+      profile: isType({
+        city: isString,
+        country: isString,
+      }),
+    });
+
+    const hasNameEmail = isPick<User, 'name' | 'email'>(isUser, 'name', 'email');
+    const hasProfile = isPick<User, 'profile'>(isUser, 'profile');
+
+    expect(hasNameEmail({ name: 'A', email: 'a@b.c' })).toBe(true);
+    expect(hasProfile({ profile: { city: 'x', country: 'y' } })).toBe(true);
+    expect(hasNameEmail({ name: 'A' } as any)).toBe(false);
+
+    const mockCallback = jest.fn();
+    const config = { identifier: 'user', callbackOnError: mockCallback };
+
+    hasNameEmail({ name: 'A' } as any, config);
+    const messages2 = mockCallback.mock.calls.map((c) => c[0]);
+    expect(messages2[0]).toEqual('Expected user.email (undefined) to be "string"; Expected user.profile (undefined) to be "object"');
   });
 });
 
