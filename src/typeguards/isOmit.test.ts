@@ -69,5 +69,3 @@ describe('isOmit', () => {
     expect(omitAge([] as any)).toBe(false);
   });
 });
-
-
