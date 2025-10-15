@@ -61,6 +61,7 @@ export { isNonNullObject } from './typeguards/isNonNullObject';
 export { isObjectWithEachItem } from './typeguards/isObjectWithEachItem';
 export { isPartialOf } from './typeguards/isPartialOf';
 export { isPick } from './typeguards/isPick';
+export { isOmit } from './typeguards/isOmit';
 
 // String type guards
 export { isNonEmptyString } from './typeguards/isNonEmptyString';
