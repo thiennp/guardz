@@ -1,6 +1,17 @@
 import { isString } from './isString';
 import { isNumber } from './isNumber';
 import { isOneOfTypes } from './isOneOfTypes';
+import { isType } from './isType';
+import { isArrayWithEachItem } from './isArrayWithEachItem';
+import { isObjectWithEachItem } from './isObjectWithEachItem';
+import { isTuple } from './isTuple';
+import { isBoolean } from './isBoolean';
+import { isEqualTo } from './isEqualTo';
+import { isUndefinedOr } from './isUndefinedOr';
+import { isNullOr } from './isNullOr';
+import { isNilOr } from './isNilOr';
+import { isPositiveNumber } from './isPositiveNumber';
+import { isNonEmptyString } from './isNonEmptyString';
 
 describe('isOneOfTypes', () => {
   const isStringOrNumber = isOneOfTypes<string | number>(isString, isNumber);
@@ -37,6 +48,440 @@ describe('isOneOfTypes', () => {
       '- Expected value (true) to be "number"',
     ].join('\n');
     expect(mockCallback).toHaveBeenCalledWith(expectedError);
+  });
+
+  describe('complex nested typeguards', () => {
+    // Define complex nested interfaces
+    interface User {
+      type: 'user';
+      id: number;
+      name: string;
+      email: string;
+      profile?: {
+        bio: string;
+        avatar?: string;
+      };
+    }
+
+    interface Admin {
+      type: 'admin';
+      id: number;
+      name: string;
+      permissions: string[];
+      settings: {
+        theme: string;
+        notifications: boolean;
+      };
+    }
+
+    interface Guest {
+      type: 'guest';
+      sessionId: string;
+      preferences: Record<string, string>;
+    }
+
+    // Create complex typeguards
+    const isUser = isType<User>({
+      type: isEqualTo('user'),
+      id: isPositiveNumber,
+      name: isNonEmptyString,
+      email: isString,
+      profile: isUndefinedOr(isType({
+        bio: isString,
+        avatar: isUndefinedOr(isString)
+      }))
+    });
+
+    const isAdmin = isType<Admin>({
+      type: isEqualTo('admin'),
+      id: isPositiveNumber,
+      name: isNonEmptyString,
+      permissions: isArrayWithEachItem(isString),
+      settings: isType({
+        theme: isString,
+        notifications: isBoolean
+      })
+    });
+
+    const isGuest = isType<Guest>({
+      type: isEqualTo('guest'),
+      sessionId: isNonEmptyString,
+      preferences: isObjectWithEachItem(isString)
+    });
+
+    const isPerson = isOneOfTypes<User | Admin | Guest>(isUser, isAdmin, isGuest);
+
+    it('should validate complex nested objects with different structures', () => {
+      // Valid User
+      const validUser: User = {
+        type: 'user',
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        profile: {
+          bio: 'Software developer',
+          avatar: 'https://example.com/avatar.jpg'
+        }
+      };
+      expect(isPerson(validUser)).toBe(true);
+
+      // Valid Admin
+      const validAdmin: Admin = {
+        type: 'admin',
+        id: 2,
+        name: 'Jane Admin',
+        permissions: ['read', 'write', 'delete'],
+        settings: {
+          theme: 'dark',
+          notifications: true
+        }
+      };
+      expect(isPerson(validAdmin)).toBe(true);
+
+      // Valid Guest
+      const validGuest: Guest = {
+        type: 'guest',
+        sessionId: 'session123',
+        preferences: {
+          language: 'en',
+          timezone: 'UTC'
+        }
+      };
+      expect(isPerson(validGuest)).toBe(true);
+    });
+
+    it('should handle optional nested properties correctly', () => {
+      // User without profile
+      const userWithoutProfile: User = {
+        type: 'user',
+        id: 3,
+        name: 'Bob Smith',
+        email: 'bob@example.com'
+      };
+      expect(isPerson(userWithoutProfile)).toBe(true);
+
+      // User with profile but no avatar
+      const userWithoutAvatar: User = {
+        type: 'user',
+        id: 4,
+        name: 'Alice Johnson',
+        email: 'alice@example.com',
+        profile: {
+          bio: 'Designer'
+        }
+      };
+      expect(isPerson(userWithoutAvatar)).toBe(true);
+    });
+
+    it('should reject invalid nested structures', () => {
+      // Invalid User - wrong type
+      const invalidUser = {
+        type: 'invalid',
+        id: 1,
+        name: 'John',
+        email: 'john@example.com'
+      };
+      expect(isPerson(invalidUser)).toBe(false);
+
+      // Invalid Admin - missing required nested property
+      const invalidAdmin = {
+        type: 'admin',
+        id: 2,
+        name: 'Jane',
+        permissions: ['read'],
+        // missing settings
+      };
+      expect(isPerson(invalidAdmin)).toBe(false);
+
+      // Invalid Guest - wrong nested property type
+      const invalidGuest = {
+        type: 'guest',
+        sessionId: 'session123',
+        preferences: {
+          language: 'en',
+          timezone: 123 // should be string
+        }
+      };
+      expect(isPerson(invalidGuest)).toBe(false);
+    });
+
+    it('should handle deeply nested arrays and objects', () => {
+      interface ComplexData {
+        type: 'complex';
+        items: Array<{
+          id: number;
+          tags: string[];
+          metadata?: {
+            created: string;
+            updated?: string;
+            flags: boolean[];
+          };
+        }>;
+        config: {
+          version: string;
+          features: Record<string, boolean>;
+          limits: [number, number, number]; // tuple
+        };
+      }
+
+      const isComplexData = isType<ComplexData>({
+        type: isEqualTo('complex'),
+        items: isArrayWithEachItem(isType({
+          id: isPositiveNumber,
+          tags: isArrayWithEachItem(isString),
+          metadata: isUndefinedOr(isType({
+            created: isString,
+            updated: isUndefinedOr(isString),
+            flags: isArrayWithEachItem(isBoolean)
+          }))
+        })),
+        config: isType({
+          version: isString,
+          features: isObjectWithEachItem(isBoolean),
+          limits: isTuple(isNumber, isNumber, isNumber)
+        })
+      });
+
+      const isDataOrPerson = isOneOfTypes<ComplexData | User | Admin>(isComplexData, isUser, isAdmin);
+
+      // Valid complex data
+      const validComplexData: ComplexData = {
+        type: 'complex',
+        items: [
+          {
+            id: 1,
+            tags: ['important', 'urgent'],
+            metadata: {
+              created: '2023-01-01',
+              flags: [true, false, true]
+            }
+          },
+          {
+            id: 2,
+            tags: ['normal']
+            // metadata is optional
+          }
+        ],
+        config: {
+          version: '1.0.0',
+          features: {
+            darkMode: true,
+            notifications: false
+          },
+          limits: [100, 200, 300]
+        }
+      };
+      expect(isDataOrPerson(validComplexData)).toBe(true);
+
+      // Should still accept valid User
+      const validUser: User = {
+        type: 'user',
+        id: 1,
+        name: 'John',
+        email: 'john@example.com'
+      };
+      expect(isDataOrPerson(validUser)).toBe(true);
+    });
+
+    it('should handle conditional and nullable types', () => {
+      interface ConditionalUser {
+        type: 'conditional';
+        status: 'active' | 'inactive' | 'pending';
+        data: string | null | undefined;
+        scores: (number | null)[];
+        metadata?: Record<string, string | number> | null;
+      }
+
+      const isConditionalUser = isType<ConditionalUser>({
+        type: isEqualTo('conditional'),
+        status: isOneOfTypes(
+          isEqualTo('active'),
+          isEqualTo('inactive'),
+          isEqualTo('pending')
+        ),
+        data: isNilOr(isString),
+        scores: isArrayWithEachItem(isNullOr(isNumber)),
+        metadata: isUndefinedOr(isNullOr(isObjectWithEachItem(isOneOfTypes<string | number>(isString, isNumber))))
+      });
+
+      const isAnyUser = isOneOfTypes<User | Admin | Guest | ConditionalUser>(
+        isUser, isAdmin, isGuest, isConditionalUser
+      );
+
+      // Valid conditional user
+      const validConditionalUser: ConditionalUser = {
+        type: 'conditional',
+        status: 'active',
+        data: 'some data',
+        scores: [100, null, 85, null, 92],
+        metadata: {
+          key1: 'value1',
+          key2: 42
+        }
+      };
+      expect(isAnyUser(validConditionalUser)).toBe(true);
+
+      // Valid conditional user with null/undefined values
+      const validConditionalUserWithNulls: ConditionalUser = {
+        type: 'conditional',
+        status: 'pending',
+        data: null,
+        scores: [null, null],
+        metadata: null
+      };
+      expect(isAnyUser(validConditionalUserWithNulls)).toBe(true);
+    });
+
+    it('should handle union types with overlapping properties', () => {
+      interface BaseEntity {
+        id: number;
+        createdAt: string;
+      }
+
+      interface Product extends BaseEntity {
+        type: 'product';
+        name: string;
+        price: number;
+        category: string;
+      }
+
+      interface Service extends BaseEntity {
+        type: 'service';
+        name: string;
+        duration: number;
+        category: string;
+      }
+
+      const isProduct = isType<Product>({
+        type: isEqualTo('product'),
+        id: isPositiveNumber,
+        createdAt: isString,
+        name: isNonEmptyString,
+        price: isPositiveNumber,
+        category: isString
+      });
+
+      const isService = isType<Service>({
+        type: isEqualTo('service'),
+        id: isPositiveNumber,
+        createdAt: isString,
+        name: isNonEmptyString,
+        duration: isPositiveNumber,
+        category: isString
+      });
+
+      const isEntity = isOneOfTypes<Product | Service>(isProduct, isService);
+
+      // Valid Product
+      const validProduct: Product = {
+        type: 'product',
+        id: 1,
+        createdAt: '2023-01-01',
+        name: 'Laptop',
+        price: 999.99,
+        category: 'Electronics'
+      };
+      expect(isEntity(validProduct)).toBe(true);
+
+      // Valid Service
+      const validService: Service = {
+        type: 'service',
+        id: 2,
+        createdAt: '2023-01-02',
+        name: 'Consultation',
+        duration: 60,
+        category: 'Professional'
+      };
+      expect(isEntity(validService)).toBe(true);
+
+      // Invalid - wrong type but correct structure
+      const invalidEntity = {
+        type: 'invalid',
+        id: 3,
+        createdAt: '2023-01-03',
+        name: 'Something',
+        price: 100,
+        category: 'Misc'
+      };
+      expect(isEntity(invalidEntity)).toBe(false);
+    });
+
+    it('should handle error reporting for complex nested structures', () => {
+      const mockCallback = jest.fn();
+      const config = { identifier: 'complexValue', callbackOnError: mockCallback };
+
+      // Test with invalid complex data
+      const invalidComplexData = {
+        type: 'complex',
+        items: [
+          {
+            id: 'not a number', // should be number
+            tags: ['valid', 'tags'],
+            metadata: {
+              created: '2023-01-01',
+              flags: [true, 'not boolean', true] // should be boolean array
+            }
+          }
+        ],
+        config: {
+          version: '1.0.0',
+          features: {
+            darkMode: true,
+            notifications: 'not boolean' // should be boolean
+          },
+          limits: [100, 200] // should be tuple of 3 numbers
+        }
+      };
+
+      interface ComplexData {
+        type: 'complex';
+        items: Array<{
+          id: number;
+          tags: string[];
+          metadata?: {
+            created: string;
+            flags: boolean[];
+          };
+        }>;
+        config: {
+          version: string;
+          features: Record<string, boolean>;
+          limits: [number, number, number];
+        };
+      }
+
+      const isComplexData = isType<ComplexData>({
+        type: isEqualTo('complex'),
+        items: isArrayWithEachItem(isType({
+          id: isPositiveNumber,
+          tags: isArrayWithEachItem(isString),
+          metadata: isUndefinedOr(isType({
+            created: isString,
+            flags: isArrayWithEachItem(isBoolean)
+          }))
+        })),
+        config: isType({
+          version: isString,
+          features: isObjectWithEachItem(isBoolean),
+          limits: isTuple(isNumber, isNumber, isNumber)
+        })
+      });
+
+      const isComplexOrPerson = isOneOfTypes<ComplexData | User>(isComplexData, isUser);
+
+      isComplexOrPerson(invalidComplexData, config);
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+      const errorMessage = mockCallback.mock.calls[0][0];
+      
+      // Should include the main error message (function names may be empty for isType guards)
+      expect(errorMessage).toContain('Expected complexValue type to match one of');
+      
+      // Should include error details from the failing typeguards
+      expect(errorMessage).toContain('Expected complexValue.items');
+      expect(errorMessage).toContain('Expected complexValue.config');
+      expect(errorMessage).toContain('Expected complexValue.type');
+    });
   });
 
   describe('error reporting edge cases', () => {

@@ -16,7 +16,7 @@ import {
   isIntersectionOf,
   isEqualTo,
   guardWithTolerance
-} from 'guardz';
+} from '../src';
 
 console.log('=== Guardz v1.10.0 Backward Compatibility Test ===\n');
 
