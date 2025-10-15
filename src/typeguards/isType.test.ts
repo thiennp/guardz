@@ -825,6 +825,105 @@ describe('isType', () => {
       
       expect(formattedError).toBe(expectedTemplateLiteral);
     });
+
+    it('should report only the first error in single error mode', () => {
+      const errors: string[] = [];
+      const config = {
+        callbackOnError: (error: string) => errors.push(error),
+        identifier: 'user',
+        errorMode: 'single' as const,
+      };
+
+      interface TestUser {
+        name: string;
+        age: number;
+        isActive: boolean;
+      }
+
+      const isTestUser = isType<TestUser>({
+        name: isString,
+        age: isNumber,
+        isActive: isBoolean,
+      });
+
+      const invalidUser = {
+        name: 123, // should be string
+        age: '30', // should be number
+        isActive: 'yes', // should be boolean
+      };
+
+      const result = isTestUser(invalidUser, config);
+
+      expect(result).toBe(false);
+      // Single mode should report only the first encountered error
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain('Expected user.name (123) to be "string"');
+    });
+
+    it('should report nested path correctly in single error mode', () => {
+      interface NestedUser {
+        name: string;
+        details: {
+          age: number;
+          email: string;
+        };
+      }
+
+      const isNestedUser = isType<NestedUser>({
+        name: isString,
+        details: isType({
+          age: isNumber,
+          email: isString,
+        }),
+      });
+
+      const errors: string[] = [];
+      const config = {
+        callbackOnError: (error: string) => errors.push(error),
+        identifier: 'user',
+        errorMode: 'single' as const,
+      };
+
+      const invalidUser = {
+        name: 'John',
+        details: {
+          age: '30', // should be number
+          email: 'john@example.com',
+        },
+      };
+
+      const result = isNestedUser(invalidUser, config);
+
+      expect(result).toBe(false);
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toContain('user.details.age');
+      expect(errors[0]).toContain('to be "number"');
+    });
+
+    it('should report non-object values properly in single error mode', () => {
+      const errors: string[] = [];
+      const config = {
+        callbackOnError: (error: string) => errors.push(error),
+        identifier: 'user',
+        errorMode: 'single' as const,
+      };
+
+      interface SimpleTestUser {
+        name: string;
+        age: number;
+      }
+
+      const isSimpleTestUser = isType<SimpleTestUser>({
+        name: isString,
+        age: isNumber,
+      });
+
+      const result = isSimpleTestUser('not an object', config);
+
+      expect(result).toBe(false);
+      expect(errors.length).toBe(1);
+      expect(errors[0]).toBe('Expected user ("not an object") to be "non-null object"');
+    });
   });
 
   describe('empty object validation', () => {
