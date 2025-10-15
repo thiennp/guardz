@@ -24,30 +24,43 @@ describe('isOmit', () => {
     'isActive'
   );
 
-  it('should pass when omitted keys are not present', () => {
+  it('should pass regardless of omitted keys; validate the rest', () => {
+    // omitted age can be present/wrong/missing; rest must be valid per base guard
     expect(omitAge({ name: 'A', isActive: true })).toBe(true);
+    expect(omitAge({ name: 'A', isActive: true, age: 2 } as any)).toBe(true);
+    expect(omitAge({ name: 'A', isActive: true, age: 'bad' } as any)).toBe(true);
+    // when non-omitted props are invalid -> fail
+    expect(omitAge({ name: 1, isActive: true } as any)).toBe(false);
     expect(omitNameAndActive({ age: 2 })).toBe(true);
   });
 
-  it('should fail when an omitted key is present', () => {
-    expect(omitAge({ age: 0 } as any)).toBe(false);
-    expect(omitNameAndActive({ name: 'A' } as any)).toBe(false);
-    expect(omitNameAndActive({ isActive: false } as any)).toBe(false);
-  });
-
-  it('should report error messages for present omitted keys', () => {
+  it('should ignore errors for omitted keys and enforce remaining keys', () => {
     const mockCallback = jest.fn();
     const config = { identifier: 'user', callbackOnError: mockCallback };
 
-    omitAge({ age: 1 } as any, config);
-    const messages1 = mockCallback.mock.calls.map((c) => c[0]);
-    expect(messages1[0]).toEqual('Expected user.age (1) to be "undefined"');
+    // age wrong type, but omitted; missing required non-omitted keys should error
+    omitAge({ name: 'A' } as any, config);
+    const msgs1 = mockCallback.mock.calls.map((c) => c[0]);
+    expect(msgs1.length).toBe(1);
+    expect(msgs1[0]).toBe('Expected user.isActive (undefined) to be "boolean"');
 
     mockCallback.mockClear();
-    omitNameAndActive({ name: 'A', isActive: false } as any, config);
-    const messages2 = mockCallback.mock.calls.map((c) => c[0]);
-    expect(messages2).toContain('Expected user.name ("A") to be "undefined"');
-    expect(messages2).toContain('Expected user.isActive (false) to be "undefined"');
+    omitAge({ isActive: true } as any, config);
+    const msgs2 = mockCallback.mock.calls.map((c) => c[0]);
+    expect(msgs2.length).toBe(1);
+    expect(msgs2[0]).toBe('Expected user.name (undefined) to be "string"');
+  });
+
+  it('should not report messages for omitted keys but still report for others', () => {
+    const mockCallback = jest.fn();
+    const config = { identifier: 'user', callbackOnError: mockCallback };
+
+    omitAge({ age: 'bad' } as any, config);
+    // no errors because other required properties are omitted as well; but omitted keys are ignored
+    expect(mockCallback).not.toHaveBeenCalled();
+
+    omitNameAndActive({ age: 'ok' as any } as any, config);
+    expect(mockCallback).not.toHaveBeenCalled();
   });
 
   it('should return false for non-object values', () => {
