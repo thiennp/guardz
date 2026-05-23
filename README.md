@@ -1,13 +1,22 @@
 # Guardz
 
-[![npm version](https://badge.fury.io/js/guardz.svg)](https://badge.fury.io/js/guardz)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
-[![npm downloads](https://img.shields.io/npm/dm/guardz.svg)](https://npm-stat.com/charts.html?package=guardz)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/guardz)](https://bundlephobia.com/result?p=guardz)
+An elegant, zero-dependency runtime validation library designed to enforce explicit type-safe boundaries in complex TypeScript architectures.
 
-A comprehensive TypeScript type guard library with advanced validation capabilities, error reporting, and performance optimizations.
+[![npm version](https://img.shields.io/npm/v/guardz.svg)](https://www.npmjs.com/package/guardz)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Why Guardz?
+
+In large-scale enterprise systems, compile-time type safety is not enough to guarantee production integrity. Data entering your system from external APIs, local storage, or user inputs can easily bypass compile-time checks, leading to silent runtime failures.
+
+`Guardz` bridges this gap. It allows you to build robust runtime quality gates and semantic validation layers without bloating your bundle or sacrificing execution performance.
+
+### Key Architectural Pillars:
+
+* **Zero Dependencies:** Engineered at the framework baseline level to ensure minimal footprint and high execution speed.
+* **Type-Safe Boundaries:** Seamlessly infers static TypeScript types from your runtime guard configurations, eliminating duplication between validation logic and type definitions.
+* **Extensible Architecture:** Designed around composable validation primitives, allowing you to easily construct domain-specific validation rules for complex entity states.
+* **FSD & Clean Architecture Ready:** Ideal for enforcing strict interface contracts at layer boundaries (e.g., validating API payloads inside Feature-Sliced Design data providers before data hits your core business logic).
 
 ## 🚀 Quick Start
 
@@ -69,13 +78,6 @@ if (isUser(maybeUser)) {
 }
 
 ```
-
-## 🎯 Type Guards vs Validators
-
-**Guardz is a type guard library, not a validation library.**
-
-Guardz focuses on providing lightweight, composable type guards that enable TypeScript's type narrowing while maintaining excellent performance. For a detailed explanation of the differences between type guards and validators, see [this comprehensive guide](https://nguyenphongthien.medium.com/distinguishing-type-guards-and-validators-in-typescript-a-practical-and-conceptual-guide-88def286a777).
-
 
 ## ✨ Features
 
