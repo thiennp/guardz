@@ -1,11 +1,9 @@
-import { isNullOr } from './isNullOr';
-import { isUndefinedOr } from './isUndefinedOr';
-import type { TypeGuardFn } from './isType';
+import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 
 /**
  * A function that takes a type guard function of type T,
  * and returns a new function that checks if a value is either of type T, null, or undefined.
- * This is equivalent to `isUndefinedOr(isNullOr(typeGuardFn))`.
  *
  * @param {function} typeGuardFn - the callback function that checks if a value is of type T
  * @returns {function} - a function that returns true if the value is of type T, null, or undefined, false otherwise
@@ -32,5 +30,18 @@ import type { TypeGuardFn } from './isType';
 export function isNilOr<T>(
   typeGuardFn: TypeGuardFn<T>
 ): TypeGuardFn<T | null | undefined> {
-  return isUndefinedOr(isNullOr(typeGuardFn));
+  function isNilOrGuard(
+    value: unknown,
+    config?: TypeGuardFnConfig | null
+  ): value is T | null | undefined {
+    if (value === null || value === undefined) {
+      return true;
+    }
+    return typeGuardFn(value, config);
+  }
+
+  return attachTypeGuardMeta(isNilOrGuard, {
+    innerGuard: typeGuardFn,
+    wrapperKind: 'nilOr',
+  });
 }

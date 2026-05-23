@@ -103,7 +103,7 @@ describe('isPick', () => {
 
     hasNameEmail({ name: 'A' } as any, config);
     const messages2 = mockCallback.mock.calls.map((c) => c[0]);
-    expect(messages2[0]).toEqual('Expected user.email (undefined) to be "string"; Expected user.profile (undefined) to be "object"');
+    expect(messages2[0]).toEqual('Expected user.email (undefined) to be "string"; Expected user.profile (undefined) to be "non-null object"');
   });
 });
 

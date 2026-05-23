@@ -1,4 +1,5 @@
-import type { TypeGuardFn } from './isType';
+import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 
 /**
  * Creates a type guard that checks if a value is either null or matches a specific type.
@@ -32,10 +33,18 @@ import type { TypeGuardFn } from './isType';
 export function isNullOr<T>(
   typeGuardFn: TypeGuardFn<T>
 ): TypeGuardFn<T | null> {
-  return function (value, config): value is T | null {
+  function isNullOrGuard(
+    value: unknown,
+    config?: TypeGuardFnConfig | null
+  ): value is T | null {
     if (value === null) {
       return true;
     }
     return typeGuardFn(value, config);
-  };
+  }
+
+  return attachTypeGuardMeta(isNullOrGuard, {
+    innerGuard: typeGuardFn,
+    wrapperKind: 'nullOr',
+  });
 }

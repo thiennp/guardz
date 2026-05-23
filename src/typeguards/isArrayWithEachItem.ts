@@ -1,5 +1,6 @@
 import { generateTypeGuardError } from './generateTypeGuardError';
 import type { TypeGuardFn } from './isType';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 
 /**
  * Creates a type guard that checks if a value is an array where each item matches a specific type.
@@ -65,6 +66,6 @@ export function isArrayWithEachItem<T>(
     writable: false,
     configurable: true
   });
-  
-  return arrayGuard;
+
+  return attachTypeGuardMeta(arrayGuard, { itemGuard: predicate });
 }

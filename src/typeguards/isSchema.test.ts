@@ -283,6 +283,115 @@ describe('isSchema', () => {
       },
     });
 
+    it('should throw when schema is not an object', () => {
+      expect(() => isSchema(null as any)).toThrow(
+        'schema must be a non-null object'
+      );
+    });
+
+    it('should report array type errors in single mode', () => {
+      const errors: string[] = [];
+      const isUserWithTags = isSchema({
+        tags: [{ value: isString }],
+      });
+
+      isUserWithTags(
+        { tags: 'not-an-array' },
+        {
+          callbackOnError: (error) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'single',
+        }
+      );
+
+      expect(errors[0]).toBe('Expected user.tags to be an array');
+    });
+
+    it('should reject non-object values in single mode', () => {
+      const errors: string[] = [];
+      isTestUser('not-an-object', {
+        callbackOnError: (error) => errors.push(error),
+        identifier: 'user',
+        errorMode: 'single',
+      });
+
+      expect(errors[0]).toBe('Expected user ("not-an-object") to be "non-null object"');
+    });
+
+    it('should reject invalid array items in single mode with indexed paths', () => {
+      const errors: string[] = [];
+      const isUserWithTags = isSchema({
+        tags: [{ value: isString }],
+      });
+
+      isUserWithTags(
+        { tags: [{ value: 'ok' }, { value: 123 }] },
+        {
+          callbackOnError: (error) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'single',
+        }
+      );
+
+      expect(errors[0]).toContain('user.tags[1].value');
+    });
+
+    it('should reject non-array values without config in single mode', () => {
+      const isUserWithTags = isSchema({
+        tags: [{ value: isString }],
+      });
+
+      expect(isUserWithTags({ tags: 'not-an-array' })).toBe(false);
+    });
+
+    it('should accept prebuilt type guard functions in schema definitions', () => {
+      const isUser = isSchema({
+        name: isString,
+        profile: isType({ city: isString }),
+      });
+
+      expect(isUser({ name: 'John', profile: { city: 'Paris' } })).toBe(true);
+      expect(isUser({ name: 'John', profile: { city: 123 } })).toBe(false);
+    });
+
+    it('should preserve fallback schema entries for non-object values', () => {
+      const alwaysFalse = (() => false) as unknown as typeof isString;
+      const isWeird = isSchema({
+        broken: alwaysFalse,
+      });
+
+      expect(isWeird({ broken: 'value' })).toBe(false);
+    });
+
+    it('should resolve function, array, object, and fallback schema entries', () => {
+      const guard = isSchema({
+        name: isString,
+        tags: [{ value: isString }],
+        profile: { city: isString },
+        fallback: (() => false) as unknown as typeof isString,
+      });
+
+      expect(guard).toBeDefined();
+    });
+
+    it('should fail when a schema entry resolves to a missing guard in single mode', () => {
+      const isBroken = isSchema({
+        ok: isString,
+        bad: undefined as unknown as typeof isString,
+      });
+
+      expect(
+        isBroken(
+          { ok: 'value' },
+          {
+            callbackOnError: () => undefined,
+            identifier: 'user',
+            errorMode: 'single',
+          }
+        )
+      ).toBe(false);
+    });
+
     it('should provide proper error messages for nested validation failures', () => {
       const errors: string[] = [];
       const config = {
@@ -328,7 +437,8 @@ describe('isSchema', () => {
       expect(errors.length).toBe(1);
       const combinedError = errors[0];
       expect(combinedError).toContain('Expected user.name (123) to be "string"');
-      expect(combinedError).toContain('Expected user.profile ({"age":"30","email":true}) to be "object"');
+      expect(combinedError).toContain('Expected user.profile.age ("30") to be "number"');
+      expect(combinedError).toContain('Expected user.profile.email (true) to be "string"');
       expect(combinedError).toMatch(/; /); // Should contain semicolon separators
     });
 
@@ -471,15 +581,27 @@ describe('isSchema', () => {
       "profile": {
         "valid": false,
         "value": {
-          "age": "25",
-          "email": true
+          "age": {
+            "valid": false,
+            "value": "25",
+            "expectedType": "number"
+          },
+          "email": {
+            "valid": false,
+            "value": true,
+            "expectedType": "string"
+          }
         },
         "expectedType": "object"
       },
       "settings": {
         "valid": false,
         "value": {
-          "notifications": "yes"
+          "notifications": {
+            "valid": false,
+            "value": "yes",
+            "expectedType": "boolean"
+          }
         },
         "expectedType": "object"
       }
@@ -491,6 +613,74 @@ describe('isSchema', () => {
       const formattedError = JSON.stringify(errorTree, null, 2);
       
       expect(formattedError).toBe(expectedTemplateLiteral);
+    });
+
+    describe('nested error message quality', () => {
+      it('should report leaf paths in default multi mode for inline nested schemas', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+        };
+
+        isTestUser(
+          {
+            name: 'John',
+            profile: { age: '30', email: 'john@example.com' },
+          },
+          config
+        );
+
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).toBe(
+          'Expected user.profile.age ("30") to be "number"'
+        );
+      });
+
+      it('should report array item field paths in multi mode', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'multi' as const,
+        };
+
+        const isUserWithContacts = isSchema({
+          contacts: [{
+            type: isString,
+            value: isString,
+          }],
+        });
+
+        isUserWithContacts(
+          {
+            contacts: [
+              { type: 'email', value: 'john@example.com' },
+              { type: 'phone', value: 5551234 },
+            ],
+          },
+          config
+        );
+
+        expect(errors[0]).toContain(
+          'Expected user.contacts[1].value (5551234) to be "string"'
+        );
+      });
+
+      it('should report missing nested inline objects as non-null object errors', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'multi' as const,
+        };
+
+        isTestUser({ name: 'John' }, config);
+
+        expect(errors[0]).toContain(
+          'Expected user.profile (undefined) to be "non-null object"'
+        );
+      });
     });
   });
 

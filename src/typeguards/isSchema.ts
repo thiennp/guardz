@@ -1,5 +1,6 @@
 import { isNonNullObject } from './isNonNullObject';
 import { validateObject, reportValidationResults } from '../utils/validationUtils';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -64,40 +65,52 @@ export function isSchema<T>(schema: any): TypeGuardFn<T> {
     throw new TypeError('schema must be a non-null object');
   }
 
-  return function isSchemaGuard(value, config): value is T {
+  const processedSchema = processNestedSchema(schema);
+
+  function isSchemaGuard(value: unknown, config?: import('./isType').TypeGuardFnConfig | null): value is T {
     const errorMode = config?.errorMode || 'multi';
-    
-    // For multi or json modes, use the validation utils
+
     if (errorMode === 'multi' || errorMode === 'json') {
       const context = {
         path: config?.identifier || 'root',
         config: config || null
       };
-      
-      const processedSchema = processNestedSchema(schema);
+
       const result = validateObject(value, processedSchema, context);
       reportValidationResults(result, config || null);
-      
+
       return result.valid;
     }
-    
-    // Original single error mode behavior
-    if (!isNonNullObject(value, config)) {
-      return false;
-    }
 
-    const processedSchema = processNestedSchema(schema);
-    
+    if (!isNonNullObject(value, config)) return false;
     return Object.keys(processedSchema).every(function (key) {
       const typeGuardFn = processedSchema[key];
       if (!typeGuardFn) return false;
-      
+
       return typeGuardFn(
         value[key],
         config ? { ...config, identifier: `${config.identifier}.${key}` } : null
       );
     });
-  };
+  }
+
+  return attachTypeGuardMeta(isSchemaGuard, { schema: processedSchema });
+}
+
+function resolveSchemaEntry(value: unknown): TypeGuardFn<any> {
+  if (typeof value === 'function') {
+    return value as TypeGuardFn<any>;
+  }
+
+  if (Array.isArray(value)) {
+    return createArrayTypeGuard(value);
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    return isSchema(value);
+  }
+
+  return value as TypeGuardFn<any>;
 }
 
 /**
@@ -105,23 +118,11 @@ export function isSchema<T>(schema: any): TypeGuardFn<T> {
  */
 function processNestedSchema(schema: any): { [key: string]: TypeGuardFn<any> } {
   const processed: { [key: string]: TypeGuardFn<any> } = {};
-  
+
   for (const [key, value] of Object.entries(schema)) {
-    if (typeof value === 'function') {
-      // It's already a type guard function
-      processed[key] = value as TypeGuardFn<any>;
-    } else if (Array.isArray(value)) {
-      // Handle array of object definitions
-      processed[key] = createArrayTypeGuard(value);
-    } else if (typeof value === 'object' && value !== null) {
-      // It's an inline object definition, convert to type guard
-      processed[key] = isSchema(value);
-    } else {
-      // Fallback for other cases
-      processed[key] = value as TypeGuardFn<any>;
-    }
+    processed[key] = resolveSchemaEntry(value);
   }
-  
+
   return processed;
 }
 
@@ -129,12 +130,10 @@ function processNestedSchema(schema: any): { [key: string]: TypeGuardFn<any> } {
  * Create a type guard for arrays of objects
  */
 function createArrayTypeGuard(arraySchema: any[]): TypeGuardFn<any[]> {
-  // For now, we'll use the first schema in the array
-  // In the future, this could be extended to support tuple types
   const itemSchema = arraySchema[0];
   const itemTypeGuard = isSchema(itemSchema);
-  
-  return function (value, config): value is any[] {
+
+  function isArrayGuard(value: unknown, config?: import('./isType').TypeGuardFnConfig | null): value is any[] {
     if (!Array.isArray(value)) {
       if (config) {
         config.callbackOnError(
@@ -143,14 +142,16 @@ function createArrayTypeGuard(arraySchema: any[]): TypeGuardFn<any[]> {
       }
       return false;
     }
-    
+
     return value.every((item, index) => {
       return itemTypeGuard(
         item,
         config ? { ...config, identifier: `${config.identifier}[${index}]` } : null
       );
     });
-  };
+  }
+
+  return attachTypeGuardMeta(isArrayGuard, { itemGuard: itemTypeGuard });
 }
 
 // Aliases for backward compatibility and flexibility

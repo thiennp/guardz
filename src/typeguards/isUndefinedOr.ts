@@ -1,4 +1,5 @@
-import type { TypeGuardFn } from './isType';
+import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 
 /**
  * Creates a type guard that checks if a value is either undefined or matches a specific type.
@@ -32,10 +33,18 @@ import type { TypeGuardFn } from './isType';
 export function isUndefinedOr<T>(
   typeGuardFn: TypeGuardFn<T>
 ): TypeGuardFn<T | undefined> {
-  return function (value, config): value is T | undefined {
+  function isUndefinedOrGuard(
+    value: unknown,
+    config?: TypeGuardFnConfig | null
+  ): value is T | undefined {
     if (value === undefined) {
       return true;
     }
     return typeGuardFn(value, config);
-  };
+  }
+
+  return attachTypeGuardMeta(isUndefinedOrGuard, {
+    innerGuard: typeGuardFn,
+    wrapperKind: 'undefinedOr',
+  });
 }

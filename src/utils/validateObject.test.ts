@@ -422,7 +422,7 @@ describe('validateObject', () => {
       const result = validateObject(invalidNestedUser, nestedSchema, context);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(2);
+      expect(result.errors).toHaveLength(3);
       expect(result.tree).toBeDefined();
       expect(result.tree?.valid).toBe(false);
       expect(result.tree?.children).toBeDefined();
@@ -698,7 +698,7 @@ describe('validateObject', () => {
       const result = validateObject(invalidComplexUser, complexSchema, context);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(2);
+      expect(result.errors).toHaveLength(3);
       expect(result.tree).toBeDefined();
       expect(result.tree?.valid).toBe(false);
       expect(result.tree?.children).toBeDefined();

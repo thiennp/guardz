@@ -1,7 +1,12 @@
-import { getExpectedTypeName } from './getExpectedTypeName';
+import { getExpectedTypeName, getTypeGuardDisplayName } from './getExpectedTypeName';
 import { isString } from '../typeguards/isString';
 import { isNumber } from '../typeguards/isNumber';
 import { isBoolean } from '../typeguards/isBoolean';
+import { isUndefinedOr } from '../typeguards/isUndefinedOr';
+import { isNullOr } from '../typeguards/isNullOr';
+import { isNilOr } from '../typeguards/isNilOr';
+import { attachTypeGuardMeta } from './typeGuardMeta';
+import type { TypeGuardFn } from '../typeguards/isType';
 
 describe('getExpectedTypeName', () => {
   describe('standard type guards', () => {
@@ -47,6 +52,44 @@ describe('getExpectedTypeName', () => {
     });
   });
 
+  describe('display names', () => {
+    it('should return isType for anonymous guards', () => {
+      const anonymousGuard = (value: unknown): value is string => typeof value === 'string';
+      Object.defineProperty(anonymousGuard, 'name', { value: '' });
+      expect(getTypeGuardDisplayName(anonymousGuard)).toBe('isType');
+    });
+
+    it('should strip Guard suffix from display names', () => {
+      const namedGuard = function isStringGuard(value: unknown): value is string {
+        return typeof value === 'string';
+      };
+      expect(getTypeGuardDisplayName(namedGuard)).toBe('isString');
+    });
+  });
+
+  describe('wrapper type guards', () => {
+    it('should report undefinedOr wrapper types', () => {
+      expect(getExpectedTypeName(isUndefinedOr(isString))).toBe('string | undefined');
+    });
+
+    it('should report nullOr wrapper types', () => {
+      expect(getExpectedTypeName(isNullOr(isString))).toBe('string | null');
+    });
+
+    it('should report nilOr wrapper types', () => {
+      expect(getExpectedTypeName(isNilOr(isString))).toBe('string | null | undefined');
+    });
+
+    it('should ignore incomplete wrapper metadata', () => {
+      const incompleteGuard = attachTypeGuardMeta(
+        ((value: unknown): value is string => typeof value === 'string') as TypeGuardFn<string>,
+        { wrapperKind: 'nullOr' }
+      );
+
+      expect(getExpectedTypeName(incompleteGuard)).toBe('unknown');
+    });
+  });
+
   describe('anonymous functions', () => {
     it('should return "object" for anonymous isType functions', () => {
       const anonymousGuard = (value: unknown): value is { id: number } => {
@@ -54,7 +97,7 @@ describe('getExpectedTypeName', () => {
       };
       // Remove the name to simulate anonymous function
       Object.defineProperty(anonymousGuard, 'name', { value: '' });
-      expect(getExpectedTypeName(anonymousGuard)).toBe('object');
+      expect(getExpectedTypeName(anonymousGuard)).toBe('unknown');
     });
 
     it('should return "object" for functions with empty name', () => {
@@ -62,7 +105,7 @@ describe('getExpectedTypeName', () => {
         return typeof value === 'object' && value !== null;
       };
       Object.defineProperty(emptyNameGuard, 'name', { value: '' });
-      expect(getExpectedTypeName(emptyNameGuard)).toBe('object');
+      expect(getExpectedTypeName(emptyNameGuard)).toBe('unknown');
     });
   });
 
@@ -72,6 +115,13 @@ describe('getExpectedTypeName', () => {
         return typeof value === 'object' && value !== null;
       };
       expect(getExpectedTypeName(validateUser)).toBe('unknown');
+    });
+
+    it('should return "unknown" for named non-is guards', () => {
+      function validateString(value: unknown): value is string {
+        return typeof value === 'string';
+      }
+      expect(getExpectedTypeName(validateString)).toBe('unknown');
     });
 
     it('should handle single character after "is"', () => {

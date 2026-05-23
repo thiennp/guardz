@@ -1,5 +1,6 @@
 import { isNonNullObject } from './isNonNullObject';
 import { validateObject, reportValidationResults } from '../utils/validationUtils';
+import { attachTypeGuardMeta } from '../utils/typeGuardMeta';
 
 export interface TypeGuardFnConfig {
   readonly callbackOnError: (errorMessage: string) => void;
@@ -75,26 +76,22 @@ export function isType<T>(propsTypesToCheck: {
     throw new TypeError('propsTypesToCheck must be a non-null object');
   }
 
-  return function isTypeGuard(value, config): value is T {
+  function isTypeGuard(value: unknown, config?: TypeGuardFnConfig | null): value is T {
     const errorMode = config?.errorMode || 'multi';
-    
-    // For multi or json modes, use the validation utils
+
     if (errorMode === 'multi' || errorMode === 'json') {
       const context = {
         path: config?.identifier || 'root',
         config: config || null
       };
-      
+
       const result = validateObject(value, propsTypesToCheck, context);
       reportValidationResults(result, config || null);
-      
+
       return result.valid;
     }
-    
-    // Original single error mode behavior (default)
-    if (!isNonNullObject(value, config)) {
-      return false;
-    }
+
+    if (!isNonNullObject(value, config)) return false;
 
     return Object.keys(propsTypesToCheck).every(function (key) {
       const typeGuardFn = propsTypesToCheck[key as keyof T];
@@ -103,5 +100,7 @@ export function isType<T>(propsTypesToCheck: {
         config ? { ...config, identifier: `${config.identifier}.${key}` } : null
       );
     });
-  };
+  }
+
+  return attachTypeGuardMeta(isTypeGuard, { schema: propsTypesToCheck });
 }

@@ -25,6 +25,12 @@ describe('isType', () => {
       age: isNumber,
     });
 
+    it('should throw when propsTypesToCheck is not an object', () => {
+      expect(() => isType(null as any)).toThrow(
+        'propsTypesToCheck must be a non-null object'
+      );
+    });
+
     it('should return true for valid objects', () => {
       const validUser = { name: 'John', age: 30 };
       expect(isSimpleUser(validUser)).toBe(true);
@@ -299,7 +305,7 @@ describe('isType', () => {
       expect(combinedError).toContain('Expected user.age ("30") to be "number"');
       expect(combinedError).toContain('Expected user.isActive ("yes") to be "boolean"');
       expect(combinedError).toContain('Expected user.tags ("not an array") to be "Array"');
-      expect(combinedError).toContain('Expected user.profile (456) to be "object"');
+      expect(combinedError).toContain('Expected user.profile (456) to be "string | undefined"');
       expect(combinedError).toMatch(/; /); // Should contain semicolon separators
     });
 
@@ -357,8 +363,11 @@ describe('isType', () => {
       expect(errors.length).toBe(1);
       const combinedError = errors[0];
       expect(combinedError).toContain('Expected user.name (123) to be "string"');
-      expect(combinedError).toContain('Expected user.details ({"age":"30","email":true,"phone":456}) to be "object"');
-      expect(combinedError).toContain('Expected user.settings ({"notifications":"true","theme":789}) to be "object"');
+      expect(combinedError).toContain('Expected user.details.age ("30") to be "number"');
+      expect(combinedError).toContain('Expected user.details.email (true) to be "string"');
+      expect(combinedError).toContain('Expected user.details.phone (456) to be "string"');
+      expect(combinedError).toContain('Expected user.settings.notifications ("true") to be "boolean"');
+      expect(combinedError).toContain('Expected user.settings.theme (789) to be "string"');
       expect(combinedError).toMatch(/; /); // Should contain semicolon separators
     });
 
@@ -475,11 +484,9 @@ describe('isType', () => {
       const result = isNestedUser(invalidUser, config);
 
       expect(result).toBe(false);
-      // In JSON tree mode, we get both individual errors and the tree
-      expect(errors.length).toBeGreaterThan(1);
-      
-      // Find the JSON tree error (it will be the last one)
-      const jsonTreeError = errors[errors.length - 1];
+      expect(errors.length).toBe(1);
+
+      const jsonTreeError = errors[0];
       const errorTree = JSON.parse(jsonTreeError);
       expect(errorTree).toMatchObject({
         user: {
@@ -493,15 +500,27 @@ describe('isType', () => {
             profile: {
               valid: false,
               value: {
-                age: '25',
-                email: true
+                age: {
+                  valid: false,
+                  value: '25',
+                  expectedType: 'number'
+                },
+                email: {
+                  valid: false,
+                  value: true,
+                  expectedType: 'string'
+                }
               },
               expectedType: 'object'
             },
             settings: {
               valid: false,
               value: {
-                notifications: 'yes'
+                notifications: {
+                  valid: false,
+                  value: 'yes',
+                  expectedType: 'boolean'
+                }
               },
               expectedType: 'object'
             }
@@ -784,13 +803,13 @@ describe('isType', () => {
       const result = isNestedUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(1);
-      
-      const jsonTreeError = errors[errors.length - 1];
-      
+      expect(errors.length).toBe(1);
+
+      const jsonTreeError = errors[0];
+
       // Test that the JSON tree is properly formatted as a template literal
       expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/); // Should be valid JSON
-      
+
       // Test template literal formatting with proper indentation for nested objects
       const expectedTemplateLiteral = `{
   "user": {
@@ -804,15 +823,27 @@ describe('isType', () => {
       "profile": {
         "valid": false,
         "value": {
-          "age": "25",
-          "email": true
+          "age": {
+            "valid": false,
+            "value": "25",
+            "expectedType": "number"
+          },
+          "email": {
+            "valid": false,
+            "value": true,
+            "expectedType": "string"
+          }
         },
         "expectedType": "object"
       },
       "settings": {
         "valid": false,
         "value": {
-          "notifications": "yes"
+          "notifications": {
+            "valid": false,
+            "value": "yes",
+            "expectedType": "boolean"
+          }
         },
         "expectedType": "object"
       }
@@ -822,7 +853,7 @@ describe('isType', () => {
 
       const errorTree = JSON.parse(jsonTreeError);
       const formattedError = JSON.stringify(errorTree, null, 2);
-      
+
       expect(formattedError).toBe(expectedTemplateLiteral);
     });
 
@@ -923,6 +954,110 @@ describe('isType', () => {
       expect(result).toBe(false);
       expect(errors.length).toBe(1);
       expect(errors[0]).toBe('Expected user ("not an object") to be "non-null object"');
+    });
+
+    it('should use root path when identifier is missing in multi mode', () => {
+      const errors: string[] = [];
+      const isSimpleUser = isType<SimpleUser>({
+        name: isString,
+        age: isNumber,
+      });
+
+      isSimpleUser(
+        { name: 123, age: '30' },
+        {
+          callbackOnError: (error) => errors.push(error),
+          errorMode: 'multi',
+        } as any
+      );
+
+      expect(errors[0]).toContain('root.name');
+    });
+
+    describe('nested error message quality', () => {
+      it('should report leaf paths in default multi mode for nested objects', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+        };
+
+        const isUser = isType({
+          name: isString,
+          profile: isType({
+            age: isNumber,
+            email: isString,
+          }),
+        });
+
+        isUser(
+          { name: 'John', profile: { age: '30', email: 'john@example.com' } },
+          config
+        );
+
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).toBe(
+          'Expected user.profile.age ("30") to be "number"'
+        );
+      });
+
+      it('should report union wrapper types instead of object for isUndefinedOr', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'multi' as const,
+        };
+
+        const isUser = isType({
+          nickname: isUndefinedOr(isString),
+        });
+
+        isUser({ nickname: 123 }, config);
+
+        expect(errors[0]).toContain(
+          'Expected user.nickname (123) to be "string | undefined"'
+        );
+      });
+
+      it('should report array item index paths in multi mode', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'multi' as const,
+        };
+
+        const isUser = isType({
+          tags: isArrayWithEachItem(isString),
+        });
+
+        isUser({ tags: ['valid', 123] }, config);
+
+        expect(errors[0]).toContain(
+          'Expected user.tags[1] (123) to be "string"'
+        );
+      });
+
+      it('should report missing nested objects as non-null object errors', () => {
+        const errors: string[] = [];
+        const config = {
+          callbackOnError: (error: string) => errors.push(error),
+          identifier: 'user',
+          errorMode: 'multi' as const,
+        };
+
+        const isUser = isType({
+          name: isString,
+          profile: isType({ age: isNumber }),
+        });
+
+        isUser({ name: 'John' }, config);
+
+        expect(errors[0]).toContain(
+          'Expected user.profile (undefined) to be "non-null object"'
+        );
+      });
     });
   });
 

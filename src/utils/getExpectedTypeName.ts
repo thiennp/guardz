@@ -1,15 +1,8 @@
 import { TypeGuardFn } from '../typeguards/isType';
-
-/**
- * Returns true when the type guard represents a nested object schema (isType / isSchema).
- */
-export const isNestedObjectTypeGuard = (typeGuardFn: TypeGuardFn<any>): boolean => {
-  const fnName = typeGuardFn.name;
-  if (!fnName) {
-    return true;
-  }
-  return fnName === 'isTypeGuard' || fnName === 'isSchemaGuard';
-};
+import {
+  getTypeGuardInnerGuard,
+  getTypeGuardWrapperKind,
+} from './typeGuardMeta';
 
 /**
  * Returns the display name of a type guard for error messages (e.g. isStringGuard -> isString).
@@ -31,26 +24,40 @@ export const getTypeGuardDisplayName = (typeGuardFn: TypeGuardFn<any>): string =
  * @returns The expected type name as a string
  */
 export const getExpectedTypeName = (typeGuardFn: TypeGuardFn<any>): string => {
+  const wrapperKind = getTypeGuardWrapperKind(typeGuardFn);
+  const innerGuard = getTypeGuardInnerGuard(typeGuardFn);
+
+  if (wrapperKind && innerGuard) {
+    const innerType = getExpectedTypeName(innerGuard);
+    if (wrapperKind === 'undefinedOr') {
+      return `${innerType} | undefined`;
+    }
+    if (wrapperKind === 'nullOr') {
+      return `${innerType} | null`;
+    }
+    if (wrapperKind === 'nilOr') {
+      return `${innerType} | null | undefined`;
+    }
+  }
+
   const fnName = typeGuardFn.name;
   if (fnName.startsWith('is')) {
-    // Remove 'is' prefix and 'Guard' suffix if present
     let typeName = fnName.slice(2);
     if (typeName.endsWith('Guard')) {
       typeName = typeName.slice(0, -5);
     }
-    // Special case for nested isType/isSchema calls - return 'object'
     if (typeName === 'Type' || typeName === 'Schema') {
       return 'object';
     }
-    // Special case for Array to maintain proper casing
     if (typeName === 'Array') {
       return 'Array';
     }
     return typeName.toLowerCase();
   }
-  // For nested isType calls (which have empty names), return 'object' instead of 'unknown'
+
   if (!fnName) {
-    return 'object';
+    return 'unknown';
   }
+
   return 'unknown';
 };

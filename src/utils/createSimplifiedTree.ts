@@ -1,5 +1,26 @@
 import { ValidationTree } from './validationTypes';
 
+const simplifyChildNode = (tree: ValidationTree): Record<string, any> => {
+  if (tree.children && Object.keys(tree.children).length > 0) {
+    const value: Record<string, any> = {};
+    Object.entries(tree.children).forEach(([key, childTree]) => {
+      value[key] = simplifyChildNode(childTree);
+    });
+
+    return {
+      valid: tree.valid,
+      value,
+      ...(tree.expectedType && { expectedType: tree.expectedType }),
+    };
+  }
+
+  return {
+    valid: tree.valid,
+    value: tree.actualValue,
+    ...(tree.expectedType && { expectedType: tree.expectedType }),
+  };
+};
+
 /**
  * Create a simplified flat tree structure for JSON output
  * @param tree - The validation tree to simplify
@@ -8,30 +29,24 @@ import { ValidationTree } from './validationTypes';
 export const createSimplifiedTree = (tree: ValidationTree): Record<string, any> => {
   const rootKey = tree.path.split('.').pop() || 'root';
   const result: Record<string, any> = {};
-  
+
   if (tree.children && Object.keys(tree.children).length) {
-    // Object with properties
     const value: Record<string, any> = {};
     Object.entries(tree.children).forEach(([key, childTree]) => {
-      value[key] = {
-        valid: childTree.valid,
-        value: childTree.actualValue,
-        ...(childTree.expectedType && { expectedType: childTree.expectedType })
-      };
+      value[key] = simplifyChildNode(childTree);
     });
-    
+
     result[rootKey] = {
       valid: tree.valid,
-      value
+      value,
     };
   } else {
-    // Primitive value
     result[rootKey] = {
       valid: tree.valid,
       value: tree.actualValue,
-      ...(tree.expectedType && { expectedType: tree.expectedType })
+      ...(tree.expectedType && { expectedType: tree.expectedType }),
     };
   }
-  
+
   return result;
-}; 
+};
