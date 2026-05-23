@@ -1,5 +1,6 @@
 import { stringify } from '@/stringify';
 
+import { getTypeGuardDisplayName } from '../utils/getExpectedTypeName';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -67,7 +68,7 @@ export function isOneOfTypes<T>(
           : `${config.identifier} (${valueString})`;
 
       const errorMessages = [
-        `Expected ${displayValue} type to match one of "${typeGuards.map(fn => fn.name).join(' | ')}"`,
+        `Expected ${displayValue} type to match one of "${typeGuards.map(fn => getTypeGuardDisplayName(fn)).join(' | ')}"`,
       ];
 
       // Use the validation results we already collected

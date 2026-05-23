@@ -13,26 +13,69 @@ export type TypeGuardFn<T> = (
 ) => value is T;
 
 /**
+ * Creates a type guard function for validating objects against a schema.
+ *
  * The data type that comes from different sources (like from server side, library, url params) is not always reliable.
  * Therefore, we need to use this function to ensure the data type is correct.
  *
- * Usage:
- *   Case 1:
- *     data = { prop1: 1, prop2: 'lorem' };
- *     isPropertyTypeValid<DataType>(data, { prop1: ['number'], prop2: ['string'] }); // true
+ * @template T - The type to validate
+ * @param propsTypesToCheck - Object mapping property keys to their type guard functions
+ * @returns A type guard function that validates the object structure
  *
- *   Case 2:
- *     data = { prop1: 1, prop2: { prop3: 'lorem' } };
- *     isPropertyTypeValid<DataType['prop2']>(data.prop2, { prop3: ['string'] })
- *       && isPropertyTypeValid(data, { prop1: ['number'] }); // true
+ * @example
+ * ```typescript
+ * import { isType, isString, isNumber } from 'guardz';
  *
- * @param propsTypesToCheck - list of keys and possible types that it can have
- * @return - a type-guard function to check whether the data type is correct
+ * interface User {
+ *   name: string;
+ *   age: number;
+ * }
+ *
+ * const isUser = isType<User>({
+ *   name: isString,
+ *   age: isNumber,
+ * });
+ *
+ * const data: unknown = { name: 'John', age: 30 };
+ * if (isUser(data)) {
+ *   // TypeScript now knows data is User
+ *   console.log(data.name); // Safe to access
+ * }
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Nested object validation
+ * interface Address {
+ *   street: string;
+ *   city: string;
+ * }
+ *
+ * interface User {
+ *   name: string;
+ *   address: Address;
+ * }
+ *
+ * const isAddress = isType<Address>({
+ *   street: isString,
+ *   city: isString,
+ * });
+ *
+ * const isUser = isType<User>({
+ *   name: isString,
+ *   address: isAddress,
+ * });
+ * ```
  */
 export function isType<T>(propsTypesToCheck: {
   [P in keyof T]: TypeGuardFn<T[P]>;
 }): TypeGuardFn<T> {
-  return function (value, config): value is T {
+  // Validate input
+  if (!isNonNullObject(propsTypesToCheck, null)) {
+    throw new TypeError('propsTypesToCheck must be a non-null object');
+  }
+
+  return function isTypeGuard(value, config): value is T {
     const errorMode = config?.errorMode || 'multi';
     
     // For multi or json modes, use the validation utils

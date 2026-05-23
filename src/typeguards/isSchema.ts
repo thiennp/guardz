@@ -59,8 +59,13 @@ import type { TypeGuardFn } from './isType';
  * ```
  */
 export function isSchema<T>(schema: any): TypeGuardFn<T> {
-  return function (value, config): value is T {
-    const errorMode = config?.errorMode || 'single';
+  // Validate input
+  if (!isNonNullObject(schema, null)) {
+    throw new TypeError('schema must be a non-null object');
+  }
+
+  return function isSchemaGuard(value, config): value is T {
+    const errorMode = config?.errorMode || 'multi';
     
     // For multi or json modes, use the validation utils
     if (errorMode === 'multi' || errorMode === 'json') {

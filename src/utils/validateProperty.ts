@@ -3,7 +3,7 @@ import { ValidationResult, ValidationContext } from './validationTypes';
 import { createValidationResult } from './createValidationResult';
 import { createValidationError } from './createValidationError';
 import { createTreeNode } from './createTreeNode';
-import { getExpectedTypeName } from './getExpectedTypeName';
+import { getExpectedTypeName, isNestedObjectTypeGuard } from './getExpectedTypeName';
 
 /**
  * Validate a single property using functional approach
@@ -67,5 +67,5 @@ export const validateProperty = <T>(
   };
 
   // Use functional composition to determine validation strategy
-  return !typeGuard.name ? validateNestedTypeGuard() : validateRegularTypeGuard();
+  return isNestedObjectTypeGuard(typeGuard) ? validateNestedTypeGuard() : validateRegularTypeGuard();
 }; 

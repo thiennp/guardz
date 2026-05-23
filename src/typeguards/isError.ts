@@ -1,4 +1,4 @@
-import { generateTypeGuardError } from './generateTypeGuardError';
+import { reportTypeGuardError } from '../utils/reportTypeGuardError';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -44,16 +44,12 @@ import type { TypeGuardFn } from './isType';
  * }
  * ```
  */
-export const isError: TypeGuardFn<Error> = function (
+export const isError: TypeGuardFn<Error> = function isErrorGuard(
   value,
   config
 ): value is Error {
   if (!(value instanceof Error)) {
-    if (config) {
-      config.callbackOnError(
-        generateTypeGuardError(value, config.identifier, 'Error')
-      );
-    }
+    reportTypeGuardError(config, value, 'Error');
     return false;
   }
 

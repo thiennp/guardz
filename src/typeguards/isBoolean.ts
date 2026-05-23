@@ -1,4 +1,4 @@
-import { generateTypeGuardError } from './generateTypeGuardError';
+import { reportTypeGuardError } from '../utils/reportTypeGuardError';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -27,16 +27,12 @@ import type { TypeGuardFn } from './isType';
  * }
  * ```
  */
-export const isBoolean: TypeGuardFn<boolean> = function (
+export const isBoolean: TypeGuardFn<boolean> = function isBooleanGuard(
   value,
   config
 ): value is boolean {
   if (typeof value !== 'boolean') {
-    if (config) {
-      config.callbackOnError(
-        generateTypeGuardError(value, config.identifier, 'boolean')
-      );
-    }
+    reportTypeGuardError(config, value, 'boolean');
     return false;
   }
   return true;

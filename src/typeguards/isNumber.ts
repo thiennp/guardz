@@ -1,4 +1,4 @@
-import { generateTypeGuardError } from './generateTypeGuardError';
+import { reportTypeGuardError } from '../utils/reportTypeGuardError';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -28,16 +28,12 @@ import type { TypeGuardFn } from './isType';
  * }
  * ```
  */
-export const isNumber: TypeGuardFn<number> = function (
+export const isNumber: TypeGuardFn<number> = function isNumberGuard(
   value,
   config
 ): value is number {
   if (typeof value !== 'number' || isNaN(value)) {
-    if (config) {
-      config.callbackOnError(
-        generateTypeGuardError(value, config.identifier, 'number')
-      );
-    }
+    reportTypeGuardError(config, value, 'number');
     return false;
   }
 

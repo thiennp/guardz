@@ -288,6 +288,7 @@ describe('isSchema', () => {
       const config = {
         callbackOnError: (error: string) => errors.push(error),
         identifier: 'user',
+        errorMode: 'single' as const,
       };
 
       const invalidUser = {

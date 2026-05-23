@@ -1,4 +1,4 @@
-import { generateTypeGuardError } from './generateTypeGuardError';
+import { reportTypeGuardError } from '../utils/reportTypeGuardError';
 import type { TypeGuardFn } from './isType';
 
 /**
@@ -25,16 +25,12 @@ import type { TypeGuardFn } from './isType';
  * }
  * ```
  */
-export const isString: TypeGuardFn<string> = function (
+export const isString: TypeGuardFn<string> = function isStringGuard(
   value,
   config
 ): value is string {
   if (typeof value !== 'string') {
-    if (config) {
-      config.callbackOnError(
-        generateTypeGuardError(value, config.identifier, 'string')
-      );
-    }
+    reportTypeGuardError(config, value, 'string');
     return false;
   }
   return true;
