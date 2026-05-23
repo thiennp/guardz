@@ -41,6 +41,20 @@ describe('isType', () => {
       expect(isSimpleUser(invalidUser)).toBe(false);
     });
 
+    it('should report missing property errors with identifier', () => {
+      const errors: string[] = [];
+      const config = {
+        callbackOnError: (error: string) => errors.push(error),
+        identifier: 'user',
+      };
+
+      isSimpleUser({ name: 'John' }, config);
+
+      expect(errors).toEqual([
+        'Expected user.age (undefined) to be "number"',
+      ]);
+    });
+
     it('should return false for objects with wrong property types', () => {
       const invalidUser = { name: 'John', age: '30' };
       expect(isSimpleUser(invalidUser)).toBe(false);
@@ -197,8 +211,9 @@ describe('isType', () => {
       const result = isSimpleUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0]).toContain('user.age');
+      expect(errors).toEqual([
+        'Expected user.age ("30") to be "number"',
+      ]);
     });
 
     it('should call error callback for non-object values', () => {
@@ -221,10 +236,12 @@ describe('isType', () => {
       const result = isSimpleTestUser('not an object', config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
+      expect(errors).toEqual([
+        'Expected user ("not an object") to be "non-null object"',
+      ]);
     });
 
-    it('should handle nested property errors with proper identifiers', () => {
+    it('should report leaf paths for nested property errors in default multi mode', () => {
       interface NestedUser {
         name: string;
         details: {
@@ -258,9 +275,9 @@ describe('isType', () => {
       const result = isNestedUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
-      // In single error mode, we expect a simple error about the nested object
-      expect(errors[0]).toContain('user.details');
+      expect(errors).toEqual([
+        'Expected user.details.age ("30") to be "number"',
+      ]);
     });
 
     it('should collect multiple errors instead of stopping at first failure', () => {
@@ -403,12 +420,8 @@ describe('isType', () => {
       const result = isTestUser(invalidUser, config);
 
       expect(result).toBe(false);
-      // In JSON tree mode, we get both individual errors and the tree
       expect(errors.length).toBe(1);
 
-      console.log(errors);
-      
-      // Find the JSON tree error (it will be the last one)
       const jsonTreeError = errors[0];
       const errorTree = JSON.parse(jsonTreeError);
       expect(errorTree).toMatchObject({
@@ -654,9 +667,10 @@ describe('isType', () => {
       const result = isMixedUser(mixedUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
-      
-      const jsonTreeError = errors[errors.length - 1];
+      expect(errors).toHaveLength(1);
+
+      const jsonTreeError = errors[0];
+      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/);
       const errorTree = JSON.parse(jsonTreeError);
       expect(errorTree).toMatchObject({
         user: {
@@ -664,102 +678,28 @@ describe('isType', () => {
           value: {
             id: {
               valid: true,
-              value: 1
+              value: 1,
             },
             name: {
               valid: true,
-              value: 'John Doe'
+              value: 'John Doe',
             },
             email: {
               valid: false,
               value: true,
-              expectedType: 'string'
+              expectedType: 'string',
             },
             isActive: {
               valid: false,
               value: 'yes',
-              expectedType: 'boolean'
-            }
-          }
-        }
+              expectedType: 'boolean',
+            },
+          },
+        },
       });
     });
 
-    it('should provide JSON tree feedback in template literal format', () => {
-      const errors: string[] = [];
-      const config = {
-        callbackOnError: (error: string) => errors.push(error),
-        identifier: 'user',
-        errorMode: 'json' as const,
-      };
-
-      interface TestUser {
-        id: number;
-        name: string;
-        email: string;
-        isActive: boolean;
-      }
-
-      const isTestUser = isType<TestUser>({
-        id: isNumber,
-        name: isString,
-        email: isString,
-        isActive: isBoolean,
-      });
-
-      const invalidUser = {
-        id: '1', // should be number
-        name: 123, // should be string
-        email: true, // should be string
-        isActive: 'yes', // should be boolean
-      };
-
-      const result = isTestUser(invalidUser, config);
-
-      expect(result).toBe(false);
-      expect(errors.length).toBe(1);
-
-      const jsonTreeError = errors[0];
-      
-      // Test that the JSON tree is properly formatted as a template literal
-      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/); // Should be valid JSON
-      
-      // Test template literal formatting with proper indentation
-      const expectedTemplateLiteral = `{
-  "user": {
-    "valid": false,
-    "value": {
-      "id": {
-        "valid": false,
-        "value": "1",
-        "expectedType": "number"
-      },
-      "name": {
-        "valid": false,
-        "value": 123,
-        "expectedType": "string"
-      },
-      "email": {
-        "valid": false,
-        "value": true,
-        "expectedType": "string"
-      },
-      "isActive": {
-        "valid": false,
-        "value": "yes",
-        "expectedType": "boolean"
-      }
-    }
-  }
-}`;
-
-      const errorTree = JSON.parse(jsonTreeError);
-      const formattedError = JSON.stringify(errorTree, null, 2);
-      
-      expect(formattedError).toBe(expectedTemplateLiteral);
-    });
-
-    it('should provide JSON tree feedback in template literal format for nested objects', () => {
+    it('should provide JSON tree feedback for nested objects', () => {
       const errors: string[] = [];
       const config = {
         callbackOnError: (error: string) => errors.push(error),
@@ -806,55 +746,46 @@ describe('isType', () => {
       expect(errors.length).toBe(1);
 
       const jsonTreeError = errors[0];
-
-      // Test that the JSON tree is properly formatted as a template literal
-      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/); // Should be valid JSON
-
-      // Test template literal formatting with proper indentation for nested objects
-      const expectedTemplateLiteral = `{
-  "user": {
-    "valid": false,
-    "value": {
-      "name": {
-        "valid": false,
-        "value": 123,
-        "expectedType": "string"
-      },
-      "profile": {
-        "valid": false,
-        "value": {
-          "age": {
-            "valid": false,
-            "value": "25",
-            "expectedType": "number"
-          },
-          "email": {
-            "valid": false,
-            "value": true,
-            "expectedType": "string"
-          }
-        },
-        "expectedType": "object"
-      },
-      "settings": {
-        "valid": false,
-        "value": {
-          "notifications": {
-            "valid": false,
-            "value": "yes",
-            "expectedType": "boolean"
-          }
-        },
-        "expectedType": "object"
-      }
-    }
-  }
-}`;
+      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/);
 
       const errorTree = JSON.parse(jsonTreeError);
-      const formattedError = JSON.stringify(errorTree, null, 2);
-
-      expect(formattedError).toBe(expectedTemplateLiteral);
+      expect(errorTree).toMatchObject({
+        user: {
+          valid: false,
+          value: {
+            name: {
+              valid: false,
+              value: 123,
+              expectedType: 'string',
+            },
+            profile: {
+              valid: false,
+              value: {
+                age: {
+                  valid: false,
+                  value: '25',
+                  expectedType: 'number',
+                },
+                email: {
+                  valid: false,
+                  value: true,
+                  expectedType: 'string',
+                },
+              },
+            },
+            settings: {
+              valid: false,
+              value: {
+                notifications: {
+                  valid: false,
+                  value: 'yes',
+                  expectedType: 'boolean',
+                },
+              },
+            },
+          },
+        },
+      });
     });
 
     it('should report only the first error in single error mode', () => {
@@ -1153,36 +1084,48 @@ describe('isType', () => {
     });
 
     it('should handle config without identifier in multi error mode', () => {
+      const errors: string[] = [];
       const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'test',
+        callbackOnError: (error: string) => errors.push(error),
         errorMode: 'multi' as const,
       };
 
       const result = isSimpleUser({ name: 'John', age: 30 }, config);
       expect(result).toBe(true);
 
-      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
-      expect(invalidResult).toBe(false);
+      isSimpleUser({ name: 123, age: '30' }, config);
+      expect(errors).toEqual([
+        'Expected root.name (123) to be "string"; Expected root.age ("30") to be "number"',
+      ]);
     });
 
     it('should handle config without identifier in json error mode', () => {
+      const errors: string[] = [];
       const config = {
-        callbackOnError: jest.fn(),
-        identifier: 'test',
+        callbackOnError: (error: string) => errors.push(error),
         errorMode: 'json' as const,
       };
 
       const result = isSimpleUser({ name: 'John', age: 30 }, config);
       expect(result).toBe(true);
 
-      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
-      expect(invalidResult).toBe(false);
+      isSimpleUser({ name: 123, age: '30' }, config);
+      expect(errors).toHaveLength(1);
+      expect(JSON.parse(errors[0])).toMatchObject({
+        root: {
+          valid: false,
+          value: {
+            name: { valid: false, value: 123, expectedType: 'string' },
+            age: { valid: false, value: '30', expectedType: 'number' },
+          },
+        },
+      });
     });
 
     it('should handle config with falsy identifier in multi error mode', () => {
+      const errors: string[] = [];
       const config = {
-        callbackOnError: jest.fn(),
+        callbackOnError: (error: string) => errors.push(error),
         identifier: '',
         errorMode: 'multi' as const,
       };
@@ -1190,13 +1133,16 @@ describe('isType', () => {
       const result = isSimpleUser({ name: 'John', age: 30 }, config);
       expect(result).toBe(true);
 
-      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
-      expect(invalidResult).toBe(false);
+      isSimpleUser({ name: 123, age: '30' }, config);
+      expect(errors).toEqual([
+        'Expected root.name (123) to be "string"; Expected root.age ("30") to be "number"',
+      ]);
     });
 
     it('should handle config with falsy identifier in json error mode', () => {
+      const errors: string[] = [];
       const config = {
-        callbackOnError: jest.fn(),
+        callbackOnError: (error: string) => errors.push(error),
         identifier: '',
         errorMode: 'json' as const,
       };
@@ -1204,8 +1150,17 @@ describe('isType', () => {
       const result = isSimpleUser({ name: 'John', age: 30 }, config);
       expect(result).toBe(true);
 
-      const invalidResult = isSimpleUser({ name: 123, age: '30' }, config);
-      expect(invalidResult).toBe(false);
+      isSimpleUser({ name: 123, age: '30' }, config);
+      expect(errors).toHaveLength(1);
+      expect(JSON.parse(errors[0])).toMatchObject({
+        root: {
+          valid: false,
+          value: {
+            name: { valid: false, value: 123, expectedType: 'string' },
+            age: { valid: false, value: '30', expectedType: 'number' },
+          },
+        },
+      });
     });
 
 

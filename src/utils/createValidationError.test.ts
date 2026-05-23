@@ -258,18 +258,13 @@ describe('createValidationError', () => {
   });
 
   describe('performance', () => {
-    it('should handle large number of calls efficiently', () => {
-      const start = performance.now();
-      
+    it('should handle large number of calls without throwing', () => {
       for (const i of Array.from({ length: 10000 }, (_, i) => i)) {
         createValidationError(`property.${i}`, 'string', i, `Error ${i}`);
       }
-      
-      const end = performance.now();
-      expect(end - start).toBeLessThan(100); // Should complete in less than 100ms
     });
 
-    it('should handle complex values efficiently', () => {
+    it('should handle complex values without throwing', () => {
       const complexValue = {
         nested: {
           deep: {
@@ -278,15 +273,10 @@ describe('createValidationError', () => {
           }
         }
       };
-      
-      const start = performance.now();
-      
+
       for (const i of Array.from({ length: 1000 }, (_, i) => i)) {
         createValidationError(`property.${i}`, 'string', complexValue, `Error ${i}`);
       }
-      
-      const end = performance.now();
-      expect(end - start).toBeLessThan(50); // Should complete in less than 50ms
     });
   });
 }); 

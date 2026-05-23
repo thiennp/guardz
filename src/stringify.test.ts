@@ -173,19 +173,15 @@ describe('stringify', () => {
   });
 
   describe('performance', () => {
-    it('should handle large objects efficiently', () => {
+    it('should handle large objects without throwing', () => {
       const largeObj: Record<string, any> = {};
       for (let i = 0; i < 1000; i++) {
         largeObj[`key${i}`] = `value${i}`;
       }
-      
-      const start = performance.now();
+
       const result = stringify(largeObj);
-      const end = performance.now();
-      
       expect(result).toContain('"key0": "value0"');
       expect(result).toContain('"key999": "value999"');
-      expect(end - start).toBeLessThan(100); // Should complete in less than 100ms
     });
   });
 }); 

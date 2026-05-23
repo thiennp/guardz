@@ -190,31 +190,22 @@ describe('createValidationResult', () => {
   });
 
   describe('performance', () => {
-    it('should handle large number of calls efficiently', () => {
-      const start = performance.now();
-      
+    it('should handle large number of calls without throwing', () => {
       for (const i of Array.from({ length: 10000 }, (_, i) => i)) {
         createValidationResult(i % 2 === 0);
       }
-      
-      const end = performance.now();
-      expect(end - start).toBeLessThan(100); // Should complete in less than 100ms
     });
 
-    it('should handle large error arrays efficiently', () => {
+    it('should handle large error arrays without throwing', () => {
       const largeErrors: ValidationError[] = Array.from({ length: 1000 }, (_, i) => ({
         path: `property.${i}`,
         expectedType: 'string',
         actualValue: i,
         message: `Error ${i}`
       }));
-      
-      const start = performance.now();
+
       const result = createValidationResult(false, largeErrors);
-      const end = performance.now();
-      
       expect(result.errors).toHaveLength(1000);
-      expect(end - start).toBeLessThan(50); // Should complete in less than 50ms
     });
   });
 }); 

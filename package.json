@@ -10,6 +10,7 @@
     "test:watch": "npx jest --watch",
     "test:coverage": "npx jest --coverage",
     "test:ci": "npx jest --ci --coverage --watchAll=false --testPathIgnorePatterns=benchmarks",
+    "test:integration": "npx jest --testPathPattern=__tests__/integration",
     "test:performance": "npx jest --testPathPattern=performance.test.ts",
     "test:performance:modes": "npx jest --testPathPattern=error-modes-performance.test.ts",
     "test:performance:ci": "npx jest --testPathPattern=ci-performance.test.ts",

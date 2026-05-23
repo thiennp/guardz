@@ -37,6 +37,7 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/benchmarks/'
+    '/benchmarks/',
+    '/__tests__/.*?/fixtures/',
   ],
 }; 

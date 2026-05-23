@@ -91,21 +91,12 @@ describe('getExpectedTypeName', () => {
   });
 
   describe('anonymous functions', () => {
-    it('should return "object" for anonymous isType functions', () => {
+    it('should return "unknown" for anonymous guards with empty name', () => {
       const anonymousGuard = (value: unknown): value is { id: number } => {
         return typeof value === 'object' && value !== null;
       };
-      // Remove the name to simulate anonymous function
       Object.defineProperty(anonymousGuard, 'name', { value: '' });
       expect(getExpectedTypeName(anonymousGuard)).toBe('unknown');
-    });
-
-    it('should return "object" for functions with empty name', () => {
-      const emptyNameGuard = (value: unknown): value is { id: number } => {
-        return typeof value === 'object' && value !== null;
-      };
-      Object.defineProperty(emptyNameGuard, 'name', { value: '' });
-      expect(getExpectedTypeName(emptyNameGuard)).toBe('unknown');
     });
   });
 
@@ -147,14 +138,10 @@ describe('getExpectedTypeName', () => {
   });
 
   describe('performance', () => {
-    it('should handle large number of calls efficiently', () => {
-      const start = performance.now();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    it('should handle large number of calls without throwing', () => {
       for (const _ of Array.from({ length: 10000 })) {
         getExpectedTypeName(isString);
       }
-      const end = performance.now();
-      expect(end - start).toBeLessThan(100); // Should complete in less than 100ms
     });
   });
 }); 

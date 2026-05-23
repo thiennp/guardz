@@ -411,8 +411,29 @@ describe('isSchema', () => {
       const result = isTestUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0]).toContain('user.profile.age');
+      expect(errors).toEqual([
+        'Expected user.profile.age ("30") to be "number"',
+      ]);
+    });
+
+    it('should report missing property errors with identifier', () => {
+      const isSimpleUser = isSchema<{ name: string; age: number }>({
+        name: isString,
+        age: isNumber,
+      });
+      const errors: string[] = [];
+
+      isSimpleUser(
+        { name: 'John' },
+        {
+          callbackOnError: (error) => errors.push(error),
+          identifier: 'user',
+        }
+      );
+
+      expect(errors).toEqual([
+        'Expected user.age (undefined) to be "number"',
+      ]);
     });
 
     it('should handle multi error mode', () => {
@@ -442,7 +463,7 @@ describe('isSchema', () => {
       expect(combinedError).toMatch(/; /); // Should contain semicolon separators
     });
 
-    it('should provide JSON tree feedback in template literal format', () => {
+    it('should provide JSON tree feedback for invalid flat objects', () => {
       const errors: string[] = [];
       const config = {
         callbackOnError: (error: string) => errors.push(error),
@@ -474,49 +495,42 @@ describe('isSchema', () => {
       const result = isTestUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBe(1);
+      expect(errors).toHaveLength(1);
 
       const jsonTreeError = errors[0];
-      
-      // Test that the JSON tree is properly formatted as a template literal
-      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/); // Should be valid JSON
-      
-      // Test template literal formatting with proper indentation
-      const expectedTemplateLiteral = `{
-  "user": {
-    "valid": false,
-    "value": {
-      "id": {
-        "valid": false,
-        "value": "1",
-        "expectedType": "number"
-      },
-      "name": {
-        "valid": false,
-        "value": 123,
-        "expectedType": "string"
-      },
-      "email": {
-        "valid": false,
-        "value": true,
-        "expectedType": "string"
-      },
-      "isActive": {
-        "valid": false,
-        "value": "yes",
-        "expectedType": "boolean"
-      }
-    }
-  }
-}`;
+      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/);
 
       const errorTree = JSON.parse(jsonTreeError);
-      const formattedError = JSON.stringify(errorTree, null, 2);
-      
-      expect(formattedError).toBe(expectedTemplateLiteral);
+      expect(errorTree).toMatchObject({
+        user: {
+          valid: false,
+          value: {
+            id: {
+              valid: false,
+              value: '1',
+              expectedType: 'number',
+            },
+            name: {
+              valid: false,
+              value: 123,
+              expectedType: 'string',
+            },
+            email: {
+              valid: false,
+              value: true,
+              expectedType: 'string',
+            },
+            isActive: {
+              valid: false,
+              value: 'yes',
+              expectedType: 'boolean',
+            },
+          },
+        },
+      });
     });
 
-    it('should provide JSON tree feedback in template literal format for nested objects', () => {
+    it('should provide JSON tree feedback for nested objects', () => {
       const errors: string[] = [];
       const config = {
         callbackOnError: (error: string) => errors.push(error),
@@ -560,59 +574,49 @@ describe('isSchema', () => {
       const result = isNestedUser(invalidUser, config);
 
       expect(result).toBe(false);
-      expect(errors.length).toBeGreaterThan(0);
-      
-      // Find the JSON tree error (it will be the last one)
-      const jsonTreeError = errors[errors.length - 1];
-      
-      // Test that the JSON tree is properly formatted as a template literal
-      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/); // Should be valid JSON
-      
-      // Test template literal formatting with proper indentation for nested objects
-      const expectedTemplateLiteral = `{
-  "user": {
-    "valid": false,
-    "value": {
-      "name": {
-        "valid": false,
-        "value": 123,
-        "expectedType": "string"
-      },
-      "profile": {
-        "valid": false,
-        "value": {
-          "age": {
-            "valid": false,
-            "value": "25",
-            "expectedType": "number"
-          },
-          "email": {
-            "valid": false,
-            "value": true,
-            "expectedType": "string"
-          }
-        },
-        "expectedType": "object"
-      },
-      "settings": {
-        "valid": false,
-        "value": {
-          "notifications": {
-            "valid": false,
-            "value": "yes",
-            "expectedType": "boolean"
-          }
-        },
-        "expectedType": "object"
-      }
-    }
-  }
-}`;
+      expect(errors).toHaveLength(1);
+
+      const jsonTreeError = errors[0];
+      expect(jsonTreeError).toMatch(/^\{[\s\S]*\}$/);
 
       const errorTree = JSON.parse(jsonTreeError);
-      const formattedError = JSON.stringify(errorTree, null, 2);
-      
-      expect(formattedError).toBe(expectedTemplateLiteral);
+      expect(errorTree).toMatchObject({
+        user: {
+          valid: false,
+          value: {
+            name: {
+              valid: false,
+              value: 123,
+              expectedType: 'string',
+            },
+            profile: {
+              valid: false,
+              value: {
+                age: {
+                  valid: false,
+                  value: '25',
+                  expectedType: 'number',
+                },
+                email: {
+                  valid: false,
+                  value: true,
+                  expectedType: 'string',
+                },
+              },
+            },
+            settings: {
+              valid: false,
+              value: {
+                notifications: {
+                  valid: false,
+                  value: 'yes',
+                  expectedType: 'boolean',
+                },
+              },
+            },
+          },
+        },
+      });
     });
 
     describe('nested error message quality', () => {
