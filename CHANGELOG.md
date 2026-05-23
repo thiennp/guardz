@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2026-05-23
+
+### 🐛 Fixed
+- **Nested error messages**: Multi and JSON error modes now report leaf paths (for example `user.profile.age`) instead of unhelpful `"object"` blobs
+- **Wrapper types in errors**: Guards like `isUndefinedOr` now show union-style expected types such as `"string | undefined"`
+- **Array validation errors**: Invalid array items report index paths like `user.tags[1]`
+
+### 🔧 Improved
+- **Centralized error reporting**: Primitive and composite guards share `reportTypeGuardError` for consistent messages
+- **Named guards**: Internal guards expose clearer display names in aggregated errors
+- **Nested schema drilling**: `validateProperty` and `createSimplifiedTree` recurse into nested objects and arrays in all error modes
+
+### 📚 Documentation
+- **README refresh**: Repositioned Guardz as a zero-dependency runtime validation library with updated "Why Guardz?" section
+
+### 🧪 Testing & CI
+- **Integration tests**: Added API validation, error-mode contract, and compiled `dist/` consumer coverage
+- **Stronger assertions**: Error-message tests now use exact expected strings instead of loose substring checks
+- **CI matrix**: GitHub Actions now tests Node.js 18, 20, 22, and 24
+
 ## [1.12.1] - 2024-12-20
 
 ### ✨ New Features

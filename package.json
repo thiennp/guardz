@@ -1,6 +1,6 @@
 {
   "name": "guardz",
-  "version": "1.12.3",
+  "version": "1.13.0",
   "description": "A simple and lightweight TypeScript type guard library for runtime type validation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "test": "npx jest",
     "test:watch": "npx jest --watch",
     "test:coverage": "npx jest --coverage",
-    "test:ci": "npx jest --ci --coverage --watchAll=false --testPathIgnorePatterns=benchmarks",
+    "test:ci": "npx jest --ci --coverage --watchAll=false --testPathIgnorePatterns=benchmarks --testPathIgnorePatterns=fixtures",
     "test:integration": "npx jest --testPathPattern=__tests__/integration",
     "test:performance": "npx jest --testPathPattern=performance.test.ts",
     "test:performance:modes": "npx jest --testPathPattern=error-modes-performance.test.ts",
