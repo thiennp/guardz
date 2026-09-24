@@ -941,6 +941,10 @@ if (isUserId(id)) {
 
 
 
+## 📦 npm release (Cloud Agents)
+
+Maintainers can publish from a Cloud Agent using a **Runtime Secret** `NPM_TOKEN`. See [.cursor/NPM_PUBLISH.md](.cursor/NPM_PUBLISH.md) for setup and `npm run release:publish`.
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.

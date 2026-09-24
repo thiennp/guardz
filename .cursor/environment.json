@@ -1,0 +1,4 @@
+{
+  "name": "guardz",
+  "install": "bash scripts/cloud-agent-install.sh"
+}
