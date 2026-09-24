@@ -41,7 +41,7 @@ describe('integration: API validation workflow', () => {
     ]);
   });
 
-  it('supports tolerant migration while logging validation issues', () => {
+  it('supports tolerant migration while logging validation issues', async () => {
     const migrationLogs: string[] = [];
     const config = {
       identifier: 'response',
@@ -51,6 +51,7 @@ describe('integration: API validation workflow', () => {
     const payload = guardWithTolerance(invalidApiResponse, isApiResponse, config);
 
     expect(payload).toBe(invalidApiResponse);
+    await new Promise<void>(resolve => queueMicrotask(resolve));
     expect(migrationLogs.length).toBeGreaterThan(0);
     expect(migrationLogs[0]).toContain('response.data.users[1].id');
     expect(migrationLogs[0]).toContain('response.data.users[1].role');
