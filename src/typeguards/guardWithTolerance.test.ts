@@ -4,6 +4,9 @@ import { isNumber } from './isNumber';
 import { isType } from './isType';
 import { isBoolean } from './isBoolean';
 
+const flushMicrotasks = (): Promise<void> =>
+  new Promise(resolve => queueMicrotask(resolve));
+
 describe('guardWithTolerance', () => {
   interface User {
     name: string;
@@ -28,7 +31,7 @@ describe('guardWithTolerance', () => {
       expect(result.isActive).toBe(true);
     });
 
-    it('should not call error callback when validation passes', () => {
+    it('should not call error callback when validation passes', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -39,7 +42,23 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(validData, isUser, config);
 
       expect(result).toBe(validData);
+      await flushMicrotasks();
       expect(mockCallback).not.toHaveBeenCalled();
+    });
+
+    it('should return before scheduled validation runs', async () => {
+      const events: string[] = [];
+      const config = {
+        callbackOnError: () => events.push('error'),
+        identifier: 'userData',
+      };
+      const invalidData = { name: 'John', age: '30', isActive: true };
+
+      guardWithTolerance(invalidData, isUser, config);
+      events.push('returned');
+
+      await flushMicrotasks();
+      expect(events).toEqual(['returned', 'error']);
     });
   });
 
@@ -53,7 +72,7 @@ describe('guardWithTolerance', () => {
       expect((result as any).age).toBe('30'); // Still the original invalid value
     });
 
-    it('should call error callback when validation fails', () => {
+    it('should call error callback when validation fails', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -64,11 +83,13 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isUser, config);
 
       expect(result).toBe(invalidData);
+      expect(mockCallback).not.toHaveBeenCalled();
+      await flushMicrotasks();
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback.mock.calls[0][0]).toContain('userData.age');
     });
 
-    it('should handle completely invalid data types', () => {
+    it('should handle completely invalid data types', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -79,10 +100,11 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isUser, config);
 
       expect(result).toBe(invalidData);
+      await flushMicrotasks();
       expect(mockCallback).toHaveBeenCalled();
     });
 
-    it('should handle null data', () => {
+    it('should handle null data', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -92,10 +114,11 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(null, isUser, config);
 
       expect(result).toBe(null);
+      await flushMicrotasks();
       expect(mockCallback).toHaveBeenCalled();
     });
 
-    it('should handle undefined data', () => {
+    it('should handle undefined data', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -105,6 +128,7 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(undefined, isUser, config);
 
       expect(result).toBe(undefined);
+      await flushMicrotasks();
       expect(mockCallback).toHaveBeenCalled();
     });
   });
@@ -124,7 +148,7 @@ describe('guardWithTolerance', () => {
       expect(result).toBe(invalidData);
     });
 
-    it('should collect multiple validation errors', () => {
+    it('should collect multiple validation errors', async () => {
       const errors: string[] = [];
       const config = {
         callbackOnError: (error: string) => errors.push(error),
@@ -135,6 +159,7 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isUser, config);
 
       expect(result).toBe(invalidData);
+      await flushMicrotasks();
       expect(errors.length).toBeGreaterThan(0);
       // Should have collected errors for multiple fields
     });
@@ -155,7 +180,7 @@ describe('guardWithTolerance', () => {
       expect(result).toBe(validData);
     });
 
-    it('should handle primitive validation errors', () => {
+    it('should handle primitive validation errors', async () => {
       const mockCallback = jest.fn();
       const config = {
         callbackOnError: mockCallback,
@@ -166,6 +191,7 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isString, config);
 
       expect(result).toBe(invalidData);
+      await flushMicrotasks();
       expect(mockCallback).toHaveBeenCalled();
       expect(mockCallback.mock.calls[0][0]).toContain('value');
     });
@@ -188,7 +214,7 @@ describe('guardWithTolerance', () => {
       }),
     });
 
-    it('should handle nested validation errors', () => {
+    it('should handle nested validation errors', async () => {
       const errors: string[] = [];
       const config = {
         callbackOnError: (error: string) => errors.push(error),
@@ -207,6 +233,7 @@ describe('guardWithTolerance', () => {
       const result = guardWithTolerance(invalidData, isNestedUser, config);
 
       expect(result).toBe(invalidData);
+      await flushMicrotasks();
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0]).toContain('user.profile');
     });
@@ -229,7 +256,7 @@ describe('guardWithTolerance', () => {
   });
 
   describe('use case scenarios', () => {
-    it('should demonstrate logging validation errors while proceeding', () => {
+    it('should demonstrate logging validation errors while proceeding', async () => {
       const validationErrors: string[] = [];
 
       // Simulate data from an unreliable API
@@ -253,11 +280,12 @@ describe('guardWithTolerance', () => {
       expect((user as any).age).toBe('30'); // Need to handle potential string
       expect((user as any).isActive).toBe(1); // Need to handle potential number
 
+      await flushMicrotasks();
       // But you have awareness of the issues
       expect(validationErrors.length).toBeGreaterThan(0);
     });
 
-    it('should work for gradual migration scenarios', () => {
+    it('should work for gradual migration scenarios', async () => {
       // When migrating from untyped to typed code, you can use guardWithTolerance
       // to start logging validation issues while maintaining existing behavior
 
@@ -276,6 +304,7 @@ describe('guardWithTolerance', () => {
       // System continues to work with legacy data
       expect(user).toBe(legacyData);
 
+      await flushMicrotasks();
       // But you're aware of what needs to be fixed
       expect(migrationLogs.length).toBeGreaterThan(0);
     });

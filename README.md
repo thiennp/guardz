@@ -817,7 +817,7 @@ const validateUsers = (users: unknown[]) => {
 ### Advanced Type Guards
 
 - **`isBranded`** - Creates a type guard function for a branded type using a predicate function (validates and narrows to branded types)
-- **`guardWithTolerance`** - Validates data against a type guard but returns the data regardless of validation result (useful for logging errors while proceeding with potentially invalid data)
+- **`guardWithTolerance`** - Validates data against a type guard but returns the data immediately regardless of validation result; validation and error callbacks run on a microtask (useful for logging errors while proceeding with potentially invalid data without blocking the caller)
 
 ### Type Guard Error Generation
 

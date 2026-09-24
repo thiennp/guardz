@@ -12,7 +12,9 @@ import type { TypeGuardFn, TypeGuardFnConfig } from './isType';
  * @param data - The data to validate
  * @param typeGuardFn - The type guard function to use for validation
  * @param config - Optional configuration for error handling
- * @returns The data cast to type T (regardless of validation result)
+ * @returns The data cast to type T (regardless of validation result). Validation runs
+ * asynchronously on a microtask so the caller is not blocked; error callbacks fire after
+ * this function returns.
  *
  * @example
  * ```typescript
@@ -51,6 +53,8 @@ export function guardWithTolerance<T>(
   typeGuardFn: TypeGuardFn<T>,
   config?: Nullable<TypeGuardFnConfig>
 ): T {
-  typeGuardFn(data, config);
+  queueMicrotask(() => {
+    typeGuardFn(data, config);
+  });
   return data as T;
 }
